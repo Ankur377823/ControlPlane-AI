@@ -1,0 +1,30 @@
+# One-command startup: builds and runs the FastAPI backend, which also
+# serves the static frontend at /. No separate frontend service needed.
+#
+# Usage:
+#   docker compose up --build
+#   open http://localhost:8000/
+#
+# Onboard a real Botpress bot through the UI (see README.md) -- no
+# Botpress credentials are required at build/run time.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - BOTPRESS_CONNECTOR_DB=/app/data/botpress_connector.db
+      - FRONTEND_DIST=/app/frontend
+    volumes:
+      - botpress-data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  botpress-data:
