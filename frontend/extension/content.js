@@ -231,7 +231,12 @@
         const stored = await chrome.storage.local.get(["cp_token", "cp_tenant_id", "cp_server_url"]);
         if (stored && stored.cp_token) tokenKey = stored.cp_token;
         if (stored && stored.cp_tenant_id) tenantId = stored.cp_tenant_id;
-        if (stored && stored.cp_server_url) serverUrl = stored.cp_server_url.replace(/\/$/, '');
+        if (stored && stored.cp_server_url) {
+          serverUrl = stored.cp_server_url.trim().replace(/\/$/, '');
+          if (serverUrl.includes("controlplane-botpress-connector") && !serverUrl.includes("onrender.com")) {
+            serverUrl = "https://controlplane-botpress-connector.onrender.com";
+          }
+        }
       }
 
       let currentSessionId = window.__cp_session_id;

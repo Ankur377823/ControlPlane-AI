@@ -17,6 +17,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const defaultServerUrl = "https://controlplane-botpress-connector.onrender.com";
 
+  function cleanUrl(rawUrl) {
+    if (!rawUrl) return defaultServerUrl;
+    let url = rawUrl.trim().replace(/\/$/, '');
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      url = "https://" + url;
+    }
+    // Fix truncated onrender.com URLs
+    if (url.includes("controlplane-botpress-connector") && !url.includes("onrender.com")) {
+      url = "https://controlplane-botpress-connector.onrender.com";
+    }
+    return url;
+  }
+
   // Load existing token, tenant ID, and server URL from storage
   if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
     const data = await chrome.storage.local.get(["cp_token", "cp_tenant_id", "cp_server_url"]);
@@ -27,15 +40,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (data && data.cp_tenant_id && tenantInput) {
       tenantInput.value = data.cp_tenant_id;
     }
-    if (data && data.cp_server_url && serverInput) {
-      serverInput.value = data.cp_server_url;
-      if (dashboardLink) dashboardLink.href = `${data.cp_server_url.replace(/\/$/, '')}/#/dashboard`;
-    }
+    let loadedServerUrl = cleanUrl(data ? data.cp_server_url : null);
+    if (serverInput) serverInput.value = loadedServerUrl;
+    if (dashboardLink) dashboardLink.href = `${loadedServerUrl}/#/dashboard`;
+  } else {
+    if (serverInput) serverInput.value = defaultServerUrl;
   }
 
   // Save Config Handler
   saveBtn.addEventListener("click", async () => {
-    const serverVal = (serverInput ? serverInput.value.trim() : defaultServerUrl).replace(/\/$/, '');
+    const serverVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
     const tokenVal = tokenInput.value.trim();
     const tenantVal = tenantInput ? tenantInput.value.trim() : "acme-tenant-1";
 
@@ -43,6 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       showPopupToast("Please enter Server URL, Tenant ID, and Token", "#ef4444");
       return;
     }
+    if (serverInput) serverInput.value = serverVal;
     if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
       await chrome.storage.local.set({ cp_token: tokenVal, cp_tenant_id: tenantVal, cp_server_url: serverVal });
     }
@@ -54,7 +69,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Auto-Enroll Handler (Fetches active 48-day token & connects to tenant)
   autoBtn.addEventListener("click", async () => {
     try {
-      const serverVal = (serverInput ? serverInput.value.trim() : defaultServerUrl).replace(/\/$/, '');
+      const serverVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
+      if (serverInput) serverInput.value = serverVal;
+
       const res = await fetch(`${serverVal}/api/v1/tokens/active`);
       const tenantVal = tenantInput ? (tenantInput.value.trim() || "acme-tenant-1") : "acme-tenant-1";
 
@@ -69,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (statusPill) statusPill.innerText = "CONNECTED";
         showPopupToast(`Auto-enrolled on ${tenantVal} with 48-day token!`, "#10b981");
       } else {
-        showPopupToast("Failed to fetch active token", "#ef4444");
+        showPopupToast("Failed to fetch active token from server", "#ef4444");
       }
     } catch (err) {
       showPopupToast("POC API unreachable. Verify Server URL.", "#f59e0b");
@@ -82,7 +99,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const prompt = testInput.value.trim();
       if (!prompt) return;
 
-      const serverVal = (serverInput ? serverInput.value.trim() : defaultServerUrl).replace(/\/$/, '');
+      const serverVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
       testBox.style.display = "block";
       testBox.innerHTML = '<span style="color:#38bdf8;">⏳ Evaluating prompt...</span>';
 
