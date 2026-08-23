@@ -24,6 +24,8 @@ import { renderDashboardPage } from './views/dashboardView.js';
 import { renderInventoryPage, handleOnboardSubmit } from './views/inventoryView.js';
 import { handleRunRedTeamScan, handleSandboxSubmit, downloadScanPdfReport } from './views/scannerView.js';
 import { handlePolicySubmit, initPoliciesView } from './views/policiesView.js';
+import { handleVerifyClick, populateSampleData } from './views/hallucinationsView.js';
+
 
 let currentUser = null;
 
@@ -142,6 +144,7 @@ window.approveUserAccount = approveUserAccount;
 window.rejectUserAccount = rejectUserAccount;
 window.openEventOverviewModal = openEventOverviewModal;
 window.closeEventOverviewModal = closeEventOverviewModal;
+window.populateSampleData = populateSampleData;
 
 // Resource Populate Helper
 async function populateResources() {
@@ -172,3 +175,5 @@ document.getElementById('onboard-resource-form')?.addEventListener('submit', (e)
 document.getElementById('btn-run-redteam')?.addEventListener('click', handleRunRedTeamScan);
 document.getElementById('sandbox-form')?.addEventListener('submit', handleSandboxSubmit);
 document.getElementById('policy-form')?.addEventListener('submit', handlePolicySubmit);
+document.getElementById('hallucination-verify-form')?.addEventListener('submit', handleVerifyClick);
+
