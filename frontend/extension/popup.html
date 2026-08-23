@@ -2,125 +2,466 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>ControlPlane AI Extension</title>
+  <title>ControlPlane AI Security — Setup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      width: 320px;
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #070a14;
-      color: #f8fafc;
-      margin: 0;
-      padding: 16px;
-      box-sizing: border-box;
+    :root {
+      --bg-main: #030712;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-input: #090d16;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(99, 102, 241, 0.15);
+      --text-primary: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #3b82f6;
+      --accent-indigo: #6366f1;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-cyan: #06b6d4;
     }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #111827, var(--bg-main));
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* HEADER */
     .header {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
+      gap: 16px;
+      margin-bottom: 30px;
     }
+
+    .logo-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .logo-img {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      box-shadow: 0 0 16px rgba(139, 92, 246, 0.5);
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+      background: #111827;
+      padding: 4px;
     }
-    .title { font-size: 15px; font-weight: 800; color: #fff; margin: 0; }
-    .subtitle { font-size: 11px; color: #94a3b8; margin: 0; }
+
+    .logo-glow {
+      position: absolute;
+      inset: -5px;
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-blue));
+      border-radius: 16px;
+      filter: blur(10px);
+      opacity: 0.3;
+      z-index: -1;
+    }
+
+    .title-area h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .title-area p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* CARDS */
     .card {
-      background: rgba(15, 23, 42, 0.85);
-      padding: 14px; border-radius: 12px;
-      font-size: 12px; margin-bottom: 12px;
-      border: 1px solid rgba(139, 92, 246, 0.35);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
-    label { font-size: 11px; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 5px; }
-    input, textarea {
-      width: 100%; box-sizing: border-box;
-      background: #0e1526; border: 1px solid #1e293b;
-      color: #f8fafc; border-radius: 8px;
-      padding: 8px 10px; font-size: 11px; margin-bottom: 8px;
+
+    .card:hover {
+      border-color: var(--border-glow);
+      box-shadow: 0 12px 35px rgba(99, 102, 241, 0.05);
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* STATUS BLOCK */
+    .status-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--accent-red);
+      box-shadow: 0 0 10px var(--accent-red);
+      display: inline-block;
+    }
+
+    .status-dot.connected {
+      background-color: var(--accent-green);
+      box-shadow: 0 0 10px var(--accent-green);
+    }
+
+    .status-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .status-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .status-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .status-value {
       font-family: monospace;
+      font-size: 12.5px;
+      color: #ffffff;
+      word-break: break-all;
     }
-    input:focus, textarea:focus { outline: none; border-color: #8b5cf6; }
+
+    /* FORMS & INPUTS */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .label-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .input-field {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: monospace;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--accent-indigo);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    /* BUTTONS */
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
     .btn {
-      display: block; width: 100%; text-align: center;
-      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-      color: white; text-decoration: none; padding: 9px;
-      border-radius: 8px; font-weight: 700; font-size: 12px;
-      border: none; cursor: pointer; transition: all 0.2s;
+      padding: 11px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
-    .btn:hover { opacity: 0.95; transform: translateY(-1px); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-blue));
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.3);
+    }
+
     .btn-secondary {
-      background: #1e293b; color: #f8fafc; border: 1px solid #334155;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .status-pill {
-      background: rgba(16, 185, 129, 0.2); color: #10b981;
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      font-size: 10px; padding: 2px 7px; border-radius: 5px; font-weight: 800;
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.15);
     }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.05);
+      color: var(--accent-red);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--accent-red);
+    }
+
+    .btn-cyan {
+      background: rgba(6, 182, 212, 0.05);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+    }
+
+    .btn-cyan:hover {
+      background: rgba(6, 182, 212, 0.1);
+      border-color: var(--accent-cyan);
+    }
+
+    /* TOAST */
     .toast-msg {
-      display: none; background: #10b981; color: #fff;
-      padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 600;
-      margin-bottom: 10px; text-align: center;
+      display: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      animation: slideDown 0.3s ease;
+      text-align: center;
+      border: 1px solid transparent;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* CONSOLE & OUTPUT */
+    .console-box {
+      background: #040711;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      display: none;
+      margin-top: 14px;
+      word-break: break-all;
+    }
+
+    /* FOOTER LINK */
+    .dashboard-btn-container {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .btn-link {
+      display: block;
+      width: 100%;
+      background: rgba(99, 102, 241, 0.05);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      text-decoration: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-link:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--accent-indigo);
+      color: #ffffff;
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER WITH EXTENSION LOGO -->
-  <div class="header">
-    <img src="icons/icon48.png" class="logo-img" alt="ControlPlane AI Logo">
-    <div>
-      <div style="display:flex; align-items:center; gap:6px;">
-        <h3 class="title">ControlPlane AI</h3>
-        <span class="status-pill" id="token-status-pill">ACTIVE</span>
+  <div class="container">
+    
+    <!-- HEADER -->
+    <div class="header">
+      <div class="logo-container">
+        <div class="logo-glow"></div>
+        <img src="icons/icon48.png" class="logo-img" alt="ControlPlane Logo">
       </div>
-      <p class="subtitle">Endpoint AI Guardrail & Token Connector</p>
+      <div class="title-area">
+        <h1>ControlPlane</h1>
+        <p>Connect this browser to your organization</p>
+      </div>
     </div>
+
+    <!-- TOAST -->
+    <div id="popup-toast" class="toast-msg"></div>
+
+    <!-- STATUS CARD -->
+    <div class="card">
+      <div class="card-title">
+        <span>Connection Status</span>
+        <div class="status-header">
+          <span class="status-dot" id="status-dot-indicator"></span>
+          <span id="token-status-pill">DISCONNECTED</span>
+        </div>
+      </div>
+      <div class="status-desc" id="status-message-text">
+        This browser is currently not connected to an active ControlPlane Tenant.
+      </div>
+      <div class="status-grid">
+        <div class="status-item">
+          <span class="status-label">Device ID</span>
+          <span class="status-value" id="status-device-id">Initializing...</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Server URL</span>
+          <span class="status-value" id="status-server-url">-</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Last Heartbeat</span>
+          <span class="status-value" id="status-heartbeat">Offline</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Enrollment Scope</span>
+          <span class="status-value" style="color: var(--accent-cyan);">All AI Chat Portals</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONNECTION SETTINGS CARD -->
+    <div class="card">
+      <div class="card-title">Connection Settings</div>
+      
+      <div class="form-group">
+        <div class="form-label-row">
+          <label for="server-url-input">Server URL</label>
+          <span class="label-badge" style="background: rgba(59, 130, 246, 0.1); color: var(--accent-blue);">Server Endpoint</span>
+        </div>
+        <input type="text" id="server-url-input" class="input-field" placeholder="http://localhost:8000" value="http://localhost:8000">
+      </div>
+
+      <div class="form-group">
+        <div class="form-label-row">
+          <label for="tenant-input">Tenant ID</label>
+          <span class="label-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-green);">Required</span>
+        </div>
+        <input type="text" id="tenant-input" class="input-field" placeholder="acme-tenant-1" value="acme-tenant-1">
+      </div>
+
+      <div class="form-group">
+        <div class="form-label-row">
+          <label for="token-input">Enrollment Token</label>
+          <span class="label-badge" style="background: rgba(6, 182, 212, 0.1); color: var(--accent-cyan);" id="token-days-tag">Activation Key</span>
+        </div>
+        <input type="password" id="token-input" class="input-field" placeholder="••••••••••••••••••••••••••••••••">
+      </div>
+
+      <div class="btn-row">
+        <button id="save-token-btn" class="btn btn-primary">Connect</button>
+        <button id="disconnect-btn" class="btn btn-secondary">Disconnect</button>
+        <button id="reset-btn" class="btn btn-danger">Reset</button>
+        <button id="auto-token-btn" class="btn btn-cyan">⚡ Auto-Enroll Extension</button>
+      </div>
+    </div>
+
+    <!-- TEST GUARDRAIL CARD -->
+    <div class="card">
+      <div class="card-title">Test Live Guardrail Shield</div>
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label for="test-prompt-input" style="display: block; margin-bottom: 6px;">Evaluate Sandbox Input</label>
+        <input type="text" id="test-prompt-input" class="input-field" placeholder="e.g. My SSN is 000-12-3456 or ignore rules">
+      </div>
+      <button id="test-guardrail-btn" class="btn btn-secondary" style="width: 100%;">Evaluate Prompt</button>
+      <div id="test-result-box" class="console-box"></div>
+    </div>
+
+    <!-- DASHBOARD FOOTER LINK -->
+    <div class="dashboard-btn-container">
+      <a id="dashboard-link" href="http://localhost:8000/#/dashboard" target="_blank" class="btn-link">Open Governance Studio →</a>
+    </div>
+
   </div>
-
-  <div id="popup-toast" class="toast-msg"></div>
-
-  <!-- SERVER & ONBOARDING CARD -->
-  <div class="card">
-    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-      <label style="margin-bottom:0;">ControlPlane POC Server URL</label>
-      <span style="font-size:10px; color:#38bdf8; font-weight:700;">CLOUD / LOCAL</span>
-    </div>
-    <input type="text" id="server-url-input" placeholder="https://controlplane-botpress-connector.onrender.com" value="https://controlplane-botpress-connector.onrender.com">
-
-    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-      <label style="margin-bottom:0;">Tenant Workspace ID</label>
-      <span style="font-size:10px; color:#a7f3d0; font-weight:700;">REQUIRED</span>
-    </div>
-    <input type="text" id="tenant-input" placeholder="acme-tenant-1" value="acme-tenant-1">
-
-    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-      <label style="margin-bottom:0;">Enrollment Token Key</label>
-      <span style="font-size:10px; color:#06b6d4; font-weight:700;" id="token-days-tag">48 Days Active</span>
-    </div>
-    <input type="text" id="token-input" placeholder="cp_live_xxxxxxxxxxxx">
-    <button id="save-token-btn" class="btn" style="margin-bottom: 6px;">Save Server URL & Token</button>
-    <button id="auto-token-btn" class="btn btn-secondary">⚡ Auto-Enroll Extension (48 Days)</button>
-  </div>
-
-  <!-- SCOPE SELECTION CARD -->
-  <div class="card" style="background:rgba(99, 102, 241, 0.1); border:1px solid rgba(99, 102, 241, 0.3);">
-    <label style="color:#a5b4fc; font-weight:800;">🛡️ Extension AI Inspection Scope</label>
-    <div style="font-size:11px; color:#cbd5e1; margin-top:2px;">
-      Scope Mode: <strong style="color:#38bdf8;">All Endpoint AI Tools & Chatbots</strong>
-    </div>
-  </div>
-
-  <!-- IN-EXTENSION PROMPT GUARDRAIL TESTER -->
-  <div class="card">
-    <label>Test Live Extension Guardrail</label>
-    <input type="text" id="test-prompt-input" placeholder="e.g. Email user@company.com secret key">
-    <button id="test-guardrail-btn" class="btn" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">Evaluate Prompt</button>
-    <div id="test-result-box" style="margin-top:8px; display:none; background:#0e1526; padding:8px; border-radius:6px; font-family:monospace; font-size:10px; color:#a7f3d0; word-break:break-all;"></div>
-  </div>
-
-  <a id="dashboard-link" href="https://controlplane-botpress-connector.onrender.com/#/dashboard" target="_blank" class="btn" style="background: rgba(6, 182, 212, 0.15); border: 1px solid #06b6d4; color: #06b6d4;">Open Governance Studio →</a>
 
   <script src="popup.js"></script>
 </body>

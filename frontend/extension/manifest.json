@@ -15,8 +15,10 @@
   "host_permissions": [
     "<all_urls>"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
-    "default_popup": "popup.html",
     "default_title": "ControlPlane AI Guardrail Status",
     "default_icon": {
       "16": "icons/icon16.png",

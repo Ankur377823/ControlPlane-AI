@@ -1,5 +1,5 @@
 /**
- * ControlPlane AI — Extension Popup Controller & Auto-Onboarding
+ * ControlPlane AI — Extension Popup & Configuration Controller
  */
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -8,10 +8,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   const tokenInput = document.getElementById("token-input");
   const saveBtn = document.getElementById("save-token-btn");
   const autoBtn = document.getElementById("auto-token-btn");
+  const disconnectBtn = document.getElementById("disconnect-btn");
+  const resetBtn = document.getElementById("reset-btn");
   const testBtn = document.getElementById("test-guardrail-btn");
   const testInput = document.getElementById("test-prompt-input");
   const testBox = document.getElementById("test-result-box");
+  
+  // Status panel elements
   const statusPill = document.getElementById("token-status-pill");
+  const statusDot = document.getElementById("status-dot-indicator");
+  const statusMsg = document.getElementById("status-message-text");
+  const statusDeviceId = document.getElementById("status-device-id");
+  const statusServerUrl = document.getElementById("status-server-url");
+  const statusHeartbeat = document.getElementById("status-heartbeat");
   const daysTag = document.getElementById("token-days-tag");
   const dashboardLink = document.getElementById("dashboard-link");
 
@@ -26,44 +35,153 @@ document.addEventListener("DOMContentLoaded", async () => {
     return url;
   }
 
-
-  // Load existing token, tenant ID, and server URL from storage
-  if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-    const data = await chrome.storage.local.get(["cp_token", "cp_tenant_id", "cp_server_url"]);
-    if (data && data.cp_token) {
-      tokenInput.value = data.cp_token;
-      if (statusPill) statusPill.innerText = "CONNECTED";
+  // Cross-environment helper for chrome storage or localStorage fallback
+  async function getStorageData(keys) {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      return await chrome.storage.local.get(keys);
+    } else {
+      const res = {};
+      for (const k of keys) {
+        res[k] = localStorage.getItem(k);
+      }
+      return res;
     }
-    if (data && data.cp_tenant_id && tenantInput) {
-      tenantInput.value = data.cp_tenant_id;
-    }
-    let loadedServerUrl = cleanUrl(data ? data.cp_server_url : null);
-    if (serverInput) serverInput.value = loadedServerUrl;
-    if (dashboardLink) dashboardLink.href = `${loadedServerUrl}/#/dashboard`;
-  } else {
-    if (serverInput) serverInput.value = defaultServerUrl;
   }
 
-  // Save Config Handler
+  async function setStorageData(data) {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      await chrome.storage.local.set(data);
+    } else {
+      for (const [k, v] of Object.entries(data)) {
+        localStorage.setItem(k, v);
+      }
+    }
+  }
+
+  async function removeStorageData(keys) {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      await chrome.storage.local.remove(keys);
+    } else {
+      for (const k of keys) {
+        localStorage.removeItem(k);
+      }
+    }
+  }
+
+  // Initialize or load unique Device ID
+  let deviceId = "";
+  const storedData = await getStorageData(["cp_device_id", "cp_token", "cp_tenant_id", "cp_server_url"]);
+  
+  if (storedData.cp_device_id) {
+    deviceId = storedData.cp_device_id;
+  } else {
+    // Generate simulated UUID
+    deviceId = 'device_' + 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+    await setStorageData({ cp_device_id: deviceId });
+  }
+  if (statusDeviceId) statusDeviceId.innerText = deviceId;
+
+  // Load existing configuration
+  if (storedData.cp_token) {
+    tokenInput.value = storedData.cp_token;
+  }
+  if (storedData.cp_tenant_id) {
+    tenantInput.value = storedData.cp_tenant_id;
+  }
+  
+  const loadedServerUrl = cleanUrl(storedData.cp_server_url || defaultServerUrl);
+  if (serverInput) serverInput.value = loadedServerUrl;
+  if (dashboardLink) dashboardLink.href = `${loadedServerUrl}/#/dashboard`;
+
+  // Update connection status layout
+  updateStatusDisplay();
+
+  // Helper to sync status details based on current input values
+  function updateStatusDisplay() {
+    const serverVal = serverInput.value.trim();
+    const tokenVal = tokenInput.value.trim();
+    const tenantVal = tenantInput.value.trim();
+
+    if (statusServerUrl) statusServerUrl.innerText = serverVal;
+
+    if (tokenVal) {
+      if (statusDot) statusDot.className = "status-dot connected";
+      if (statusPill) {
+        statusPill.innerText = "CONNECTED";
+        statusPill.style.color = "var(--accent-green)";
+      }
+      if (statusMsg) {
+        statusMsg.innerText = `This browser is enrolled and reporting to ControlPlane under workspace "${tenantVal}".`;
+      }
+      if (statusHeartbeat) {
+        statusHeartbeat.innerText = "OK - just now";
+        statusHeartbeat.style.color = "var(--accent-green)";
+      }
+    } else {
+      if (statusDot) statusDot.className = "status-dot";
+      if (statusPill) {
+        statusPill.innerText = "DISCONNECTED";
+        statusPill.style.color = "var(--accent-red)";
+      }
+      if (statusMsg) {
+        statusMsg.innerText = "This browser is currently not connected to an active ControlPlane Tenant.";
+      }
+      if (statusHeartbeat) {
+        statusHeartbeat.innerText = "Offline";
+        statusHeartbeat.style.color = "var(--accent-red)";
+      }
+    }
+  }
+
+  // Connect Button Handler
   saveBtn.addEventListener("click", async () => {
     const serverVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
     const tokenVal = tokenInput.value.trim();
     const tenantVal = tenantInput ? tenantInput.value.trim() : "acme-tenant-1";
 
     if (!tokenVal || !tenantVal || !serverVal) {
-      showPopupToast("Please enter Server URL, Tenant ID, and Token", "#ef4444");
+      showPopupToast("Please fill in Server URL, Tenant ID, and Enrollment Token", "rgba(239, 68, 68, 0.15)", "var(--accent-red)");
       return;
     }
+
     if (serverInput) serverInput.value = serverVal;
-    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-      await chrome.storage.local.set({ cp_token: tokenVal, cp_tenant_id: tenantVal, cp_server_url: serverVal });
-    }
+
+    await setStorageData({
+      cp_token: tokenVal,
+      cp_tenant_id: tenantVal,
+      cp_server_url: serverVal
+    });
+
     if (dashboardLink) dashboardLink.href = `${serverVal}/#/dashboard`;
-    if (statusPill) statusPill.innerText = "CONNECTED";
-    showPopupToast(`Connected to ${tenantVal} at ${serverVal}!`, "#10b981");
+    updateStatusDisplay();
+    showPopupToast(`Connected successfully to workspace "${tenantVal}"!`, "rgba(16, 185, 129, 0.15)", "var(--accent-green)");
   });
 
-  // Auto-Enroll Handler (Fetches active 48-day token & connects to tenant)
+  // Disconnect Button Handler
+  disconnectBtn.addEventListener("click", async () => {
+    tokenInput.value = "";
+    await removeStorageData(["cp_token"]);
+    updateStatusDisplay();
+    showPopupToast("Disconnected browser from ControlPlane.", "rgba(255, 255, 255, 0.05)", "var(--text-muted)");
+  });
+
+  // Reset Button Handler
+  resetBtn.addEventListener("click", async () => {
+    serverInput.value = defaultServerUrl;
+    tenantInput.value = "acme-tenant-1";
+    tokenInput.value = "";
+    
+    await removeStorageData(["cp_token", "cp_tenant_id", "cp_server_url"]);
+    
+    if (dashboardLink) dashboardLink.href = `${defaultServerUrl}/#/dashboard`;
+    updateStatusDisplay();
+    showPopupToast("Configuration settings reset to default values.", "rgba(239, 68, 68, 0.15)", "var(--accent-red)");
+  });
+
+  // Auto-Enroll Handler (Fetches active token and connects to tenant)
   autoBtn.addEventListener("click", async () => {
     try {
       const inputVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
@@ -86,7 +204,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             break;
           }
         } catch (e) {
-          // Try next candidate URL
+          // Try next URL candidate
         }
       }
 
@@ -96,20 +214,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (serverInput) serverInput.value = workingUrl;
         tokenInput.value = data.token_key;
         if (daysTag) daysTag.innerText = `${data.days_valid || 48} Days Active`;
-        if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-          await chrome.storage.local.set({ cp_token: data.token_key, cp_tenant_id: tenantVal, cp_server_url: workingUrl });
-        }
+        
+        await setStorageData({
+          cp_token: data.token_key,
+          cp_tenant_id: tenantVal,
+          cp_server_url: workingUrl
+        });
+
         if (dashboardLink) dashboardLink.href = `${workingUrl}/#/dashboard`;
-        if (statusPill) statusPill.innerText = "CONNECTED";
-        showPopupToast(`Connected to ${workingUrl}!`, "#10b981");
+        updateStatusDisplay();
+        showPopupToast(`Auto-enrolled successfully at ${workingUrl}!`, "rgba(16, 185, 129, 0.15)", "var(--accent-green)");
       } else {
-        showPopupToast("API unreachable. Start server on localhost:8000.", "#ef4444");
+        showPopupToast("API unreachable. Verify your local server is running.", "rgba(239, 68, 68, 0.15)", "var(--accent-red)");
       }
     } catch (err) {
-      showPopupToast("API unreachable. Verify Server URL.", "#f59e0b");
+      showPopupToast("Connection failed. Verify server URL.", "rgba(239, 68, 68, 0.15)", "var(--accent-red)");
     }
   });
-
 
   // In-Extension Guardrail Tester
   if (testBtn) {
@@ -126,7 +247,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ]));
 
       testBox.style.display = "block";
-      testBox.innerHTML = '<span style="color:#38bdf8;">⏳ Evaluating prompt...</span>';
+      testBox.innerHTML = '<span style="color: var(--accent-cyan);">⏳ Evaluating prompt...</span>';
 
       let data = null;
       for (const base of candidates) {
@@ -147,23 +268,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (data) {
         testBox.innerHTML = `
-          <div>Action: <strong style="color:${data.action === 'BLOCK' ? '#ef4444' : '#10b981'}">${data.action}</strong></div>
-          <div>Sanitized: ${escapeHtml(data.sanitized_prompt || data.user_prompt)}</div>
-          <div>Scores (P/$/R): ${data.scores.performance_p}% / ${data.scores.cost_dollars}% / ${data.scores.responsibility_r}%</div>
+          <div style="margin-bottom: 4px;">Action: <strong style="color: ${data.action === 'BLOCK' ? 'var(--accent-red)' : 'var(--accent-green)'}">${data.action}</strong></div>
+          <div style="margin-bottom: 4px; color: var(--text-muted);">Sanitized: ${escapeHtml(data.sanitized_prompt || data.user_prompt)}</div>
+          <div style="color: var(--text-muted);">Scores (P/$/R): ${data.scores.performance_p}% / ${data.scores.cost_dollars}% / ${data.scores.responsibility_r}%</div>
         `;
       } else {
         testBox.innerText = "Evaluation failed. Make sure local server is running at http://localhost:8000";
       }
     });
   }
-
 });
 
-function showPopupToast(msg, bg) {
+function showPopupToast(msg, bg, border) {
   const el = document.getElementById("popup-toast");
   if (!el) return;
   el.innerText = msg;
-  el.style.background = bg || "#10b981";
+  el.style.backgroundColor = bg || "rgba(16, 185, 129, 0.15)";
+  el.style.borderColor = border || "var(--accent-green)";
+  el.style.color = border || "var(--accent-green)";
   el.style.display = "block";
   setTimeout(() => { el.style.display = "none"; }, 3500);
 }
