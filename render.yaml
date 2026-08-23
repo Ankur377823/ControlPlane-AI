@@ -16,4 +16,4 @@ services:
       - key: BOTPRESS_CONNECTOR_DB
         value: /app/data/botpress_connector.db
       - key: DATABASE_URL
-        value: postgresql://neondb_owner:npg_31ZKONQIiuWB@ep-lively-voice-axel8uav.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require
+        sync: false
