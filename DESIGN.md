@@ -10,8 +10,6 @@ The **Botpress Connector** isolates platform-specific complexity behind a clean,
 3. `reset_conversation()`: Ensures scan prompt isolation by resetting conversation context.
 4. `get_platform_metadata()`: Exposes platform capabilities, delivery mode, and metadata.
 
-This abstraction allows the core scanning engine, guardrail evaluator, frontend UI, and telemetry reporter to operate seamlessly.
-
 ---
 
 ## 2. System Architecture & Component Interaction
@@ -31,18 +29,56 @@ This abstraction allows the core scanning engine, guardrail evaluator, frontend 
                                                                              └────────────────────────┘
 ```
 
-### Layered Architecture:
-- **Frontend SPA (`frontend/index.html`, `js/`, `css/`)**: A single-page vanilla JavaScript application designed with a Cyber Obsidian dark theme. Interacts exclusively with the FastAPI REST API.
-- **FastAPI Backend (`backend/app/main.py`, `routes/`)**: Owns persistence (SQLite WAL via `models/db.py`), authentication & admin approvals (`auth.py`), policy guardrails (`guardrail.py`), risk findings (`findings.py`), and enrollment tokens (`tokens.py`).
-- **Botpress Connector (`backend/app/connector/`)**:
-  - `scanner.py` (`BotpressScanner`): Manages conversation lifecycles, polling loops, and error-to-result mapping.
-  - `client.py` (`BotpressChatClient`): Low-level HTTP client wrapping Botpress Chat API endpoints.
-  - `config.py` (`BotpressTargetConfig`): Typed configuration schema.
-  - `errors.py` (`BotpressError` hierarchy): Provides error sanitization (`sanitize_error`) and secret redaction (`redact_webhook_id`).
+---
+
+## 3. Database Specifications & Dual Persistence Architecture
+
+ControlPlane AI abstracts database operations inside [backend/app/models/db.py](file:///c:/ControlPlane/backend/app/models/db.py) to support dual database execution environments:
+
+### 1. Storage Drivers & Configuration
+- **SQLite Mode (Default Local)**:
+  - Triggered when `DATABASE_URL` is unset.
+  - Path: `BOTPRESS_CONNECTOR_DB` (defaults to `botpress_connector.db`).
+  - Employs SQLite WAL mode for fast connection concurrency.
+- **PostgreSQL Mode (Cloud Production)**:
+  - Triggered when `DATABASE_URL` is supplied (e.g. **Neon Cloud PostgreSQL**).
+  - Drivers: `psycopg2-binary` / `pg8000`.
+  - Enables 24/7 cloud persistence, connection pooling, and multi-tenant scaling.
+
+### 2. Schema Specifications & Relations
+
+```
+┌──────────────┐         ┌────────────────┐         ┌─────────────────┐
+│    users     │         │   resources    │         │  interceptions  │
+├──────────────┤         ├────────────────┤         ├─────────────────┤
+│ id (PK)      │         │ id (PK)        │         │ id (PK)         │
+│ username     │         │ account_name   │         │ resource_id(FK) │
+│ email        │         │ resource_name  │         │ timestamp       │
+│ password_hash│         │ webhook_id     │         │ user_prompt     │
+│ role         │         │ use_case_type  │         │ sanitized_prompt│
+│ tenant_id    │         │ policy_id (FK) │         │ action          │
+└──────────────┘         └───────┬────────┘         │ session_id      │
+                                 │                  │ tenant_id       │
+                                 ▼                  └─────────────────┘
+                         ┌────────────────┐
+                         │    policies    │
+                         ├────────────────┤
+                         │ id (PK)        │
+                         │ name           │
+                         │ use_case_type  │
+                         │ enforcement    │
+                         └────────────────┘
+```
+
+### 3. Automated Migration & Sanitation Pipeline
+The `_migrate_db(conn)` pipeline executes upon backend boot (`init_db()`):
+- Dynamically checks and alters missing columns across tables.
+- Automatically cleanses legacy session ID formats (converting legacy strings to `sess_botpress_...`).
+- Seeds initial admin accounts (`ankur@acme.com`), policies (`pol_customer_support`), and demo resources.
 
 ---
 
-## 3. Onboarding & Security Specification
+## 4. Onboarding & Security Specification
 
 ### Onboarding Schema (`POST /api/v1/resources`)
 
@@ -63,7 +99,7 @@ This abstraction allows the core scanning engine, guardrail evaluator, frontend 
 
 ---
 
-## 4. Guardrail Evaluation & Policy Engine
+## 5. Guardrail Evaluation & Policy Engine
 
 When a prompt is evaluated via `POST /api/v1/resources/{id}/check`:
 
@@ -78,7 +114,7 @@ When a prompt is evaluated via `POST /api/v1/resources/{id}/check`:
 
 ---
 
-## 5. Error Handling Matrix
+## 6. Error Handling Matrix
 
 | Botpress HTTP Status | Internal Exception | User-Facing Sanitized Message |
 |---|---|---|
@@ -92,7 +128,7 @@ When a prompt is evaluated via `POST /api/v1/resources/{id}/check`:
 
 ---
 
-## 6. Testing & Verification
+## 7. Testing & Verification
 
 The codebase enforces 100% clean test coverage:
 - **Unit Tests (`tests/test_scanner.py` & `test_guardrail.py`)**: Tests `BotpressScanner`, text extraction, error sanitization, and policy scoring.

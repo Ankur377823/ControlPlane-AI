@@ -3,6 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-green.svg)](https://fastapi.tiangolo.com/)
 [![Botpress](https://img.shields.io/badge/Botpress-Connector-purple.svg)](https://botpress.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon%20Cloud-336791.svg)](https://neon.tech/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 [![Tests](https://img.shields.io/badge/Pytest-45%2F45%20Passed-emerald.svg)](#-testing--verification)
 
@@ -43,8 +44,7 @@ As organizations rapidly adopt AI chatbots, enterprise LLM agents, and customer 
  ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
  │                              CONTROLPLANE AI FASTAPI BACKEND                                 │
  │  • Sub-15ms Policy Guardrail Engine: Performance (P), Cost ($), Responsibility (R) Scores    │
- │  • Policy Enforcement: BLOCK, MASK / REDACT, MONITOR, ALLOW                               │
- │  • SQLite Database WAL Persistence & Automated Migrations                                    │
+ │  • Dual Database Adapter: Local SQLite WAL & Neon Cloud PostgreSQL                           │
  └─────────────────────────────────────────────────────────┬────────────────────────────────────┘
                                                            │
                                                            ▼
@@ -56,6 +56,33 @@ As organizations rapidly adopt AI chatbots, enterprise LLM agents, and customer 
  │  • Enrollment Token Lifecycle & Admin User Approvals                                         │
  └──────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 💾 Database Architecture & Dual Storage (SQLite & Neon PostgreSQL)
+
+ControlPlane AI features a flexible dual-database engine designed for seamless local development and production cloud deployment.
+
+### 1. Dual Database Modes
+
+- **Local Development (SQLite)**:
+  - **Path**: `botpress_connector.db`
+  - **Mode**: Zero-configuration, embedded SQLite WAL database. Ideal for offline coding, fast unit testing, and instant local execution without needing cloud credentials.
+- **Production / Cloud Deployment (Neon PostgreSQL)**:
+  - **Driver**: `psycopg2-binary` / `pg8000`
+  - **Connection**: Managed via `DATABASE_URL` environment variable pointing to **Neon Cloud PostgreSQL**.
+  - **Benefits**: 24/7 permanent cloud storage, automated snapshots, high-concurrency request handling, and zero data loss on server restarts or re-deploys.
+
+### 2. Database Schema Overview
+
+ControlPlane AI manages 6 core relational tables:
+
+1. `users`: Stores admin and operator accounts, password hashes, roles (`ADMIN`/`USER`), and tenant workspace assignments (`acme-tenant-1`, `globex-tenant-2`).
+2. `resources`: Manages onboarded Botpress chatbots, workspace names, and redacted Webhook IDs.
+3. `interceptions`: Records live risk findings, raw user prompts, redacted sanitized prompts, latency ms, governance scores (P, $, R), and unique Session IDs (`sess_botpress_...`).
+4. `policies`: Configures policy guardrail thresholds, PII sensitivity levels, and prompt injection shield actions (`BLOCK`, `MASK`, `MONITOR`).
+5. `tokens`: Manages 48-day enrollment tokens for Chrome Extension activation.
+6. `scans`: Stores Botpress Red Team vulnerability audit scan executions.
 
 ---
 
@@ -131,12 +158,6 @@ docker compose up --build
    docker run -d -p 8000:8000 -v botpress-data:/app/data --name controlplane-container controlplane-ai
    ```
 
-3. **Stop & Remove Container**:
-   ```bash
-   docker stop controlplane-container
-   docker rm controlplane-container
-   ```
-
 ---
 
 ## 🌐 Accessing the Application
@@ -155,12 +176,6 @@ Once launched locally or via Docker:
 ---
 
 ## 🚀 Local Setup Guide (Without Docker)
-
-### Prerequisites
-- **Python 3.9+** (Python 3.11 recommended)
-- **Git**
-
-### Installation Steps
 
 ```bash
 # 1. Create Python virtual environment
@@ -181,21 +196,11 @@ python -m uvicorn backend.app.main:app --reload --port 8000
 
 ---
 
-## 🧩 Installing the Chrome Extension
-
-1. Open Google Chrome and navigate to `chrome://extensions`.
-2. Enable **Developer mode** in the top-right corner.
-3. Click **Load unpacked** and select `frontend/extension`.
-4. Open any webpage or chatbot target; the top **ControlPlane AI Monitoring Enabled** banner will display active protection.
-
----
-
 ## 🔌 API Reference Highlights
 
 ### 1. Guardrail Real-Time Check
 `POST /api/v1/resources/{resource_id}/check`
 
-**Request Body**:
 ```json
 {
   "user_prompt": "My SSN is 000-12-3456 and email is sara@company.com",
@@ -203,27 +208,8 @@ python -m uvicorn backend.app.main:app --reload --port 8000
 }
 ```
 
-**Response**:
-```json
-{
-  "interception_id": "ic_9a1b2c3d",
-  "action": "MASK",
-  "sanitized_prompt": "My SSN is [REDACTED_SSN] and email is [REDACTED_EMAIL]",
-  "latency_ms": 12,
-  "scores": {
-    "performance_p": 98.5,
-    "cost_dollars": 95.0,
-    "responsibility_r": 99.0
-  },
-  "triggered_rules": ["PII_SSN_REDACT", "PII_EMAIL_MASK"]
-}
-```
-
 ### 2. List Risk Findings
 `GET /api/v1/findings?limit=100`
-
-### 3. Onboard Resource
-`POST /api/v1/resources`
 
 ---
 
