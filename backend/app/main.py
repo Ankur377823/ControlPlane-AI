@@ -72,7 +72,26 @@ def ready():
 # ----------------------------------------------------------------------
 # Serve the static frontend, if present, at /
 # ----------------------------------------------------------------------
-_FRONTEND_DIR = Path(os.environ.get("FRONTEND_DIST", Path(__file__).resolve().parents[2] / "frontend"))
+frontend_env = os.environ.get("FRONTEND_DIST")
+_FRONTEND_DIR = None
 
-if _FRONTEND_DIR.exists():
+if frontend_env:
+    cand = Path(frontend_env).resolve()
+    if cand.exists():
+        _FRONTEND_DIR = cand
+
+if not _FRONTEND_DIR or not _FRONTEND_DIR.exists():
+    base_root = Path(__file__).resolve().parents[2]
+    candidates = [
+        base_root / "frontend",
+        Path.cwd() / "frontend",
+        Path("/app/frontend"),
+        Path("./frontend").resolve()
+    ]
+    for cand in candidates:
+        if cand.exists():
+            _FRONTEND_DIR = cand
+            break
+
+if _FRONTEND_DIR and _FRONTEND_DIR.exists():
     app.mount("/", StaticFiles(directory=str(_FRONTEND_DIR), html=True), name="frontend")
