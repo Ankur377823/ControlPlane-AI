@@ -22,7 +22,8 @@ import { renderEventOverviewPage, openEventOverviewModal, closeEventOverviewModa
 import { renderTokensPage, handleCreateTokenSubmit } from './views/tokensView.js';
 import { renderDashboardPage } from './views/dashboardView.js';
 import { renderInventoryPage, handleOnboardSubmit } from './views/inventoryView.js';
-import { handleRunRedTeamScan, handleSandboxSubmit, downloadScanPdfReport } from './views/scannerView.js';
+import { handleRunRedTeamScan, downloadScanPdfReport } from './views/scannerView.js';
+import { handleSandboxSubmit } from './views/agentRuntimeView.js';
 import { handlePolicySubmit, initPoliciesView } from './views/policiesView.js';
 import { handleVerifyClick, populateSampleData } from './views/hallucinationsView.js';
 
@@ -145,6 +146,24 @@ window.rejectUserAccount = rejectUserAccount;
 window.openEventOverviewModal = openEventOverviewModal;
 window.closeEventOverviewModal = closeEventOverviewModal;
 window.populateSampleData = populateSampleData;
+window.switchDocTab = switchDocTab;
+
+export function switchDocTab(tabId, btn) {
+  document.querySelectorAll('.doc-tab-content').forEach(el => el.style.display = 'none');
+  const target = document.getElementById(tabId);
+  if (target) target.style.display = 'block';
+  if (btn) {
+    const parent = btn.parentElement;
+    if (parent) {
+      parent.querySelectorAll('button').forEach(b => {
+        b.classList.remove('btn');
+        b.classList.add('btn-secondary');
+      });
+      btn.classList.remove('btn-secondary');
+      btn.classList.add('btn');
+    }
+  }
+}
 
 // Resource Populate Helper
 async function populateResources() {
