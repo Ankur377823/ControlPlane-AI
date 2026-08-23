@@ -176,4 +176,5 @@ document.getElementById('btn-run-redteam')?.addEventListener('click', handleRunR
 document.getElementById('sandbox-form')?.addEventListener('submit', handleSandboxSubmit);
 document.getElementById('policy-form')?.addEventListener('submit', handlePolicySubmit);
 document.getElementById('hallucination-verify-form')?.addEventListener('submit', handleVerifyClick);
+document.getElementById('btn-refresh-findings')?.addEventListener('click', () => renderFindingsTable());
 
