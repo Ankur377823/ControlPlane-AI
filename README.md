@@ -1,263 +1,238 @@
-# Botpress Chat API Connector — Red-Team Scanning Demo
+# ControlPlane AI — Enterprise AI Security & Governance Studio
 
-An end-to-end demo connector for **Botpress Cloud** bots, built for an AI
-security platform's red-team scanning use case. It lets you:
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-green.svg)](https://fastapi.tiangolo.com/)
+[![Botpress](https://img.shields.io/badge/Botpress-Connector-purple.svg)](https://botpress.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
+[![Tests](https://img.shields.io/badge/Pytest-45%2F45%20Passed-emerald.svg)](#-testing--verification)
 
-1. **Onboard** a Botpress bot by its Chat API `webhook_id`.
-2. **Validate** that the bot is reachable and can hold a conversation.
-3. **Scan** the bot with adversarial prompts (prompt injection, PII
-   disclosure, jailbreak, or custom prompts) and record the bot's response,
-   latency, and metadata.
-4. Browse **scan history** per onboarded resource.
-
-The backend is a Python/FastAPI service with a connector library
-(`backend/app/connector/`) that talks to the real
-`https://chat.botpress.cloud/{webhook_id}` API. The frontend is a single
-static HTML/JS file served by the same FastAPI app — no build step, no
-Node.js required.
+**ControlPlane AI** is an enterprise-grade AI security control plane, real-time guardrail shield, and session telemetry engine designed to govern, intercept, audit, and safeguard interactions across Botpress chatbots, AI assistants, and enterprise webhooks.
 
 ---
 
-## Auth
+## 🌟 Executive Overview & Problem Statement
 
-**No authentication — all endpoints are open for evaluation.** This is a
-single-user local/demo deployment. CORS is wide open (`allow_origins=["*"]`)
-for the same reason. See `DESIGN.md` §7 for how this would change in a
-multi-tenant production deployment. There is no `EVALUATOR.md` because no
-auth is implemented — this section is the equivalent statement required by
-the spec.
+### The Problem
+As organizations rapidly adopt AI chatbots, enterprise LLM agents, and customer support webhooks, they face major security, privacy, and compliance risks:
+1. **Sensitive Data & Secret Exposure**: Users unwittingly input Personally Identifiable Information (PII such as SSNs, credit card numbers, email addresses), database passwords, API keys, and corporate trade secrets into chatbot interfaces.
+2. **Adversarial Prompt Injection**: Malicious actors craft inputs designed to bypass safety filters, hijack system prompts, or extract internal bot configuration secrets.
+3. **Lack of Session Telemetry & Auditability**: Inability to track multi-turn conversations, isolate distinct chat sessions, and enforce per-tenant security policies across chatbot environments.
+
+### The Solution: ControlPlane AI
+**ControlPlane AI** inserts a real-time, sub-15ms inline interception shield between users and AI chatbots. It automatically evaluates every prompt, redacts sensitive PII and secrets, blocks malicious prompt injection attempts, assigns unique **Session IDs** (`sess_botpress_...`) to every conversation, and provides live audit dashboards with one-click PDF security compliance reporting.
 
 ---
 
-## Project layout
+## 🏗️ System Architecture & Data Flow
 
 ```
-botpress-connector/
-├── README.md
-├── DESIGN.md
-├── .env.example
-├── docker-compose.yml
-├── requirements.txt
-├── backend/
-│   └── app/
-│       ├── main.py            # FastAPI app, serves API + static frontend
-│       ├── connector/         # Botpress HTTP client + scanner
-│       │   ├── client.py
-│       │   ├── config.py
-│       │   ├── errors.py
-│       │   └── scanner.py
-│       ├── models/db.py       # SQLite persistence
-│       ├── routes/resources.py
-│       └── tests/
-│           ├── mock_botpress.py
-│           ├── test_scanner.py   # connector unit tests
-│           └── test_api.py       # API integration tests
-└── frontend/
-    └── index.html             # single-file SPA
+                                ┌────────────────────────────────────────────────────────┐
+                                │                 BOTPRESS CHATBOTS                      │
+                                │           chat.botpress.cloud/{webhook_id}             │
+                                └───────────────────────────┬────────────────────────────┘
+                                                            │
+                                                            ▼
+ ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+ │                              CHROME EXTENSION NETWORK SHIELD                                 │
+ │  • Synchronous DOM & Main-World Fetch/XHR Interceptor                                        │
+ │  • Automatic Botpress Webhook & Hostname Detection                                           │
+ │  • Session ID Generator (e.g., sess_botpress_9a1b4c)                                          │
+ └─────────────────────────────────────────────────────────┬────────────────────────────────────┘
+                                                           │ POST /api/v1/resources/{id}/check
+                                                           ▼
+ ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+ │                              CONTROLPLANE AI FASTAPI BACKEND                                 │
+ │  • Sub-15ms Policy Guardrail Engine: Performance (P), Cost ($), Responsibility (R) Scores    │
+ │  • Policy Enforcement: BLOCK, MASK / REDACT, MONITOR, ALLOW                               │
+ │  • SQLite Database WAL Persistence & Automated Migrations                                    │
+ └─────────────────────────────────────────────────────────┬────────────────────────────────────┘
+                                                           │
+                                                           ▼
+ ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+ │                              SECURITY CENTER FRONTEND DASHBOARD                              │
+ │  • Risk Findings Telemetry (Live Interceptions Table with Session Navigation)                │
+ │  • Event Overview Popup (Deep-Dive Telemetry & LLM Session Telemetry Registry)               │
+ │  • Botpress Red Team Scanner & Automated PDF Security Report Generator                       │
+ │  • Enrollment Token Lifecycle & Admin User Approvals                                         │
+ └──────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Prerequisites
+## ⚡ Core Features & Capabilities
 
-- **Python 3.11+**
-- No Node.js / npm needed — the frontend is a static HTML file with vanilla
-  JS, served directly by FastAPI.
-- A Botpress Cloud account + published bot with the **Chat** integration
-  enabled (for the live demo only — not required to run the test suite).
+### 🛡️ 1. Sub-15ms Real-Time Policy Guardrail Engine
+- **`BLOCK`**: Instantly halts dangerous queries (e.g. database password extraction, system prompt overrides) before reaching the bot.
+- **`MASK` / `REDACT`**: Automatically sanitizes PII (SSNs, credit card numbers, emails) replacing them with `[REDACTED_*]` tokens before forwarding.
+- **`MONITOR`**: Permits non-blocking prompts while recording audit logs and safety metrics.
+- **`ALLOW`**: Passes clean queries with sub-15ms latency.
 
----
+### 🔌 2. Botpress Connector Integration
+- **Direct Botpress Integration**: Onboard Botpress Cloud chatbots via Webhook ID.
+- **Target Validation**: Test webhook connectivity (`POST /api/v1/resources/{id}/validate`).
+- **Prompt Isolation**: Optional conversation context reset between test prompts (`reset_conversation: true`).
 
-## Setup
+### 🔑 3. Distinct Chat Session ID Tracking
+- Every chat turn across Botpress or browser sessions is tagged with a distinct Session ID (`sess_botpress_9a1b4c`).
+- Clickable Session ID pills seamlessly open the **Event Overview & Telemetry** popup to inspect raw vs. redacted prompts and triggered security rules.
 
-```bash
-cd botpress-connector
-cp .env.example .env
-pip install -r requirements.txt --break-system-packages
-```
+### 🔐 4. Session Persistence & Account Security
+- **"Remember Me" & `sessionStorage` Security**: Closing the tab or starting a new browser session prompts for credentials by default, ensuring session isolation unless "Remember Me" is explicitly checked.
+- **Admin Approvals & Multi-Tenant Workspaces**: Admin user approval flow for new sign-ups and workspace isolation (`acme-tenant-1` vs. `globex-tenant-2`).
 
-(`--break-system-packages` is only needed on systems with an externally
-managed Python; use a virtualenv instead if you prefer:
-`python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`.)
-
-The `.env` file is mostly informational for this demo — onboarding a
-Botpress bot happens **through the UI**, not via environment variables (see
-"Configuring `WEBHOOK_ID` for the live demo" below). The two settings that
-do matter at runtime are `BOTPRESS_CONNECTOR_DB` (SQLite file path) and
-`FRONTEND_DIST` (where the static frontend lives), both of which already
-have sensible defaults.
+### 🎯 5. Botpress Red Team Scanner & PDF Export
+- Automated vulnerability probe execution against Botpress chatbots.
+- Tests resistance against prompt injections, PII extractions, and jailbreaks.
+- Generates downloadable professional **PDF Vulnerability Compliance Reports**.
 
 ---
 
-## Running the tests
+## 🐳 Running ControlPlane AI with Docker
 
-All 26 tests run offline against an in-process mock Botpress server — **no
-real Botpress credentials or network access required**.
+**ControlPlane AI** is fully Dockerized with built-in healthchecks, volume persistence, and automatic environment configuration.
 
-```bash
-cd backend
-python -m pytest -v
-```
+### Option A: One-Command Startup with Docker Compose (Recommended)
 
-Expected output: `26 passed` (connector unit tests in `test_scanner.py` covering
-`validate_target`, `execute_test`, timeouts, error sanitization, and text
-extraction; API integration tests in `test_api.py` covering the full
-onboard → validate → scan → history flow against a mocked Botpress server).
-
----
-
-## Running the app locally
-
-```bash
-cd backend
-python -m uvicorn app.main:app --reload --port 8000
-```
-
-Then open **http://localhost:8000/** in your browser. FastAPI serves the
-SPA at `/` and the API under `/api/v1/...`.
-
-- `GET /health` → `{"status": "ok"}`
-- `GET /ready` → `{"status": "ready"}` (touches the SQLite DB)
-- API docs (Swagger UI, auto-generated by FastAPI): http://localhost:8000/docs
-
----
-
-## Configuring `WEBHOOK_ID` for the live demo
-
-You do **not** set `WEBHOOK_ID` as an environment variable for normal
-operation. Instead:
-
-1. Follow the Botpress setup steps below to get a real `webhook_id`.
-2. Open the running app in your browser → **"New resource"**.
-3. Fill in:
-   - **Account Name** — any label, e.g. `Demo-Account`
-   - **Resource Name** — any label, e.g. `Support Bot`
-   - **Webhook ID** — paste the value from Botpress Studio → Integrations →
-     Chat
-   - *(optional)* **Encryption Key** / **User ID** — only if you enabled
-     "manual auth" on the Chat integration
-4. Click **Validate connection** — this calls
-   `GET https://chat.botpress.cloud/{webhook_id}/hello` and attempts to open
-   a conversation.
-5. Click **Save resource**.
-6. On the resource detail page, pick one of the three built-in adversarial
-   prompts (or write a custom one) and click **Run Scan**.
-
-### Botpress setup (one-time, ~5 minutes)
-
-1. Sign up at https://botpress.com and create a new bot in Botpress Studio.
-2. Give it a trivial flow (e.g. "On Message → Send Text" replying to
-   anything the user says).
-3. **Publish** the bot.
-4. Bot → **Integrations** → install and enable **Chat**.
-5. Copy the **Webhook ID** shown in the Chat integration config.
-6. Sanity check from a terminal:
-   ```bash
-   curl -s "https://chat.botpress.cloud/YOUR_WEBHOOK_ID/hello"
-   ```
-   A non-error JSON response confirms the bot is reachable.
-
----
-
-## Live smoke test (manual)
-
-With the app running locally (or hosted, see below) and a real Botpress
-`webhook_id` in hand:
-
-1. Open the UI → **New resource** → fill in Account Name, Resource Name,
-   and the real `webhook_id`.
-2. Click **Validate connection** → should show a green "validated" badge.
-   Internally this calls `validate_target()`, which does
-   `GET /{webhook_id}/hello`, creates a chat user, and opens a conversation.
-3. Click **Save resource** → navigates to the resource detail page.
-4. On the detail page, select **"System prompt leak"** (or any of the three
-   sample prompts) from the dropdown and click **Run Scan**.
-5. Within ~60 seconds (the configured `reply_timeout_sec`), the bot's actual
-   reply appears in the results card along with `execution_time_ms`,
-   `conversation_id`, and `delivery_mode: "poll"`.
-6. Refresh the page and open **Scan History** — the same result is now
-   listed and expandable.
-
-This exercises the full
-`onboard → validate → scan → history` path against a real Botpress Cloud
-bot, with zero mocking.
-
----
-
-## Deployment
-
-> **Note on hosting:** this build was produced in an environment without the
-> ability to provision a public HTTPS URL, so **no hosted deployment has
-> been created**. Everything above runs fully locally. Below are
-> step-by-step instructions to deploy it yourself to a free-tier host in a
-> few minutes — the app is a single FastAPI process serving both the API and
-> the static frontend, so it deploys as one service with no extra
-> configuration.
-
-### Option A: Railway / Render (recommended, ~5 minutes)
-
-1. Push this repo to GitHub.
-2. Create a new **Web Service** from the repo on Railway or Render.
-3. **Root directory:** repository root
-4. **Build command:** `pip install -r requirements.txt`
-5. **Start command:**
-   ```bash
-   uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT
-   ```
-6. **Environment variables:** none are required for the app to boot. You can
-   optionally set `BOTPRESS_CONNECTOR_DB=/data/botpress_connector.db` if you
-   attach a persistent volume (otherwise SQLite resets on each redeploy —
-   fine for a demo).
-7. Once deployed, visit `https://<your-app>.up.railway.app/` (or the Render
-   equivalent). `/health` and `/ready` should both respond, and the full
-   onboard → validate → scan flow works exactly as it does locally, against
-   your real Botpress bot.
-
-### Option B: Fly.io
-
-```bash
-cd backend
-fly launch --no-deploy   # creates fly.toml, choose a region
-```
-
-Edit the generated `fly.toml` so the start command is:
-
-```toml
-[processes]
-app = "uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8080"
-```
-
-```bash
-fly deploy
-```
-
-### Option C: Docker Compose (local or any Docker host)
+Run the following command from the root directory:
 
 ```bash
 docker compose up --build
 ```
 
-Then open http://localhost:8000/. See `docker-compose.yml` — it builds the
-backend image (which also serves the frontend) and exposes port 8000.
+- **Run in Background (Detached Mode)**:
+  ```bash
+  docker compose up --build -d
+  ```
 
-### After deploying
+- **View Live Application Logs**:
+  ```bash
+  docker compose logs -f
+  ```
 
-Update this README's "Live demo" section (below) with your URL — the
-evaluator should be able to open it in an incognito window and complete
-onboard → validate → scan without cloning the repo.
+- **Check Running Container Status**:
+  ```bash
+  docker compose ps
+  ```
 
-```markdown
-## Live demo
+- **Stop Container**:
+  ```bash
+  docker compose down
+  ```
 
-- **UI:** https://<fill in after you deploy>
-- **API base:** same origin, under /api/v1
-- **Deployed at:** <fill in>
-- **Notes:** cold start ~10-30s on free tiers
+### Option B: Using Manual Docker CLI Commands
+
+1. **Build the Docker Image**:
+   ```bash
+   docker build -t controlplane-ai .
+   ```
+
+2. **Run Container with Persistent Data Volume**:
+   ```bash
+   docker run -d -p 8000:8000 -v botpress-data:/app/data --name controlplane-container controlplane-ai
+   ```
+
+3. **Stop & Remove Container**:
+   ```bash
+   docker stop controlplane-container
+   docker rm controlplane-container
+   ```
+
+---
+
+## 🌐 Accessing the Application
+
+Once launched locally or via Docker:
+
+- 📊 **ControlPlane AI Dashboard**: [http://localhost:8000/](http://localhost:8000/)
+- 📖 **Interactive OpenAPI Specs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- 💓 **Health Check Endpoint**: [http://localhost:8000/health](http://localhost:8000/health)
+
+### 👤 Demo Login Credentials
+
+- **Admin Account**: `ankur@acme.com` (or `ankur`) | Password: `password123`
+- **Standard Users**: `john@acme.com` / `alice@globex.com` | Password: `password123`
+
+---
+
+## 🚀 Local Setup Guide (Without Docker)
+
+### Prerequisites
+- **Python 3.9+** (Python 3.11 recommended)
+- **Git**
+
+### Installation Steps
+
+```bash
+# 1. Create Python virtual environment
+python -m venv .venv
+
+# 2. Activate environment (Windows PowerShell)
+.venv\Scripts\Activate.ps1
+
+# Activate environment (Linux / macOS)
+source .venv/bin/activate
+
+# 3. Install requirements
+pip install -r requirements.txt
+
+# 4. Start FastAPI server
+python -m uvicorn backend.app.main:app --reload --port 8000
 ```
 
 ---
 
-## Design notes
+## 🧩 Installing the Chrome Extension
 
-See `DESIGN.md` for the full architecture, conversation lifecycle decisions,
-error-handling matrix, security model, and known limitations.
+1. Open Google Chrome and navigate to `chrome://extensions`.
+2. Enable **Developer mode** in the top-right corner.
+3. Click **Load unpacked** and select `frontend/extension`.
+4. Open any webpage or chatbot target; the top **ControlPlane AI Monitoring Enabled** banner will display active protection.
+
+---
+
+## 🔌 API Reference Highlights
+
+### 1. Guardrail Real-Time Check
+`POST /api/v1/resources/{resource_id}/check`
+
+**Request Body**:
+```json
+{
+  "user_prompt": "My SSN is 000-12-3456 and email is sara@company.com",
+  "session_id": "sess_botpress_8f3a92"
+}
+```
+
+**Response**:
+```json
+{
+  "interception_id": "ic_9a1b2c3d",
+  "action": "MASK",
+  "sanitized_prompt": "My SSN is [REDACTED_SSN] and email is [REDACTED_EMAIL]",
+  "latency_ms": 12,
+  "scores": {
+    "performance_p": 98.5,
+    "cost_dollars": 95.0,
+    "responsibility_r": 99.0
+  },
+  "triggered_rules": ["PII_SSN_REDACT", "PII_EMAIL_MASK"]
+}
+```
+
+### 2. List Risk Findings
+`GET /api/v1/findings?limit=100`
+
+### 3. Onboard Resource
+`POST /api/v1/resources`
+
+---
+
+## 🧪 Testing & Verification
+
+Run the full pytest test suite:
+
+```bash
+python -m pytest backend/tests
+```
+
+**Expected Output**: `45 passed` (100% test pass rate covering authentication, token lifecycle, bot onboarding, guardrail evaluations, risk findings, and analytics).

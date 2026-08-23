@@ -8,13 +8,10 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 COPY backend /app/backend
 COPY frontend /app/frontend
 
-WORKDIR /app/backend
-
 ENV FRONTEND_DIST=/app/frontend
 ENV BOTPRESS_CONNECTOR_DB=/app/data/botpress_connector.db
-
 RUN mkdir -p /app/data
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

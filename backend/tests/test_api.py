@@ -96,8 +96,8 @@ def test_onboard_and_list_resource(client):
     assert "webhook_id" not in resource
 
     listing = client.get("/api/v1/resources").json()
-    assert len(listing) == 1
-    assert listing[0]["id"] == resource["id"]
+    assert len(listing) >= 1
+    assert any(r["id"] == resource["id"] for r in listing)
 
 
 def test_get_nonexistent_resource_404(client):
@@ -216,3 +216,55 @@ def test_scan_requires_prompts(client):
     resource = _onboard(client, webhook_id="valid-webhook")
     resp = client.post(f"/api/v1/resources/{resource['id']}/scan", json={"prompts": []})
     assert resp.status_code == 400
+
+
+# ----------------------------------------------------------------------
+# Auth tests
+# ----------------------------------------------------------------------
+def test_login_auth_success(client):
+    resp = client.post("/api/v1/auth/login", json={"username": "admin", "password": "password123"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["role"] == "ADMIN"
+    assert data["name"] == "Ankur Kumar Singh"
+    assert "token" in data
+
+
+def test_login_auth_failure(client):
+    resp = client.post("/api/v1/auth/login", json={"username": "admin", "password": "wrongpassword"})
+    assert resp.status_code == 401
+
+
+# ----------------------------------------------------------------------
+# Enrollment Tokens (48 Days Default)
+# ----------------------------------------------------------------------
+def test_create_and_list_tokens(client):
+    res = client.post("/api/v1/tokens", json={"name": "Extension Key Token", "days_valid": 48})
+    assert res.status_code == 200
+    token_data = res.json()
+    assert token_data["days_valid"] == 48
+    assert token_data["status"] == "active"
+    assert "expires_at" in token_data
+
+    tokens_list = client.get("/api/v1/tokens").json()
+    assert len(tokens_list) >= 1
+    assert any(t["id"] == token_data["id"] for t in tokens_list)
+
+
+# ----------------------------------------------------------------------
+# Risk Findings & Filtering
+# ----------------------------------------------------------------------
+def test_list_and_filter_findings(client):
+    # Dynamically generate real findings via guardrail check
+    client.post("/api/v1/resources/res_demo/check", json={"user_prompt": "Send verification to sara@company.com"})
+    client.post("/api/v1/resources/res_demo/check", json={"user_prompt": "Contact user at john.doe@domain.org"})
+
+    findings = client.get("/api/v1/findings").json()
+    assert isinstance(findings, list)
+    assert len(findings) >= 2
+
+    # Filter by source
+    endpoint_findings = client.get("/api/v1/findings?source=Endpoint").json()
+    assert all(f["source"].lower() == "endpoint" for f in endpoint_findings)
+
+

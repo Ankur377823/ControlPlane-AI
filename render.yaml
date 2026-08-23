@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: controlplane-botpress-connector
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    disk:
+      name: botpress-data
+      mountPath: /app/data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: FRONTEND_DIST
+        value: ./frontend
+      - key: BOTPRESS_CONNECTOR_DB
+        value: /app/data/botpress_connector.db

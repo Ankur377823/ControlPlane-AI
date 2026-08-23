@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ControlPlane AI Extension</title>
+  <style>
+    body {
+      width: 320px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #070a14;
+      color: #f8fafc;
+      margin: 0;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .logo-img {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      box-shadow: 0 0 16px rgba(139, 92, 246, 0.5);
+    }
+    .title { font-size: 15px; font-weight: 800; color: #fff; margin: 0; }
+    .subtitle { font-size: 11px; color: #94a3b8; margin: 0; }
+    .card {
+      background: rgba(15, 23, 42, 0.85);
+      padding: 14px; border-radius: 12px;
+      font-size: 12px; margin-bottom: 12px;
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    label { font-size: 11px; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 5px; }
+    input, textarea {
+      width: 100%; box-sizing: border-box;
+      background: #0e1526; border: 1px solid #1e293b;
+      color: #f8fafc; border-radius: 8px;
+      padding: 8px 10px; font-size: 11px; margin-bottom: 8px;
+      font-family: monospace;
+    }
+    input:focus, textarea:focus { outline: none; border-color: #8b5cf6; }
+    .btn {
+      display: block; width: 100%; text-align: center;
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: white; text-decoration: none; padding: 9px;
+      border-radius: 8px; font-weight: 700; font-size: 12px;
+      border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { opacity: 0.95; transform: translateY(-1px); }
+    .btn-secondary {
+      background: #1e293b; color: #f8fafc; border: 1px solid #334155;
+    }
+    .status-pill {
+      background: rgba(16, 185, 129, 0.2); color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      font-size: 10px; padding: 2px 7px; border-radius: 5px; font-weight: 800;
+    }
+    .toast-msg {
+      display: none; background: #10b981; color: #fff;
+      padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 600;
+      margin-bottom: 10px; text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER WITH EXTENSION LOGO -->
+  <div class="header">
+    <img src="icons/icon48.png" class="logo-img" alt="ControlPlane AI Logo">
+    <div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <h3 class="title">ControlPlane AI</h3>
+        <span class="status-pill" id="token-status-pill">ACTIVE</span>
+      </div>
+      <p class="subtitle">Endpoint AI Guardrail & Token Connector</p>
+    </div>
+  </div>
+
+  <div id="popup-toast" class="toast-msg"></div>
+
+  <!-- ONBOARDING CARD -->
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+      <label style="margin-bottom:0;">Tenant Workspace ID</label>
+      <span style="font-size:10px; color:#a7f3d0; font-weight:700;">REQUIRED</span>
+    </div>
+    <input type="text" id="tenant-input" placeholder="acme-tenant-1" value="acme-tenant-1">
+
+    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+      <label style="margin-bottom:0;">Enrollment Token Key</label>
+      <span style="font-size:10px; color:#06b6d4; font-weight:700;" id="token-days-tag">48 Days Active</span>
+    </div>
+    <input type="text" id="token-input" placeholder="cp_live_xxxxxxxxxxxx">
+    <button id="save-token-btn" class="btn" style="margin-bottom: 6px;">Save Tenant ID & Token</button>
+    <button id="auto-token-btn" class="btn btn-secondary">⚡ Auto-Enroll Extension (48 Days)</button>
+  </div>
+
+  <!-- SCOPE SELECTION CARD -->
+  <div class="card" style="background:rgba(99, 102, 241, 0.1); border:1px solid rgba(99, 102, 241, 0.3);">
+    <label style="color:#a5b4fc; font-weight:800;">🛡️ Extension AI Inspection Scope</label>
+    <div style="font-size:11px; color:#cbd5e1; margin-top:2px;">
+      Scope Mode: <strong style="color:#38bdf8;">All Endpoint AI Tools (Excluding pure web LLMs)</strong>
+    </div>
+  </div>
+
+  <!-- IN-EXTENSION PROMPT GUARDRAIL TESTER -->
+  <div class="card">
+    <label>Test Live Extension Guardrail</label>
+    <input type="text" id="test-prompt-input" placeholder="e.g. Email user@company.com secret key">
+    <button id="test-guardrail-btn" class="btn" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">Evaluate Prompt</button>
+    <div id="test-result-box" style="margin-top:8px; display:none; background:#0e1526; padding:8px; border-radius:6px; font-family:monospace; font-size:10px; color:#a7f3d0; word-break:break-all;"></div>
+  </div>
+
+  <a href="http://localhost:8000/#/dashboard" target="_blank" class="btn" style="background: rgba(6, 182, 212, 0.15); border: 1px solid #06b6d4; color: #06b6d4;">Open Governance Studio →</a>
+
+  <script src="popup.js"></script>
+</body>
+</html>

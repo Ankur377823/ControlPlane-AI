@@ -21,7 +21,11 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .models.db import init_db
+from .routes.auth import router as auth_router
+from .routes.findings import router as findings_router
+from .routes.guardrail import router as guardrail_router
 from .routes.resources import router as resources_router
+from .routes.tokens import router as tokens_router
 
 
 @asynccontextmanager
@@ -30,7 +34,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Botpress Connector API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="ControlPlane AI Governance API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -40,7 +44,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
+app.include_router(tokens_router)
+app.include_router(findings_router)
+app.include_router(guardrail_router)
 app.include_router(resources_router)
+
 
 
 @app.get("/health")
