@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ControlPlane AI Guardrail",
   "version": "1.0.0",
-  "description": "Real-time AI Security & Responsible Guardrail for ChatGPT, Claude, Gemini, DeepSeek, and Kimi.",
+  "description": "Real-time AI Security & Guardrail for Botpress, ChatGPT, Claude, Gemini, DeepSeek, and Kimi.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -13,14 +13,7 @@
     "storage"
   ],
   "host_permissions": [
-    "https://chatgpt.com/*",
-    "https://chat.openai.com/*",
-    "https://claude.ai/*",
-    "https://gemini.google.com/*",
-    "https://chat.deepseek.com/*",
-    "https://*.deepseek.com/*",
-    "https://kimi.moonshot.cn/*",
-    "https://*.kimi.ai/*"
+    "<all_urls>"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -41,7 +34,11 @@
         "https://chat.deepseek.com/*",
         "https://*.deepseek.com/*",
         "https://kimi.moonshot.cn/*",
-        "https://*.kimi.ai/*"
+        "https://*.kimi.ai/*",
+        "https://*.botpress.cloud/*",
+        "https://*.onrender.com/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
       ],
       "js": ["content.js"],
       "run_at": "document_end"

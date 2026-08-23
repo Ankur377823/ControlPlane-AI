@@ -17,7 +17,11 @@
     host.includes("gemini.google.com") ||
     host.includes("deepseek.com") ||
     host.includes("kimi.moonshot.cn") ||
-    host.includes("kimi.ai");
+    host.includes("kimi.ai") ||
+    host.includes("botpress.cloud") ||
+    host.includes("onrender.com") ||
+    host.includes("localhost") ||
+    host.includes("127.0.0.1");
 
   if (!isAITool) return;
 
