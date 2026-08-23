@@ -4,7 +4,7 @@ Guardrail real-time evaluation routes for ControlPlane AI.
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from fastapi import APIRouter, HTTPException, Header, Query
 from pydantic import BaseModel, Field
@@ -19,6 +19,8 @@ class CheckRequest(BaseModel):
     user_prompt: str = Field(..., min_length=1)
     raw_response: Optional[str] = None
     session_id: Optional[str] = None
+    tool_call: Optional[Dict[str, Any]] = None
+    source: Optional[str] = None
 
 
 @router.post("/{resource_id}/check")
@@ -26,9 +28,11 @@ def check_guardrail(
     resource_id: str,
     payload: CheckRequest,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-ID"),
+    x_source: Optional[str] = Header(None, alias="X-Source"),
     tenant_id: Optional[str] = Query(None),
 ):
     active_tenant = tenant_id or x_tenant_id or "acme-tenant-1"
+    active_source = payload.source or x_source or "Browser Extension"
 
     resource = db.get_resource(resource_id)
     if not resource and resource_id == "res_demo":
@@ -47,9 +51,9 @@ def check_guardrail(
 
     policy = db.get_policy_for_resource(resource_id)
     guardrail = ControlPlaneGuardrail(policy)
-    eval_result = guardrail.evaluate(payload.user_prompt, payload.raw_response)
+    eval_result = guardrail.evaluate(payload.user_prompt, payload.raw_response, payload.tool_call)
 
-    # Log interception to DB under Endpoint source
+    # Log interception to DB
     intercept = db.log_interception(
         resource_id=resource_id,
         user_prompt=payload.user_prompt,
@@ -64,16 +68,19 @@ def check_guardrail(
         responsibility_score=eval_result["responsibility_score"],
         triggered_rules=eval_result["triggered_rules"],
         risk_findings=eval_result["risk_findings"],
-        source="Endpoint",
+        source=active_source,
         session_id=payload.session_id,
         tenant_id=active_tenant,
     )
+
 
     return {
         "interception_id": intercept["id"],
         "resource_id": resource_id,
         "action": eval_result["action"],
         "enforcement_mode": eval_result["enforcement_mode"],
+        "action_risk_tier": eval_result.get("action_risk_tier", "LOW"),
+        "tool_call": eval_result.get("tool_call"),
         "user_prompt": eval_result["user_prompt"],
         "raw_response": eval_result["raw_response"],
         "sanitized_prompt": eval_result["sanitized_prompt"],
@@ -88,3 +95,4 @@ def check_guardrail(
         "risk_findings": eval_result["risk_findings"],
         "policy_applied": eval_result["policy_applied"],
     }
+

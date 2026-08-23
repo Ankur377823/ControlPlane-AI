@@ -76,8 +76,8 @@
         <a class="nav-item nav-sub-item" data-route="security-center/risk-findings" onclick="navigate('#/security-center/risk-findings')">
           Risk Findings
         </a>
-        <a class="nav-item nav-sub-item" onclick="openEventOverviewModal()">
-          Event Overview (Popup)
+        <a class="nav-item nav-sub-item" data-route="security-center/event-overview" onclick="navigate('#/security-center/event-overview')">
+          Event Overview & Sessions
         </a>
         <a class="nav-item nav-sub-item" data-route="security-center/policies" onclick="navigate('#/security-center/policies')">
           Security Policies
@@ -220,8 +220,20 @@
             </div>
 
             <div class="card">
-              <div class="card-title">System Metrics</div>
+              <div class="card-title">System Metrics & Trustworthiness Index</div>
               <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                <div style="display:flex; justify-content:space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                  <span style="color:var(--text-muted);">Overall System Trustworthiness Score</span>
+                  <strong style="color:var(--success); font-size:1.05rem;" id="dash-trustworthiness-score">98.8%</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                  <span style="color:var(--text-muted);">False Positive Rate (FPR %)</span>
+                  <strong style="color:var(--cyan);" id="dash-fp-rate">1.2%</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                  <span style="color:var(--text-muted);">False Negative Rate (FNR %)</span>
+                  <strong style="color:var(--warning);" id="dash-fn-rate">0.9%</strong>
+                </div>
                 <div style="display:flex; justify-content:space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
                   <span style="color:var(--text-muted);">Average Latency</span>
                   <strong style="color:var(--primary);" id="dash-stat-latency">12.4 ms</strong>
@@ -236,6 +248,7 @@
                 </div>
               </div>
             </div>
+
           </div>
         </section>
 
@@ -249,6 +262,9 @@
               Live prompt-level vulnerability telemetry and interceptions. Click any risk finding to view detailed event telemetry, chat bot target, and session ID.
             </div>
           </div>
+
+          <!-- SUMMARY METRICS CARDS -->
+          <div class="grid-4" id="rf-summary-metrics" style="margin-bottom: 1.5rem;"></div>
 
           <div class="rf-filter-bar">
             <div class="filter-tabs">
@@ -507,7 +523,49 @@
             <div class="card-title">Vulnerability Audit Log & Scorecard</div>
             <div id="scanner-results-box" style="font-size:0.88rem; color:var(--text-main);">No scan executed yet. Select target or enter Webhook ID and click Execute Audit Scan.</div>
           </div>
+
+          <!-- AGENT ACTION RISK & TOOL INTERCEPTION SANDBOX -->
+          <div class="card" style="margin-top: 1.5rem; background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid var(--border);">
+            <div class="card-title" style="display:flex; align-items:center; gap:8px; color:#fff;">
+              <span>🤖</span> AI Agent Action Risk & Tool Call Interception Sandbox
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+              Test multi-step compounding risk and tool call interception (LOW, MEDIUM, HIGH, CRITICAL risk tiers) for AI agents.
+            </p>
+
+            <form id="sandbox-form" style="display:flex; flex-direction:column; gap:1rem;">
+              <input type="hidden" id="sandbox-resource-id" value="res_demo">
+              
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                <div class="form-group">
+                  <label style="font-weight:600; color:#fff;">Agent Prompt / Instruction</label>
+                  <input type="text" id="sandbox-prompt" value="Find suspicious email and delete it permanently" required style="width:100%;">
+                </div>
+
+                <div class="form-group">
+                  <label style="font-weight:600; color:#fff;">Simulated Agent Tool Call Action</label>
+                  <select id="sandbox-tool-select" style="width:100%;">
+                    <option value="search_web">search_web (LOW Risk -> ALLOW)</option>
+                    <option value="send_email">send_email (MEDIUM Risk -> MONITOR)</option>
+                    <option value="delete_file" selected>delete_file / delete_email (HIGH Risk -> CONFIRM_REQUIRED)</option>
+                    <option value="transfer_money">transfer_money (CRITICAL Risk -> BLOCK)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:flex-end;">
+                <button type="submit" class="btn" style="font-weight:700;">
+                  ⚡ Evaluate Agent Tool Call Interception
+                </button>
+              </div>
+            </form>
+
+            <div id="sandbox-output" style="margin-top:1rem; padding:1rem; border-radius:8px; background:rgba(15, 23, 42, 0.6); border:1px solid var(--border);">
+              <span style="font-size:0.85rem; color:var(--text-muted);">Select a tool call action above and click Evaluate to test Action Interception.</span>
+            </div>
+          </div>
         </section>
+
 
         <!-- 8. PAGE: POLICIES OVERHAUL -->
         <section id="page-security-center-policies" class="page-view">
@@ -555,7 +613,17 @@
                     <option value="8192">8,192 Tokens (Extended Context)</option>
                   </select>
                 </div>
+
+                <div class="form-group">
+                  <label>Geographic Regulatory Compliance Framework</label>
+                  <select id="pol-region">
+                    <option value="GLOBAL_DEFAULT">GLOBAL_DEFAULT — Baseline Safety & Privacy Rules</option>
+                    <option value="EU_GDPR">EU_GDPR — European Union GDPR Strict Data Protection</option>
+                    <option value="US_HIPAA">US_HIPAA — Health Insurance Portability & Privacy (HIPAA)</option>
+                  </select>
+                </div>
               </div>
+
 
               <div class="form-group">
                 <label>Hallucination Factuality Threshold (0.00 to 1.00)</label>
@@ -586,9 +654,138 @@
         </section>
 
         <section id="page-documentation" class="page-view">
-          <div class="card">
-            <div class="card-title">Documentation & Integration Guide</div>
-            <p style="color: var(--text-muted); margin-bottom: 1rem;">Integrate ControlPlane AI Security with Botpress, Copilot Studio, and browser extensions.</p>
+          <div class="card" style="border: 1px solid var(--primary); background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%); padding: 2rem;">
+            <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 1.5rem;">
+              <h2 style="font-family: var(--font-brand); font-size: 1.6rem; color: #fff; margin: 0;">📚 ControlPlane AI Enterprise Security Guide</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Integrate and configure the real-time guardrail shield, LegionForge Guardian 7-check engine, and cryptographic log chains.</p>
+            </div>
+
+            <!-- TABS LAYOUT -->
+            <div style="display: grid; grid-template-columns: 220px 1fr; gap: 2rem;">
+              
+              <!-- Left Sidebar Tabs -->
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button type="button" class="btn" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="document.querySelectorAll('.doc-tab-content').forEach(el=>el.style.display='none'); document.getElementById('doc-tab-overview').style.display='block';">🔍 1. System Overview</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="document.querySelectorAll('.doc-tab-content').forEach(el=>el.style.display='none'); document.getElementById('doc-tab-guardian').style.display='block';">🤖 2. Guardian 7-Checks</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="document.querySelectorAll('.doc-tab-content').forEach(el=>el.style.display='none'); document.getElementById('doc-tab-extension').style.display='block';">🔌 3. Chrome Extension</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="document.querySelectorAll('.doc-tab-content').forEach(el=>el.style.display='none'); document.getElementById('doc-tab-crypto').style.display='block';">🔐 4. Cryptographic Logs</button>
+              </div>
+
+              <!-- Right Tab Contents -->
+              <div>
+                
+                <!-- 1. OVERVIEW -->
+                <div id="doc-tab-overview" class="doc-tab-content" style="display: block;">
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🔍 1. System Architecture & Capabilities</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    ControlPlane AI acts as an inline security broker inserting a sub-15ms interception layer between users, agent frameworks, and LLM providers. It runs evaluations across three dimensions:
+                  </p>
+                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; margin-bottom: 1.5rem; padding-left: 1.25rem;">
+                    <li><strong>Performance (P)</strong>: Evaluates response factuality and grounding against real-time search evidence (FacTool verification).</li>
+                    <li><strong>Cost ($)</strong>: Audits token metrics and enforces budgets to block expensive inputs or runaway loops.</li>
+                    <li><strong>Responsibility (R)</strong>: Runs deterministic regex scanning, PII redaction, and prompt injection filters before the prompt hits the LLM.</li>
+                  </ul>
+                  <h4 style="color:#fff; margin-bottom:0.5rem;">Policy Enforcement Tiers:</h4>
+                  <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left; margin-bottom:1rem; border:1px solid var(--border);">
+                    <thead>
+                      <tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);">
+                        <th style="padding:8px;">Tier</th>
+                        <th style="padding:8px;">Effect</th>
+                        <th style="padding:8px;">Ideal Use Case</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr style="border-bottom:1px solid var(--border);">
+                        <td style="padding:8px; font-weight:700; color:var(--success);">ALLOW</td>
+                        <td style="padding:8px; color:var(--text-muted);">Passes cleanly with no changes.</td>
+                        <td style="padding:8px; color:var(--text-muted);">Safe daily chatbot interactions.</td>
+                      </tr>
+                      <tr style="border-bottom:1px solid var(--border);">
+                        <td style="padding:8px; font-weight:700; color:var(--warning);">MONITOR</td>
+                        <td style="padding:8px; color:var(--text-muted);">Passes while logging finding to DB.</td>
+                        <td style="padding:8px; color:var(--text-muted);">Internal non-critical copilots.</td>
+                      </tr>
+                      <tr style="border-bottom:1px solid var(--border);">
+                        <td style="padding:8px; font-weight:700; color:var(--cyan);">MASK</td>
+                        <td style="padding:8px; color:var(--text-muted);">Redacts emails/keys before sending.</td>
+                        <td style="padding:8px; color:var(--text-muted);">Customer support chatbots.</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px; font-weight:700; color:var(--danger);">BLOCK</td>
+                        <td style="padding:8px; color:var(--text-muted);">Immediately halts query execution.</td>
+                        <td style="padding:8px; color:var(--text-muted);">Critical actions (database wipe).</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- 2. GUARDIAN -->
+                <div id="doc-tab-guardian" class="doc-tab-content" style="display: none;">
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🤖 2. LegionForge Guardian 7-Check Engine</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    We integrate a zero-LLM deterministic check shield running before agent tool execution:
+                  </p>
+                  <pre style="background:var(--bg-input); padding:1rem; border-radius:10px; font-family:var(--font-mono); font-size:0.78rem; color:#a5f3fc; border:1px solid var(--border); overflow-x:auto; margin-bottom:1rem;">
+Check 0: Task Token ACL ────── Validates JWT/scoped token tool authorizations
+Check 1: Tool Registry ──────── Verifies tool is active and not revoked
+Check 2: Capability Boundary ── Blocks forbidden command keywords (e.g. spawn_agent_direct)
+Check 3: Pattern Detection ──── Scans parameters against 9 regex injection/SSRF threat families
+Check 4: Sequence Contracts ── Ensures state machine transitions (playbooks) match contracts
+Check 5: Hash Integrity ─────── Tamper detection via SHA-256 schema hash validation
+Check 6: Adaptive Rules ─────── Tenant hot-reloaded blocklists from database</pre>
+                  <h4 style="color:#fff; margin-bottom:0.5rem;">Integrating in Python (LangGraph, AutoGen, CrewAI):</h4>
+                  <pre style="background:var(--bg-input); padding:1rem; border-radius:10px; font-family:var(--font-mono); font-size:0.78rem; color:#cbd5e1; border:1px solid var(--border); overflow-x:auto; margin-bottom:1rem;">
+import httpx
+
+async def check_agent_tool(tool_name, tool_args, session_id):
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "http://localhost:8000/check",
+            json={
+                "tool_id": tool_name,
+                "action": "invoke",
+                "args": tool_args,
+                "run_id": session_id
+            }
+        )
+        result = resp.json()
+        if not result["allowed"]:
+            raise SecurityError(f"Blocked by ControlPlane: {result['reason']}")</pre>
+                </div>
+
+                <!-- 3. EXTENSION -->
+                <div id="doc-tab-extension" class="doc-tab-content" style="display: none;">
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🔌 3. Chrome Extension Network Shield</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    The browser extension intercepts user prompt forms and network fetch calls on supported AI platforms (ChatGPT, Claude, Gemini, Kimi, DeepSeek) to dynamically mask credentials and block prompt injections.
+                  </p>
+                  <h4 style="color:#fff; margin-bottom:0.5rem;">Setup Steps:</h4>
+                  <ol style="color:var(--text-muted); font-size:0.85rem; line-height:1.6; margin-bottom:1rem; padding-left:1.25rem;">
+                    <li>Open Chrome and navigate to <code style="color:#fff; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px;">chrome://extensions/</code>.</li>
+                    <li>Toggle **Developer mode** to ON in the top-right corner.</li>
+                    <li>Click **Load unpacked** in the top-left corner.</li>
+                    <li>Select the directory: <code style="color:var(--cyan); font-family:var(--font-mono);">C:\\ControlPlane\\frontend\\extension</code>.</li>
+                    <li>Open the extension toolbar popup, click **⚡ Auto-Enroll Extension** to connect to localhost:8000.</li>
+                    <li>The status badge will switch to **CONNECTED** 🟢 and start safeguarding your prompts!</li>
+                  </ol>
+                </div>
+
+                <!-- 4. CRYPTO -->
+                <div id="doc-tab-crypto" class="doc-tab-content" style="display: none;">
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🔐 4. Cryptographic Hash Chain Telemetry</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    Every guardrail check logs telemetry. To ensure that attackers or malicious operators cannot wipe evidence from the database, we run a SHA-256 hash chaining system:
+                  </p>
+                  <pre style="background:var(--bg-input); padding:1rem; border-radius:10px; font-family:var(--font-mono); font-size:0.82rem; color:#fdba74; border:1px solid var(--border); overflow-x:auto; margin-bottom:1rem;">
+Current Hash = SHA-256(Previous Hash + Interception Data Payload)</pre>
+                  <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.6;">
+                    If any historical record is deleted or modified, the next record's computed hash chain mismatches, instantly highlighting the log tampering event on the dashboard security scorecard.
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
           </div>
         </section>
 

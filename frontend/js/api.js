@@ -140,12 +140,13 @@ export async function runAdhocScan(webhookId, resourceName, prompts) {
   });
 }
 
-export async function runCheck(resourceId, userPrompt) {
+export async function runCheck(resourceId, userPrompt, toolCall = null) {
   return apiFetch(`/resources/${resourceId}/check`, {
     method: 'POST',
-    body: JSON.stringify({ user_prompt: userPrompt }),
+    body: JSON.stringify({ user_prompt: userPrompt, tool_call: toolCall }),
   });
 }
+
 
 export async function fetchPolicy(resourceId = 'res_demo') {
   return apiFetch(`/resources/${resourceId}/policy`);

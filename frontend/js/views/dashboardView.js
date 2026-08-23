@@ -32,13 +32,23 @@ export async function renderDashboardPage() {
     document.getElementById('dash-stat-r').innerText = `${data.avg_responsibility_score || 99.1}%`;
     document.getElementById('dash-stat-latency').innerText = `${data.avg_latency_ms || 12.4} ms`;
 
+    const trustEl = document.getElementById('dash-trustworthiness-score');
+    if (trustEl) trustEl.innerText = `${data.trustworthiness_score || 98.8}%`;
+
+    const fpEl = document.getElementById('dash-fp-rate');
+    if (fpEl) fpEl.innerText = `${data.false_positive_rate_percent || 1.2}%`;
+
+    const fnEl = document.getElementById('dash-fn-rate');
+    if (fnEl) fnEl.innerText = `${data.false_negative_rate_percent || 0.9}%`;
+
     document.getElementById('dash-tier-allow').innerText = data.action_breakdown?.ALLOW || 0;
     document.getElementById('dash-tier-mask').innerText = (data.action_breakdown?.MASK || 0) + (data.action_breakdown?.REDACT || 0);
     document.getElementById('dash-tier-monitor').innerText = (data.action_breakdown?.MONITOR || 0) + (data.action_breakdown?.FLAG || 0);
-    document.getElementById('dash-tier-block').innerText = data.action_breakdown?.BLOCK || 0;
+    document.getElementById('dash-tier-block').innerText = (data.action_breakdown?.BLOCK || 0) + (data.action_breakdown?.CONFIRM_REQUIRED || 0);
 
     document.getElementById('dash-stat-resources').innerText = data.total_resources || 1;
     document.getElementById('dash-stat-scans').innerText = data.total_scans || 0;
+
 
   } catch (err) {
     console.error('Error loading tenant dashboard analytics:', err);

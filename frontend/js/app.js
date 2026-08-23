@@ -117,7 +117,7 @@ async function handleRoute() {
   if (route === 'security-center/risk-findings') {
     initFindingsView(queryParams);
   } else if (route === 'security-center/event-overview') {
-    openEventOverviewModal();
+    renderEventOverviewPage(queryParams);
   } else if (route === 'security-center/policies') {
     initPoliciesView();
   } else if (route === 'tokens') {

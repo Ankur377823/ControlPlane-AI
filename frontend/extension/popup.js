@@ -15,20 +15,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   const daysTag = document.getElementById("token-days-tag");
   const dashboardLink = document.getElementById("dashboard-link");
 
-  const defaultServerUrl = "https://controlplane-botpress-connector.onrender.com";
+  const defaultServerUrl = "http://localhost:8000";
 
   function cleanUrl(rawUrl) {
     if (!rawUrl) return defaultServerUrl;
     let url = rawUrl.trim().replace(/\/$/, '');
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
-      url = "https://" + url;
-    }
-    // Fix truncated onrender.com URLs
-    if (url.includes("controlplane-botpress-connector") && !url.includes("onrender.com")) {
-      url = "https://controlplane-botpress-connector.onrender.com";
+      url = "http://" + url;
     }
     return url;
   }
+
 
   // Load existing token, tenant ID, and server URL from storage
   if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
@@ -69,29 +66,50 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Auto-Enroll Handler (Fetches active 48-day token & connects to tenant)
   autoBtn.addEventListener("click", async () => {
     try {
-      const serverVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
-      if (serverInput) serverInput.value = serverVal;
+      const inputVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
+      const candidates = Array.from(new Set([
+        inputVal,
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "https://controlplane-botpress-connector.onrender.com"
+      ]));
 
-      const res = await fetch(`${serverVal}/api/v1/tokens/active`);
+      let workingUrl = null;
+      let data = null;
+
+      for (const base of candidates) {
+        try {
+          const res = await fetch(`${base}/api/v1/tokens/active`);
+          if (res.ok) {
+            data = await res.json();
+            workingUrl = base;
+            break;
+          }
+        } catch (e) {
+          // Try next candidate URL
+        }
+      }
+
       const tenantVal = tenantInput ? (tenantInput.value.trim() || "acme-tenant-1") : "acme-tenant-1";
 
-      if (res.ok) {
-        const data = await res.json();
+      if (workingUrl && data) {
+        if (serverInput) serverInput.value = workingUrl;
         tokenInput.value = data.token_key;
         if (daysTag) daysTag.innerText = `${data.days_valid || 48} Days Active`;
         if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-          await chrome.storage.local.set({ cp_token: data.token_key, cp_tenant_id: tenantVal, cp_server_url: serverVal });
+          await chrome.storage.local.set({ cp_token: data.token_key, cp_tenant_id: tenantVal, cp_server_url: workingUrl });
         }
-        if (dashboardLink) dashboardLink.href = `${serverVal}/#/dashboard`;
+        if (dashboardLink) dashboardLink.href = `${workingUrl}/#/dashboard`;
         if (statusPill) statusPill.innerText = "CONNECTED";
-        showPopupToast(`Auto-enrolled on ${tenantVal} with 48-day token!`, "#10b981");
+        showPopupToast(`Connected to ${workingUrl}!`, "#10b981");
       } else {
-        showPopupToast("Failed to fetch active token from server", "#ef4444");
+        showPopupToast("API unreachable. Start server on localhost:8000.", "#ef4444");
       }
     } catch (err) {
-      showPopupToast("POC API unreachable. Verify Server URL.", "#f59e0b");
+      showPopupToast("API unreachable. Verify Server URL.", "#f59e0b");
     }
   });
+
 
   // In-Extension Guardrail Tester
   if (testBtn) {
@@ -100,30 +118,45 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!prompt) return;
 
       const serverVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
+      const candidates = Array.from(new Set([
+        serverVal,
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "https://controlplane-botpress-connector.onrender.com"
+      ]));
+
       testBox.style.display = "block";
       testBox.innerHTML = '<span style="color:#38bdf8;">⏳ Evaluating prompt...</span>';
 
-      try {
-        const res = await fetch(`${serverVal}/api/v1/resources/res_demo/check`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_prompt: prompt })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          testBox.innerHTML = `
-            <div>Action: <strong style="color:${data.action === 'BLOCK' ? '#ef4444' : '#10b981'}">${data.action}</strong></div>
-            <div>Sanitized: ${escapeHtml(data.sanitized_prompt || data.user_prompt)}</div>
-            <div>Scores (P/$/R): ${data.scores.performance_p}% / ${data.scores.cost_dollars}% / ${data.scores.responsibility_r}%</div>
-          `;
-        } else {
-          testBox.innerText = "Evaluation failed";
+      let data = null;
+      for (const base of candidates) {
+        try {
+          const res = await fetch(`${base}/api/v1/resources/res_demo/check`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_prompt: prompt })
+          });
+          if (res.ok) {
+            data = await res.json();
+            break;
+          }
+        } catch (e) {
+          // Try next candidate
         }
-      } catch (err) {
-        testBox.innerText = "Error: " + err.message;
+      }
+
+      if (data) {
+        testBox.innerHTML = `
+          <div>Action: <strong style="color:${data.action === 'BLOCK' ? '#ef4444' : '#10b981'}">${data.action}</strong></div>
+          <div>Sanitized: ${escapeHtml(data.sanitized_prompt || data.user_prompt)}</div>
+          <div>Scores (P/$/R): ${data.scores.performance_p}% / ${data.scores.cost_dollars}% / ${data.scores.responsibility_r}%</div>
+        `;
+      } else {
+        testBox.innerText = "Evaluation failed. Make sure local server is running at http://localhost:8000";
       }
     });
   }
+
 });
 
 function showPopupToast(msg, bg) {

@@ -38,7 +38,10 @@
         "https://*.botpress.cloud/*",
         "https://*.onrender.com/*",
         "http://localhost/*",
-        "http://127.0.0.1/*"
+        "http://localhost:8000/*",
+        "http://127.0.0.1/*",
+        "http://127.0.0.1:8000/*"
+
       ],
       "js": ["content.js"],
       "run_at": "document_end"

@@ -20,6 +20,11 @@ class UpdateFindingStatusRequest(BaseModel):
     status: str = Field(..., min_length=1)
 
 
+class FeedbackRequest(BaseModel):
+    feedback_type: str = Field(..., min_length=1)  # false_positive, true_positive, overridden
+    notes: Optional[str] = None
+
+
 @router.get("")
 def list_global_findings(
     source: Optional[str] = None,
@@ -55,3 +60,23 @@ def update_finding_status(finding_id: str, payload: UpdateFindingStatusRequest):
     if not updated:
         raise HTTPException(status_code=404, detail="Finding not found")
     return updated
+
+
+@router.post("/{finding_id}/feedback")
+def submit_finding_feedback(finding_id: str, payload: FeedbackRequest):
+    finding = db.get_interception(finding_id)
+    if not finding:
+        raise HTTPException(status_code=404, detail="Finding not found")
+
+    # Update status and record feedback telemetry
+    new_status = "false_positive" if payload.feedback_type == "false_positive" else "resolved"
+    db.update_interception_status(finding_id, new_status)
+    res = db.record_feedback(finding_id, payload.feedback_type, payload.notes)
+    return {
+        "finding_id": finding_id,
+        "status": new_status,
+        "feedback_type": payload.feedback_type,
+        "auto_tune_applied": res.get("auto_tune_applied", True),
+        "message": f"Feedback '{payload.feedback_type}' logged. Auto-tuned policy thresholds."
+    }
+

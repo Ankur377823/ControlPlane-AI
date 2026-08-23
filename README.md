@@ -208,8 +208,27 @@ python -m uvicorn backend.app.main:app --reload --port 8000
 }
 ```
 
-### 2. List Risk Findings
+### 2. LegionForge Guardian compatibility endpoint
+`POST /check`
+
+```json
+{
+  "tool_id": "web_search",
+  "action": "invoke",
+  "args": {"query": "clean search request"},
+  "agent_id": "support_agent",
+  "run_id": "run_001",
+  "sequence_so_far": []
+}
+```
+
+### 3. List Risk Findings
 `GET /api/v1/findings?limit=100`
+
+---
+
+## 🔌 Chrome Extension Setup
+Refer to [EXTENSION_SETUP.md](file:///C:/ControlPlane/EXTENSION_SETUP.md) for full instructions on installing, configuring, and verifying the Chrome Extension.
 
 ---
 
@@ -218,7 +237,7 @@ python -m uvicorn backend.app.main:app --reload --port 8000
 Run the full pytest test suite:
 
 ```bash
-python -m pytest backend/tests
+python -m pytest
 ```
 
-**Expected Output**: `45 passed` (100% test pass rate covering authentication, token lifecycle, bot onboarding, guardrail evaluations, risk findings, and analytics).
+**Expected Output**: `59 passed` (100% test pass rate covering authentication, token lifecycle, chatbot onboarding, guardrail evaluations, risk findings, LegionForge Guardian 7-check engine, and cryptographic log chains).

@@ -65,6 +65,37 @@ export async function renderFindingsTable() {
     const countEl = document.getElementById('rf-total-count');
     if (countEl) countEl.innerText = `${data.length} findings`;
 
+    // Render Summary Metrics Cards
+    const criticalCount = data.filter(f => (f.severity || '').toUpperCase() === 'CRITICAL' || (f.severity || '').toUpperCase() === 'HIGH').length;
+    const avgLatency = data.length ? Math.round(data.reduce((sum, f) => sum + (f.latency_ms || 0), 0) / data.length) : 0;
+    const uniqueBots = new Set(data.map(f => f.source || 'Endpoint AI Bot')).size;
+
+    const metricsEl = document.getElementById('rf-summary-metrics');
+    if (metricsEl) {
+      metricsEl.innerHTML = `
+        <div class="card" style="margin-bottom:0; border-left:4px solid var(--primary); padding:1rem 1.25rem;">
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">TOTAL INTERCEPTIONS</div>
+          <div style="font-size:1.8rem; font-weight:800; color:#fff; margin-top:4px;">${data.length}</div>
+          <div style="font-size:0.72rem; color:var(--text-subtle); margin-top:2px;">Across all active channels</div>
+        </div>
+        <div class="card" style="margin-bottom:0; border-left:4px solid var(--danger); padding:1rem 1.25rem;">
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">CRITICAL & HIGH RISKS</div>
+          <div style="font-size:1.8rem; font-weight:800; color:var(--danger); margin-top:4px;">${criticalCount}</div>
+          <div style="font-size:0.72rem; color:var(--text-subtle); margin-top:2px;">Immediate action recommended</div>
+        </div>
+        <div class="card" style="margin-bottom:0; border-left:4px solid var(--cyan); padding:1rem 1.25rem;">
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">AVERAGE LATENCY</div>
+          <div style="font-size:1.8rem; font-weight:800; color:var(--cyan); margin-top:4px;">${avgLatency} ms</div>
+          <div style="font-size:0.72rem; color:var(--text-subtle); margin-top:2px;">Sub-15ms compliance threshold</div>
+        </div>
+        <div class="card" style="margin-bottom:0; border-left:4px solid var(--success); padding:1rem 1.25rem;">
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">MONITORED CHANNELS</div>
+          <div style="font-size:1.8rem; font-weight:800; color:var(--success); margin-top:4px;">${uniqueBots}</div>
+          <div style="font-size:0.72rem; color:var(--text-subtle); margin-top:2px;">Connected agent frameworks</div>
+        </div>
+      `;
+    }
+
     tbody.innerHTML = '';
     if (data.length === 0) {
       tbody.innerHTML = `
@@ -85,7 +116,7 @@ export async function renderFindingsTable() {
       const sessId = item.session_id || 'sess_8f3a92b1';
 
       tbody.innerHTML += `
-        <tr onclick="openEventOverviewModal('${item.id}', '${sessId}')" style="cursor:pointer;">
+        <tr onclick="navigate('#/security-center/event-overview?id=${item.id}&session_id=${sessId}')" style="cursor:pointer;">
           <td><span class="sev-chip sev-chip-${sevClass}">${item.severity || 'HIGH'}</span></td>
           <td>
             <div style="font-weight:700; color:#fff;">${item.finding_title || 'PII Detected in User Input'}</div>
@@ -99,7 +130,7 @@ export async function renderFindingsTable() {
             <div style="font-size:0.75rem; color:var(--text-subtle); margin-top:2px;">${botName}</div>
           </td>
           <td>
-            <span class="session-badge" onclick="event.stopPropagation(); openEventOverviewModal('${item.id}', '${sessId}');" style="cursor:pointer; background:rgba(99, 102, 241, 0.15); color:var(--primary); padding:4px 10px; border-radius:6px; font-family:var(--font-mono); font-size:0.8rem; font-weight:700; border:1px solid rgba(99, 102, 241, 0.3); display:inline-flex; align-items:center; gap:4px; transition:all 0.2s;" title="Click to view event telemetry for session ${sessId}">
+            <span class="session-badge" onclick="event.stopPropagation(); navigate('#/security-center/event-overview?id=${item.id}&session_id=${sessId}');" style="cursor:pointer; background:rgba(99, 102, 241, 0.15); color:var(--primary); padding:4px 10px; border-radius:6px; font-family:var(--font-mono); font-size:0.8rem; font-weight:700; border:1px solid rgba(99, 102, 241, 0.3); display:inline-flex; align-items:center; gap:4px; transition:all 0.2s;" title="Click to view event telemetry for session ${sessId}">
               🔗 ${sessId}
             </span>
           </td>
@@ -108,7 +139,7 @@ export async function renderFindingsTable() {
             <div style="font-size:0.72rem; color:var(--text-muted); margin-top:3px;">${dateStr}</div>
           </td>
           <td>
-            <button class="btn-secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="event.stopPropagation(); openEventOverviewModal('${item.id}', '${sessId}');">Inspect Event →</button>
+            <button class="btn-secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="event.stopPropagation(); navigate('#/security-center/event-overview?id=${item.id}&session_id=${sessId}');">Inspect Event →</button>
           </td>
         </tr>
       `;

@@ -29,6 +29,9 @@ from .routes.resources import router as resources_router
 from .routes.tokens import router as tokens_router
 
 
+from .routes.guardian_api import router as guardian_router
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
@@ -51,6 +54,7 @@ app.include_router(findings_router)
 app.include_router(guardrail_router)
 app.include_router(resources_router)
 app.include_router(hallucination_router)
+app.include_router(guardian_router)
 
 
 

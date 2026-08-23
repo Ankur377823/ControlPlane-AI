@@ -25,6 +25,11 @@
 
   if (!isAITool) return;
 
+  // Do not run on the ControlPlane website/dashboard itself
+  if (document.title.includes("ControlPlane") || document.getElementById("login-screen") || document.getElementById("app-shell")) {
+    return;
+  }
+
   if (document.getElementById("controlplane-top-banner")) return;
 
   console.log("ControlPlane AI Guardrail active on: " + host);
@@ -100,9 +105,15 @@
         haltEvent(e, activeEl);
         isChecking = true;
 
-        const result = await evaluatePromptWithBackend(text);
-        handleEvaluationResult(result, text, activeEl);
-        isChecking = false;
+        try {
+          const result = await evaluatePromptWithBackend(text);
+          handleEvaluationResult(result, text, activeEl);
+        } catch (err) {
+          console.error("Evaluation error:", err);
+          triggerNativeSubmit(activeEl);
+        } finally {
+          isChecking = false;
+        }
       }
     }
   }, true);
@@ -128,16 +139,29 @@
         haltEvent(e, inputEl);
         isChecking = true;
 
-        const result = await evaluatePromptWithBackend(text);
-        handleEvaluationResult(result, text, inputEl);
-        isChecking = false;
+        try {
+          const result = await evaluatePromptWithBackend(text);
+          handleEvaluationResult(result, text, inputEl);
+        } catch (err) {
+          console.error("Evaluation error:", err);
+          triggerNativeSubmit(inputEl);
+        } finally {
+          isChecking = false;
+        }
       }
     }
   }, true);
 
+
   // 5. Evaluation Result Handler
   function handleEvaluationResult(result, rawText, inputEl) {
     if (!result) return;
+
+    if (result.action === "CONFIRM_REQUIRED") {
+      updateBannerUI("CONFIRM", "⚠️ High-Risk Action Intercepted: Explicit User Confirmation Required!", result);
+      showConfirmationModal(result, rawText, inputEl);
+      return;
+    }
 
     if (result.action === "BLOCK") {
       blockedPromptsSet.add(rawText);
@@ -145,11 +169,12 @@
         inputEl.style.border = "2px solid #ef4444";
         inputEl.style.boxShadow = "0 0 12px rgba(239, 68, 68, 0.4)";
       }
-      updateBannerUI("BLOCK", "⛔ Submission Blocked: Prompt contains sensitive secret/PII or injection threat!", result);
+      updateBannerUI("BLOCK", "⛔ Action Blocked: High severity risk or policy violation detected!", result);
       // Notify main-world fetch interceptor to block this text
       window.postMessage({ type: "CP_BLOCK_PROMPT", text: rawText }, "*");
       return;
     }
+
 
     // Unblock text if policy is set to MONITOR, WARN, MASK, or ALLOW
     blockedPromptsSet.delete(rawText);
@@ -225,17 +250,14 @@
     try {
       let tokenKey = "cp_live_default";
       let tenantId = "acme-tenant-1";
-      let serverUrl = "https://controlplane-botpress-connector.onrender.com";
+      let configuredUrl = "http://localhost:8000";
 
       if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
         const stored = await chrome.storage.local.get(["cp_token", "cp_tenant_id", "cp_server_url"]);
         if (stored && stored.cp_token) tokenKey = stored.cp_token;
         if (stored && stored.cp_tenant_id) tenantId = stored.cp_tenant_id;
-        if (stored && stored.cp_server_url) {
-          serverUrl = stored.cp_server_url.trim().replace(/\/$/, '');
-          if (serverUrl.includes("controlplane-botpress-connector") && !serverUrl.includes("onrender.com")) {
-            serverUrl = "https://controlplane-botpress-connector.onrender.com";
-          }
+        if (stored && stored.cp_server_url && stored.cp_server_url.trim()) {
+          configuredUrl = stored.cp_server_url.trim().replace(/\/$/, '');
         }
       }
 
@@ -252,21 +274,40 @@
         window.__cp_session_id = currentSessionId;
       }
 
-      const res = await fetch(`${serverUrl}/api/v1/resources/res_demo/check`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + tokenKey,
-          "X-Tenant-ID": tenantId
-        },
-        body: JSON.stringify({ user_prompt: text, session_id: currentSessionId }),
-      });
-      if (res.ok) return await res.json();
+      // Try candidates in order: configured URL -> http://127.0.0.1:8000 -> http://localhost:8000 -> remote backup
+      const candidates = Array.from(new Set([
+        configuredUrl,
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "https://controlplane-botpress-connector.onrender.com"
+      ]));
+
+      for (const base of candidates) {
+        try {
+          const res = await fetch(`${base}/api/v1/resources/res_demo/check`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + tokenKey,
+              "X-Tenant-ID": tenantId,
+              "X-Source": "Browser Extension"
+            },
+            body: JSON.stringify({ user_prompt: text, session_id: currentSessionId, source: "Browser Extension" }),
+
+          });
+          if (res.ok) {
+            return await res.json();
+          }
+        } catch (e) {
+          // Continue to next candidate endpoint
+        }
+      }
     } catch (err) {
       console.warn("ControlPlane Guardrail API offline:", err);
     }
     return null;
   }
+
 
   function updateBannerUI(action, message, data) {
     const textEl = document.getElementById("cp-banner-text");
@@ -293,6 +334,12 @@
       banner.style.color = "#78350f";
       badgeEl.style.background = "#f59e0b";
       badgeEl.style.color = "#ffffff";
+    } else if (action === "CONFIRM") {
+      banner.style.background = "#fff7ed";
+      banner.style.borderBottom = "1px solid #f97316";
+      banner.style.color = "#9a3412";
+      badgeEl.style.background = "#ea580c";
+      badgeEl.style.color = "#ffffff";
     } else {
       banner.style.background = "#dcfce7";
       banner.style.borderBottom = "1px solid #22c55e";
@@ -301,6 +348,71 @@
       badgeEl.style.color = "#ffffff";
     }
   }
+
+  function showConfirmationModal(result, rawText, inputEl) {
+    let existingModal = document.getElementById("cp-confirmation-modal");
+    if (existingModal) existingModal.remove();
+
+    const toolName = result.tool_call ? result.tool_call.name : "High-Risk Action";
+    const modal = document.createElement("div");
+    modal.id = "cp-confirmation-modal";
+    modal.style.cssText = `
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    `;
+
+    modal.innerHTML = `
+      <div style="background: #1e293b; border: 1px solid #ea580c; border-radius: 14px; max-width: 480px; width: 100%; padding: 1.5rem; color: #ffffff; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+          <span style="font-size: 1.8rem;">⚠️</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.15rem; color: #f97316; font-weight: 700;">Action Confirmation Required</h3>
+            <span style="font-size: 0.78rem; color: #94a3b8;">Risk Tier: <strong>${result.action_risk_tier || 'HIGH'}</strong></span>
+          </div>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 1.25rem; font-size: 0.85rem;">
+          <div style="color: #cbd5e1; margin-bottom: 4px;">An AI Agent requested to execute:</div>
+          <code style="color: #38bdf8; font-family: monospace; font-size: 0.9rem;">${toolName}</code>
+          <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 8px; font-style: italic;">
+            "${rawText.substring(0, 120)}${rawText.length > 120 ? '...' : ''}"
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button id="cp-modal-cancel" style="background: #334155; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
+            🛑 Block Action
+          </button>
+          <button id="cp-modal-approve" style="background: #ea580c; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.85rem;">
+            ✅ Approve & Execute
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById("cp-modal-cancel").addEventListener("click", () => {
+      modal.remove();
+      blockedPromptsSet.add(rawText);
+      updateBannerUI("BLOCK", "⛔ Action Cancelled by User!");
+    });
+
+    document.getElementById("cp-modal-approve").addEventListener("click", () => {
+      modal.remove();
+      updateBannerUI("ALLOW", "✅ Approved by User — Executing Action");
+      triggerNativeSubmit(inputEl);
+    });
+  }
+
 
   // Inject Page-Level Fetch & XHR Shield into Page Context
   function injectNetworkShield() {

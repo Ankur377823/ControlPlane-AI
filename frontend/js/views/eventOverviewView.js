@@ -32,9 +32,19 @@ window.openEventOverviewModal = openEventOverviewModal;
 window.closeEventOverviewModal = closeEventOverviewModal;
 
 export async function renderEventOverviewPage(queryParams) {
+  const container = document.getElementById('event-overview-container');
+  if (!container) return;
+
   const eventId = queryParams?.get('id');
   const targetSessionId = queryParams?.get('session_id');
-  openEventOverviewModal(eventId, targetSessionId);
+
+  container.innerHTML = `
+    <div class="card" style="text-align:center; padding:3rem; color:var(--text-muted);">
+      <div style="font-size:1.4rem; margin-bottom:0.5rem;">🔍 Loading Security Event & Session Telemetry...</div>
+      <p style="font-size:0.85rem;">Retrieving prompt interactions and session registries across LLM chatbots.</p>
+    </div>`;
+
+  await renderModalTelemetryContent(container, eventId, targetSessionId);
 }
 
 async function renderModalTelemetryContent(container, eventId, targetSessionId) {
@@ -63,7 +73,7 @@ async function renderModalTelemetryContent(container, eventId, targetSessionId) 
       container.innerHTML = `
         <div class="card" style="text-align:center; padding:3rem;">
           <h3 style="color:var(--text-muted); margin-bottom:1rem;">No Security Events or Session Telemetry Found</h3>
-          <button class="btn" onclick="closeEventOverviewModal()">✕ Close Popup</button>
+          <button class="btn" onclick="navigate('#/security-center/risk-findings')">← Back to Findings</button>
         </div>`;
       return;
     }
@@ -90,6 +100,7 @@ async function renderModalTelemetryContent(container, eventId, targetSessionId) 
           </div>
 
           <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <button class="btn" onclick="navigate('#/security-center/risk-findings')" style="font-weight:700;">← Back to Findings</button>
             <button class="btn-secondary" id="btn-ev-modal-resolve">Mark Resolved</button>
             <button class="btn-secondary" id="btn-ev-modal-investigate">Mark Investigating</button>
           </div>
@@ -160,7 +171,7 @@ async function renderModalTelemetryContent(container, eventId, targetSessionId) 
           <div>
             <div class="card-title" style="margin-bottom:4px; font-size:1.2rem;">🌐 LLM Chatbot Sessions Telemetry Registry</div>
             <p style="font-size:0.84rem; color:var(--text-muted); margin:0;">
-              Every chat interaction in an LLM chatbot (ChatGPT, Claude, Gemini, Botpress, Copilot) is assigned a unique Session ID. Click any row to inspect telemetry inside this popup.
+              Every chat interaction in an LLM chatbot (ChatGPT, Claude, Gemini, Botpress, Copilot) is assigned a unique Session ID. Click any row to inspect telemetry on this page.
             </p>
           </div>
 
@@ -224,7 +235,7 @@ async function renderModalTelemetryContent(container, eventId, targetSessionId) 
     container.innerHTML = `
       <div class="card" style="text-align:center; padding:3rem; color:var(--danger);">
         Failed to load event & session telemetry: ${err.message}<br><br>
-        <button class="btn-secondary" onclick="closeEventOverviewModal()">✕ Close Popup</button>
+        <button class="btn" onclick="navigate('#/security-center/risk-findings')">← Back to Findings</button>
       </div>`;
   }
 }
@@ -294,6 +305,7 @@ function bindModalSessionRowClickListeners(container, findings) {
       const fId = tr.getAttribute('data-finding-id');
       const sId = tr.getAttribute('data-session-id');
       renderModalTelemetryContent(container, fId, sId);
+      window.history.replaceState(null, '', `#/security-center/event-overview?id=${fId}&session_id=${sId}`);
     });
   });
 }

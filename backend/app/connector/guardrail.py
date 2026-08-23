@@ -14,22 +14,39 @@ from __future__ import annotations
 import time
 from typing import Any, Dict, Optional
 
+from .evaluators.action_risk import evaluate_action_risk
+from .evaluators.bias_safety import scan_bias_and_toxicity
 from .evaluators.cost import analyze_cost
 from .evaluators.hallucination import evaluate_grounding
 from .evaluators.injection import scan_prompt_injection
 from .evaluators.pii import scan_and_redact_pii
 
 
+
 class ControlPlaneGuardrail:
     def __init__(self, policy: Dict[str, Any]):
         self.policy = policy
 
-    def evaluate(self, user_prompt: str, raw_response: Optional[str] = None) -> Dict[str, Any]:
+    def evaluate(self, user_prompt: str, raw_response: Optional[str] = None, tool_call: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         start = time.monotonic()
         triggered_rules: list[str] = []
         risk_findings: list[dict] = []
 
         enf_mode = self.policy.get("enforcement_mode", "block").lower()
+
+        # 0. Agent Tool Call Action Risk Evaluation
+        action_eval = evaluate_action_risk(tool_call, user_prompt)
+        action_risk_tier = action_eval["action_risk_tier"]
+        if action_eval["risk_findings"]:
+            for rf in action_eval["risk_findings"]:
+                triggered_rules.append(rf["rule"])
+                risk_findings.append({
+                    "type": f"ACTION_RISK_{action_risk_tier}",
+                    "severity": rf["severity"],
+                    "location": "agent_tool_call",
+                    "snippet": f"Tool: {rf['tool_name']}",
+                    "description": rf["description"]
+                })
 
         # 1. PII Scan (Responsibility)
         prompt_pii = scan_and_redact_pii(user_prompt)
@@ -61,7 +78,7 @@ class ControlPlaneGuardrail:
                     "description": f"Model output generated sensitive {ptype} data."
                 })
 
-        # 2. Prompt Injection Scan (Responsibility)
+        # 2. Prompt Injection & Bias Scan (Responsibility)
         injection_res = scan_prompt_injection(user_prompt)
         if injection_res.is_injection:
             reason = injection_res.reason or "Adversarial Prompt Injection Detected"
@@ -73,6 +90,20 @@ class ControlPlaneGuardrail:
                 "snippet": user_prompt[:80] + "..." if len(user_prompt) > 80 else user_prompt,
                 "description": reason,
             })
+
+        bias_prompt = scan_bias_and_toxicity(user_prompt)
+        bias_response = scan_bias_and_toxicity(raw_response) if raw_response else {"has_bias": False, "risk_findings": []}
+        if bias_prompt["has_bias"] or bias_response["has_bias"]:
+            for rf in bias_prompt["risk_findings"] + bias_response["risk_findings"]:
+                triggered_rules.append(rf["rule"])
+                risk_findings.append({
+                    "type": "BIAS_SAFETY_VIOLATION",
+                    "severity": rf["severity"],
+                    "location": "content",
+                    "snippet": rf["snippet"],
+                    "description": rf["description"]
+                })
+
 
         # 3. Grounding / Hallucination Score (Performance - P)
         hal_thresh = float(self.policy.get("hallucination_threshold", 0.65))
@@ -106,16 +137,18 @@ class ControlPlaneGuardrail:
         performance_score = round(grounding_res.grounding_score * 100, 1)
         cost_score = round(cost_res.cost_score * 100, 1)
         responsibility_score = 100.0
-        if injection_res.is_injection:
+        if injection_res.is_injection or action_risk_tier == "CRITICAL":
             responsibility_score = 10.0
-        elif has_pii:
-            responsibility_score = 50.0
+        elif has_pii or action_risk_tier == "HIGH":
+            responsibility_score = 40.0
 
-        # 6. Apply Enforcement Mode (MONITOR / WARN / DETECT, MASK / REDACT, BLOCK)
+        # 6. Apply Enforcement Mode (MONITOR / MASK / BLOCK / CONFIRM_REQUIRED)
         action = "ALLOW"
-        has_risk = bool(risk_findings)
-
-        if has_risk:
+        if action_risk_tier == "CRITICAL":
+            action = "BLOCK"
+        elif action_risk_tier == "HIGH":
+            action = "CONFIRM_REQUIRED"
+        elif bool(risk_findings):
             if enf_mode in ("monitor", "detect", "warn"):
                 action = "MONITOR"
             elif enf_mode in ("mask", "redact"):
@@ -125,12 +158,13 @@ class ControlPlaneGuardrail:
             else:
                 action = "MONITOR"
 
-
         elapsed_ms = int((time.monotonic() - start) * 1000)
 
         return {
             "action": action,
             "enforcement_mode": enf_mode,
+            "action_risk_tier": action_risk_tier,
+            "tool_call": action_eval["tool_call"],
             "user_prompt": user_prompt,
             "raw_response": raw_response,
             "sanitized_prompt": sanitized_prompt if action in ("MASK", "REDACT") else user_prompt,
@@ -147,3 +181,4 @@ class ControlPlaneGuardrail:
                 "enforcement_mode": enf_mode,
             },
         }
+
