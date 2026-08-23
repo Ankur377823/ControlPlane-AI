@@ -3,6 +3,7 @@
  */
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const serverInput = document.getElementById("server-url-input");
   const tenantInput = document.getElementById("tenant-input");
   const tokenInput = document.getElementById("token-input");
   const saveBtn = document.getElementById("save-token-btn");
@@ -12,10 +13,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const testBox = document.getElementById("test-result-box");
   const statusPill = document.getElementById("token-status-pill");
   const daysTag = document.getElementById("token-days-tag");
+  const dashboardLink = document.getElementById("dashboard-link");
 
-  // Load existing token and tenant ID from storage
+  const defaultServerUrl = "https://controlplane-botpress-connector.onrender.com";
+
+  // Load existing token, tenant ID, and server URL from storage
   if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-    const data = await chrome.storage.local.get(["cp_token", "cp_tenant_id"]);
+    const data = await chrome.storage.local.get(["cp_token", "cp_tenant_id", "cp_server_url"]);
     if (data && data.cp_token) {
       tokenInput.value = data.cp_token;
       if (statusPill) statusPill.innerText = "CONNECTED";
@@ -23,28 +27,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (data && data.cp_tenant_id && tenantInput) {
       tenantInput.value = data.cp_tenant_id;
     }
+    if (data && data.cp_server_url && serverInput) {
+      serverInput.value = data.cp_server_url;
+      if (dashboardLink) dashboardLink.href = `${data.cp_server_url.replace(/\/$/, '')}/#/dashboard`;
+    }
   }
 
-  // Save Token & Tenant ID Handler
+  // Save Config Handler
   saveBtn.addEventListener("click", async () => {
+    const serverVal = (serverInput ? serverInput.value.trim() : defaultServerUrl).replace(/\/$/, '');
     const tokenVal = tokenInput.value.trim();
     const tenantVal = tenantInput ? tenantInput.value.trim() : "acme-tenant-1";
 
-    if (!tokenVal || !tenantVal) {
-      showPopupToast("Please enter both Tenant ID and Activation Token", "#ef4444");
+    if (!tokenVal || !tenantVal || !serverVal) {
+      showPopupToast("Please enter Server URL, Tenant ID, and Token", "#ef4444");
       return;
     }
     if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-      await chrome.storage.local.set({ cp_token: tokenVal, cp_tenant_id: tenantVal });
+      await chrome.storage.local.set({ cp_token: tokenVal, cp_tenant_id: tenantVal, cp_server_url: serverVal });
     }
+    if (dashboardLink) dashboardLink.href = `${serverVal}/#/dashboard`;
     if (statusPill) statusPill.innerText = "CONNECTED";
-    showPopupToast(`Connected to ${tenantVal} with active token!`, "#10b981");
+    showPopupToast(`Connected to ${tenantVal} at ${serverVal}!`, "#10b981");
   });
 
   // Auto-Enroll Handler (Fetches active 48-day token & connects to tenant)
   autoBtn.addEventListener("click", async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/tokens/active");
+      const serverVal = (serverInput ? serverInput.value.trim() : defaultServerUrl).replace(/\/$/, '');
+      const res = await fetch(`${serverVal}/api/v1/tokens/active`);
       const tenantVal = tenantInput ? (tenantInput.value.trim() || "acme-tenant-1") : "acme-tenant-1";
 
       if (res.ok) {
@@ -52,15 +63,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         tokenInput.value = data.token_key;
         if (daysTag) daysTag.innerText = `${data.days_valid || 48} Days Active`;
         if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-          await chrome.storage.local.set({ cp_token: data.token_key, cp_tenant_id: tenantVal });
+          await chrome.storage.local.set({ cp_token: data.token_key, cp_tenant_id: tenantVal, cp_server_url: serverVal });
         }
+        if (dashboardLink) dashboardLink.href = `${serverVal}/#/dashboard`;
         if (statusPill) statusPill.innerText = "CONNECTED";
         showPopupToast(`Auto-enrolled on ${tenantVal} with 48-day token!`, "#10b981");
       } else {
-        showPopupToast("Failed to fetch local token", "#ef4444");
+        showPopupToast("Failed to fetch active token", "#ef4444");
       }
     } catch (err) {
-      showPopupToast("API unreachable. Ensure backend server is running.", "#f59e0b");
+      showPopupToast("POC API unreachable. Verify Server URL.", "#f59e0b");
     }
   });
 
@@ -70,11 +82,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const prompt = testInput.value.trim();
       if (!prompt) return;
 
+      const serverVal = (serverInput ? serverInput.value.trim() : defaultServerUrl).replace(/\/$/, '');
       testBox.style.display = "block";
       testBox.innerHTML = '<span style="color:#38bdf8;">⏳ Evaluating prompt...</span>';
 
       try {
-        const res = await fetch("http://localhost:8000/api/v1/resources/res_demo/check", {
+        const res = await fetch(`${serverVal}/api/v1/resources/res_demo/check`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_prompt: prompt })

@@ -221,11 +221,13 @@
     try {
       let tokenKey = "cp_live_default";
       let tenantId = "acme-tenant-1";
+      let serverUrl = "https://controlplane-botpress-connector.onrender.com";
 
       if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-        const stored = await chrome.storage.local.get(["cp_token", "cp_tenant_id"]);
+        const stored = await chrome.storage.local.get(["cp_token", "cp_tenant_id", "cp_server_url"]);
         if (stored && stored.cp_token) tokenKey = stored.cp_token;
         if (stored && stored.cp_tenant_id) tenantId = stored.cp_tenant_id;
+        if (stored && stored.cp_server_url) serverUrl = stored.cp_server_url.replace(/\/$/, '');
       }
 
       let currentSessionId = window.__cp_session_id;
@@ -241,7 +243,7 @@
         window.__cp_session_id = currentSessionId;
       }
 
-      const res = await fetch("http://localhost:8000/api/v1/resources/res_demo/check", {
+      const res = await fetch(`${serverUrl}/api/v1/resources/res_demo/check`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
