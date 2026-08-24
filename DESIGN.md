@@ -107,7 +107,30 @@ The evaluator layer is organized in [backend/app/connector/evaluators/](file:///
 
 ---
 
-## 5. Cryptographic Log Integrity (SHA-256 Hash Chain)
+## 5. Botpress Connector & AI Red Team Scanner Architecture
+
+The **Botpress Connector** ([`backend/app/connector/scanner.py`](file:///c:/ControlPlane/backend/app/connector/scanner.py)) isolates platform-specific Chat API complexities behind a clean interface:
+
+### 1. Core Connector Contract:
+* `validate_target()`: Probes `/hello` and conversation initialization. Returns boolean without surfacing raw network exceptions.
+* `execute_test(vulnerability_id, attack_id, test_input)`: Sends adversarial probes, polls for bot replies, and packages execution time, status, and metadata.
+* `reset_conversation()`: Establishes test isolation between attack runs to prevent conversational bias.
+* `get_platform_metadata()`: Returns platform identity (`botpress`), delivery mode (`poll`), and redacted webhook identifier.
+
+### 2. Error Sanitization Matrix:
+| Botpress HTTP Status | Internal Connector Error | Sanitized User Message |
+|---|---|---|
+| 400 | `BotpressError` | "The Botpress API rejected the request as malformed." |
+| 401 / 403 | `BotpressAuthError` | "Authentication failed. Access to Botpress resource is forbidden." |
+| 404 | `BotpressNotFoundError` | "Webhook ID not found. Verify the Chat integration is enabled." |
+| 429 | `BotpressRateLimitError` | "Botpress rate limit or free-tier quota exceeded." |
+| 5xx | `BotpressServerError` | "Botpress returned a server error. Platform temporarily unavailable." |
+| Timeout | `BotpressTimeoutError` | "Timed out waiting for a response from Botpress." |
+| Connection Failure | `BotpressConnectionError` | "Could not connect to the Botpress Chat API." |
+
+---
+
+## 6. Cryptographic Log Integrity (SHA-256 Hash Chain)
 
 All telemetry interceptions are chained cryptographically to ensure audit records cannot be retroactively modified or deleted.
 
@@ -120,7 +143,7 @@ $$\text{Current Hash} = \text{SHA-256}(\text{Previous Hash} + \text{Interception
 
 ---
 
-## 6. Testing & Verification
+## 7. Testing & Verification
 
 The test suite in [backend/tests/](file:///c:/ControlPlane/backend/tests/) validates all system layers:
 * `test_action_risk.py` & `test_compound_action.py`: Action tiers and compound sequence exfiltration triggers.
@@ -131,5 +154,7 @@ The test suite in [backend/tests/](file:///c:/ControlPlane/backend/tests/) valid
 * `test_guardian.py`: 7-check deterministic zero-LLM agent security layers.
 * `test_guardrail.py`: Real-time guardrail orchestrator and enforcement modes.
 * `test_full_suite.py` & `test_api.py`: Comprehensive end-to-end integration flows.
+* `test_scanner.py`: Botpress scanner error mapping and rate limit handling.
 
 **Pass Criteria**: `75 passed` in `pytest`.
+
