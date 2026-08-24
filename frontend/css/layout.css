@@ -1,6 +1,6 @@
 /* App Layout, Sidebar & Top Navigation Bar Styles */
 
-#app-shell { display: flex; width: 100vw; min-height: 100vh; }
+#app-shell { display: flex; width: 100vw; height: 100vh; min-height: 0; }
 
 /* Login Screen Overlay */
 #login-screen {
@@ -33,7 +33,7 @@
 /* Sidebar Navigation */
 aside {
   width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; flex-shrink: 0;
+  display: flex; flex-direction: column; flex-shrink: 0; min-height: 0;
   user-select: none;
 }
 
@@ -54,7 +54,7 @@ aside {
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 
-.nav-scroll { flex: 1; overflow-y: auto; padding: 1rem 0.85rem; }
+.nav-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 1rem 0.85rem; }
 
 .nav-group-title {
   font-size: 0.72rem; font-weight: 700; color: var(--text-subtle);
@@ -93,7 +93,7 @@ aside {
 .user-role { font-size: 0.7rem; color: var(--text-subtle); font-weight: 600; text-transform: uppercase; }
 
 /* Main Workspace */
-.app-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.app-main { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; }
 
 /* Top Header Bar */
 header {
@@ -123,7 +123,7 @@ header {
   display: flex; align-items: center; justify-content: center; cursor: pointer;
 }
 
-.page-container { flex: 1; padding: 1.75rem 2rem; overflow-y: auto; }
+.page-container { flex: 1; min-height: 0; padding: 1.75rem 2rem; overflow-y: auto; }
 .page-view { display: none; }
 .page-view.active { display: block; animation: fadeIn 0.2s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
