@@ -74,7 +74,9 @@ def log_interception(
             finding_code = "CST-007"
 
     with get_conn() as conn:
-        last_row = conn.execute("SELECT hash_chain FROM interceptions WHERE hash_chain IS NOT NULL ORDER BY rowid DESC LIMIT 1").fetchone()
+        from .connection import is_postgres
+        order_clause = "ORDER BY timestamp DESC, id DESC" if is_postgres() else "ORDER BY rowid DESC"
+        last_row = conn.execute(f"SELECT hash_chain FROM interceptions WHERE hash_chain IS NOT NULL {order_clause} LIMIT 1").fetchone()
         prev_hash = last_row["hash_chain"] if last_row else None
 
         from ...connector.evaluators.guardian import compute_audit_hash
