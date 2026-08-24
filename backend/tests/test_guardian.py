@@ -1,12 +1,23 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
-from backend.app.main import app
-from backend.app.connector.evaluators.guardian import (
-    evaluate_guardian_checks,
-    compute_audit_hash,
-)
-from backend.app.models import db
+
+try:
+    from app.main import app
+    from app.connector.evaluators.guardian import (
+        evaluate_guardian_checks,
+        compute_audit_hash,
+        DEFAULT_TOOL_REGISTRY,
+    )
+    from app.models import db
+except ImportError:
+    from backend.app.main import app
+    from backend.app.connector.evaluators.guardian import (
+        evaluate_guardian_checks,
+        compute_audit_hash,
+        DEFAULT_TOOL_REGISTRY,
+    )
+    from backend.app.models import db
 
 client = TestClient(app)
 
@@ -73,7 +84,6 @@ def test_guardian_checks_all_layers():
     # Since DEFAULT_TOOL_REGISTRY has None as default, it passes.
     # Let's override it or test with a tool that checks hash.
     # Since DEFAULT_TOOL_REGISTRY hash defaults to None, let's register a hash.
-    from backend.app.connector.evaluators.guardian import DEFAULT_TOOL_REGISTRY
     DEFAULT_TOOL_REGISTRY["web_search"]["hash"] = "valid_sha256_hash"
     res = evaluate_guardian_checks(
         tool_id="web_search",
