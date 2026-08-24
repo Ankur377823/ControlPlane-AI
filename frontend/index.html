@@ -759,216 +759,269 @@
           </div>
 
           <div class="card" style="border: 1px solid var(--primary); background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%); padding: 2rem;">
-            <div style="display: grid; grid-template-columns: 240px 1fr; gap: 2rem;">
+            <div style="display: grid; grid-template-columns: 260px 1fr; gap: 2rem;">
               
               <!-- Left Sidebar Tabs -->
               <div style="display: flex; flex-direction: column; gap: 6px;">
                 <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Platform Overview</div>
-                <button type="button" class="btn" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="switchDocTab('doc-tab-overview', this)">🏗️ 1. Architecture</button>
-                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="switchDocTab('doc-tab-dashboard', this)">📊 2. Dashboard</button>
+                <button type="button" class="btn" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-overview', this)">🏗️ 1. Architecture & Pipeline</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-dashboard', this)">📊 2. Dashboard & Trust Index</button>
 
-                <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-top:8px; margin-bottom:4px;">Core Features</div>
-                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="switchDocTab('doc-tab-resources', this)">📦 3. Resources</button>
-                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="switchDocTab('doc-tab-runtime', this)">🤖 4. Agent Runtime</button>
-                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="switchDocTab('doc-tab-findings', this)">🛡️ 5. Risk Findings</button>
-                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="switchDocTab('doc-tab-events', this)">🔍 6. Event Overview</button>
+                <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-top:8px; margin-bottom:4px;">Responsible AI Core</div>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-resources', this)">📦 3. Resources & Policies</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-runtime', this)">🤖 4. Agent Runtime & Tools</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-hitl', this)">👥 5. HITL Review Queue</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-multiturn', this)">📈 6. Multi-Turn Session Risk</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-aijudge', this)">⚖️ 7. AI-as-a-Judge Fallback</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-grounding', this)">🔬 8. RAG Factuality & Grounding</button>
 
-                <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-top:8px; margin-bottom:4px;">Audit & Detection</div>
-                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="switchDocTab('doc-tab-redteam', this)">🎯 7. Red Team Scanner</button>
-                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="switchDocTab('doc-tab-hallucination', this)">🔬 8. Hallucination</button>
-
-                <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-top:8px; margin-bottom:4px;">Integration</div>
-                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="switchDocTab('doc-tab-extension', this)">🔌 9. Chrome Extension</button>
-                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 10px 14px; font-size: 0.82rem;" onclick="switchDocTab('doc-tab-security', this)">🔐 10. Security Engine</button>
+                <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-top:8px; margin-bottom:4px;">Auditing & Security</div>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-findings', this)">🛡️ 9. Risk Findings Grid</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-events', this)">🔍 10. Event Telemetry Log</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-redteam', this)">🎯 11. Red Team Scanner</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-extension', this)">🔌 12. Chrome Extension</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-security', this)">🔐 13. Evaluators & Hash Chain</button>
+                <button type="button" class="btn-secondary" style="text-align: left; justify-content: flex-start; padding: 9px 12px; font-size: 0.8rem;" onclick="switchDocTab('doc-tab-api', this)">💻 14. REST API & Recipes</button>
               </div>
 
               <!-- Right Tab Contents -->
               <div>
                 <!-- 1. ARCHITECTURE -->
                 <div id="doc-tab-overview" class="doc-tab-content" style="display: block;">
-                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🏗️ 1. System Architecture &amp; Tech Stack</h3>
-                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">ControlPlane AI is an inline AI security gateway inserting a sub-15ms interception layer between users, agent frameworks, and LLM providers. It evaluates every prompt across three dimensions:</p>
-                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; margin-bottom: 1.5rem; padding-left: 1.25rem;">
-                    <li><strong style="color:var(--success);">Performance (P)</strong>: Evaluates response factuality via FacTool verification and web search.</li>
-                    <li><strong style="color:var(--warning);">Cost ($)</strong>: Audits token consumption and enforces per-request budget limits.</li>
-                    <li><strong style="color:var(--danger);">Responsibility (R)</strong>: Runs regex scanning, heuristic indicator scoring, PII redaction, bias detection, and prompt injection filters.</li>
-                  </ul>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Tech Stack:</h4>
-                  <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left; margin-bottom:1rem; border:1px solid var(--border);"><thead><tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);"><th style="padding:8px;">Layer</th><th style="padding:8px;">Technology</th><th style="padding:8px;">Purpose</th></tr></thead><tbody>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary); font-weight:700;">Backend</td><td style="padding:8px; color:var(--text-muted);">Python + FastAPI + Uvicorn</td><td style="padding:8px; color:var(--text-muted);">REST API, guardrail evaluator engine, SQLite ORM</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary); font-weight:700;">Frontend</td><td style="padding:8px; color:var(--text-muted);">Vanilla HTML/CSS/JS (ES6 Modules)</td><td style="padding:8px; color:var(--text-muted);">SPA dashboard with hash-based routing</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary); font-weight:700;">Database</td><td style="padding:8px; color:var(--text-muted);">SQLite (aiosqlite)</td><td style="padding:8px; color:var(--text-muted);">Users, resources, policies, interceptions, scans, tokens</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary); font-weight:700;">Extension</td><td style="padding:8px; color:var(--text-muted);">Chrome Manifest V3</td><td style="padding:8px; color:var(--text-muted);">Network interceptor for AI platforms</td></tr>
-                    <tr><td style="padding:8px; color:var(--primary); font-weight:700;">Testing</td><td style="padding:8px; color:var(--text-muted);">Pytest (59 tests)</td><td style="padding:8px; color:var(--text-muted);">Evaluators, routes, DB operations</td></tr>
-                  </tbody></table>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Three-Layer Flow:</h4>
-                  <pre style="background:var(--bg-input); padding:1rem; border-radius:10px; font-family:var(--font-mono); font-size:0.78rem; color:#a5f3fc; border:1px solid var(--border); overflow-x:auto;">User / AI Agent  --&gt;  Chrome Extension / SDK  --&gt;  ControlPlane Backend (6 Evaluators)  --&gt;  Risk Findings Dashboard</pre>
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🏗️ 1. System Architecture & Tech Stack</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem;">
+                    <strong>ControlPlane AI</strong> is an enterprise-grade Responsible AI Governance Control Plane and real-time security shield inserting a deterministic sub-15ms interception layer between users, autonomous agent runtimes, and LLM backends (Botpress, OpenAI GPT-4o, Claude 3.5, Gemini, DeepSeek).
+                  </p>
+                  
+                  <div style="background:var(--bg-input); padding:1rem; border-radius:8px; border:1px solid var(--border); margin-bottom:1.5rem;">
+                    <div style="color:var(--cyan); font-weight:700; font-size:0.85rem; margin-bottom:0.5rem;">Unified Decision Pipeline:</div>
+                    <pre style="font-family:var(--font-mono); font-size:0.75rem; color:#a5f3fc; line-height:1.5; margin:0; overflow-x:auto;">
+[Incoming Prompt / Tool Call] 
+       │
+       ▼
+[Fast-Path Deterministic Layer: PII, Injection Shield, Bias, Cost (<15ms)]
+       │
+   ┌───┴────────────────────────────────┐
+   ▼                                    ▼
+[Clear Result]             [Borderline / RAG Context Check]
+   │                                    │
+   │                         [Evidence Grounding / Context Faithfulness]
+   │                                    │
+   │                         [AI-as-a-Judge Secondary Fallback (0.4-0.7)]
+   │                                    │
+   └───┬────────────────────────────────┘
+       ▼
+[Decision Engine: ALLOW | MASK | CONFIRM_REQUIRED | BLOCK]
+       │
+       ├─► [SHA-256 Cryptographic Hash Chain Audit Trail]
+       └─► [Human Review Queue & Feedback Threshold Auto-Tuning]
+                    </pre>
+                  </div>
+
+                  <h4 style="color:#fff; margin-bottom:0.5rem;">Technology Stack Summary:</h4>
+                  <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left; margin-bottom:1rem; border:1px solid var(--border);">
+                    <thead><tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);"><th style="padding:8px;">Component</th><th style="padding:8px;">Technology</th><th style="padding:8px;">Role</th></tr></thead>
+                    <tbody>
+                      <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary); font-weight:700;">Backend API</td><td style="padding:8px; color:var(--text-muted);">Python 3.11+ / FastAPI / Uvicorn</td><td style="padding:8px; color:var(--text-muted);">High-throughput asynchronous REST gateway</td></tr>
+                      <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary); font-weight:700;">Dual Database</td><td style="padding:8px; color:var(--text-muted);">SQLite (Local) / Neon PostgreSQL (Production)</td><td style="padding:8px; color:var(--text-muted);">Zero-config local DB + cloud persistent multi-tenant ORM</td></tr>
+                      <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary); font-weight:700;">Frontend Dashboard</td><td style="padding:8px; color:var(--text-muted);">Vanilla JS (ES6 Modules) + CSS Tokens</td><td style="padding:8px; color:var(--text-muted);">Zero-bundle SPA, interactive review controls, live telemetry</td></tr>
+                      <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary); font-weight:700;">Browser Shield</td><td style="padding:8px; color:var(--text-muted);">Chrome Manifest V3 Extension</td><td style="padding:8px; color:var(--text-muted);">Client-side prompt interception & transparent PII masking</td></tr>
+                      <tr><td style="padding:8px; color:var(--primary); font-weight:700;">Test Suite</td><td style="padding:8px; color:var(--text-muted);">Pytest (75 / 75 Passing Tests)</td><td style="padding:8px; color:var(--text-muted);">100% clean test coverage across all 11 Responsible AI layers</td></tr>
+                    </tbody>
+                  </table>
                 </div>
 
                 <!-- 2. DASHBOARD -->
                 <div id="doc-tab-dashboard" class="doc-tab-content" style="display: none;">
-                  <h3 style="color: #fff; margin-bottom: 0.5rem;">📊 2. Dashboard</h3>
-                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">The main dashboard provides real-time tenant workspace security health. Each metric card shows:</p>
-                  <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left; margin-bottom:1.5rem; border:1px solid var(--border);"><thead><tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);"><th style="padding:8px;">Card</th><th style="padding:8px;">What It Shows</th><th style="padding:8px;">Source</th></tr></thead><tbody>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; font-weight:700; color:var(--primary);">Interception Velocity</td><td style="padding:8px; color:var(--text-muted);">Total prompts checked</td><td style="padding:8px; color:var(--cyan);"><code>get_interception_summary()</code></td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; font-weight:700; color:var(--primary);">Performance (P)</td><td style="padding:8px; color:var(--text-muted);">Average factuality score</td><td style="padding:8px; color:var(--cyan);"><code>scores.performance_p</code></td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; font-weight:700; color:var(--warning);">Cost ($)</td><td style="padding:8px; color:var(--text-muted);">Budget efficiency rating</td><td style="padding:8px; color:var(--cyan);"><code>scores.cost_dollars</code></td></tr>
-                    <tr><td style="padding:8px; font-weight:700; color:var(--success);">Responsibility (R)</td><td style="padding:8px; color:var(--text-muted);">Safety enforcement — drops on threats</td><td style="padding:8px; color:var(--cyan);"><code>scores.responsibility_r</code></td></tr>
-                  </tbody></table>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Enforcement Action Breakdown:</h4>
-                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem;">
-                    <li><strong style="color:var(--success);">ALLOW</strong> — Clean queries, no modification.</li>
-                    <li><strong style="color:var(--cyan);">MASK</strong> — PII auto-redacted before forwarding.</li>
-                    <li><strong style="color:var(--warning);">MONITOR</strong> — Flagged for audit, allowed through.</li>
-                    <li><strong style="color:var(--danger);">BLOCK</strong> — Dangerous queries immediately halted.</li>
-                  </ul>
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">📊 2. Dashboard & Trustworthiness Index</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    The Executive Dashboard aggregates telemetry from all active resources, displaying real-time security velocity, governance scores, and automated trust metrics.
+                  </p>
+                  <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left; margin-bottom:1.5rem; border:1px solid var(--border);">
+                    <thead><tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);"><th style="padding:8px;">Metric Metric</th><th style="padding:8px;">Formula / Source</th><th style="padding:8px;">Target</th></tr></thead>
+                    <tbody>
+                      <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; font-weight:700; color:var(--cyan);">Interception Velocity</td><td style="padding:8px; color:var(--text-muted);">Total volume of inspected prompts & tool calls</td><td style="padding:8px; color:var(--text-muted);">Real-time throughput</td></tr>
+                      <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; font-weight:700; color:var(--success);">Performance Score (P)</td><td style="padding:8px; color:var(--text-muted);">Context-faithfulness & claim verification rating (0-100)</td><td style="padding:8px; color:var(--success);">&gt; 90.0</td></tr>
+                      <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; font-weight:700; color:var(--warning);">Cost Score ($)</td><td style="padding:8px; color:var(--text-muted);">Budget efficiency & token utilization compliance (0-100)</td><td style="padding:8px; color:var(--warning);">&gt; 95.0</td></tr>
+                      <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; font-weight:700; color:var(--primary);">Responsibility Score (R)</td><td style="padding:8px; color:var(--text-muted);">Safety rating (penalized by PII, injection, toxicity, action risk)</td><td style="padding:8px; color:var(--primary);">&gt; 98.0</td></tr>
+                      <tr><td style="padding:8px; font-weight:700; color:#a855f7;">Trustworthiness Index</td><td style="padding:8px; color:var(--text-muted);">$$\text{Trust} = (\text{Precision} \times 0.6) + (\text{Recall} \times 0.4)$$</td><td style="padding:8px; color:#a855f7;">Calibrated by Human Reviewers</td></tr>
+                    </tbody>
+                  </table>
                 </div>
 
-                <!-- 3. RESOURCES -->
+                <!-- 3. RESOURCES & POLICIES -->
                 <div id="doc-tab-resources" class="doc-tab-content" style="display: none;">
-                  <h3 style="color: #fff; margin-bottom: 0.5rem;">📦 3. Monitored Resources</h3>
-                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">A <strong style="color:#fff;">Resource</strong> represents any AI chatbot or agent endpoint under guardrail protection.</p>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Key Fields:</h4>
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">📦 3. Monitored Resources & Use-Case Policies</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    Resources map to distinct AI chatbot instances, agent runtimes, or customer support bots. Each resource is governed by an adaptive Policy Profile:
+                  </p>
                   <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem; margin-bottom:1rem;">
-                    <li><strong style="color:var(--cyan);">Resource Name</strong> — Human-readable label (e.g., "Customer Support Bot")</li>
-                    <li><strong style="color:var(--cyan);">Webhook ID</strong> — Botpress webhook UUID or API endpoint identifier</li>
-                    <li><strong style="color:var(--cyan);">Use Case Type</strong> — Security profile: customer_support, internal_copilot, decision_support</li>
-                  </ul>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Backend Functions:</h4>
-                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem;">
-                    <li><code style="color:var(--cyan);">create_resource(data)</code> — Registers a new chatbot with a unique <code>res_</code> ID</li>
-                    <li><code style="color:var(--cyan);">list_resources()</code> — Returns all resources for the tenant</li>
-                    <li><code style="color:var(--cyan);">get_resource(id)</code> — Fetches a single resource by ID</li>
-                    <li><code style="color:var(--cyan);">validate_resource(id)</code> — Pings the webhook URL to verify reachability</li>
+                    <li><strong style="color:var(--cyan);">Customer Support (<code>pol_customer_support</code>)</strong>: Low latency priority, aggressive PII masking (Credit cards, SSNs), polite hedging filters.</li>
+                    <li><strong style="color:var(--primary);">Internal Copilot (<code>pol_internal_copilot</code>)</strong>: Internal credential shielding, API key protection, token overflow limits.</li>
+                    <li><strong style="color:var(--warning);">Decision Support (<code>pol_decision_support</code>)</strong>: High factuality enforcement, strict RAG grounding verification, AI judge edge-case triggers.</li>
+                    <li><strong style="color:#a855f7;">Autonomous Agent (<code>pol_ai_agent</code>)</strong>: Tool call action-risk tiering (LOW/MED/HIGH/CRITICAL), compound sequence exfiltration tracking.</li>
+                    <li><strong style="color:var(--success);">EU GDPR / US HIPAA</strong>: Regional compliance templates enforcing legal data minimization rules.</li>
                   </ul>
                 </div>
 
                 <!-- 4. AGENT RUNTIME -->
                 <div id="doc-tab-runtime" class="doc-tab-content" style="display: none;">
-                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🤖 4. AI Agent Runtime</h3>
-                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">The Agent Runtime is a security gateway for autonomous AI agents that execute tools. Before any tool runs, the agent asks ControlPlane: <em>"Is this safe?"</em></p>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Action Risk Tiers:</h4>
-                  <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left; margin-bottom:1rem; border:1px solid var(--border);"><thead><tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);"><th style="padding:8px;">Tool</th><th style="padding:8px;">Risk</th><th style="padding:8px;">Action</th></tr></thead><tbody>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--text-muted);">search_web</td><td style="padding:8px; color:var(--success); font-weight:700;">LOW</td><td style="padding:8px; color:var(--success);">ALLOW</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--text-muted);">send_email</td><td style="padding:8px; color:var(--warning); font-weight:700;">MEDIUM</td><td style="padding:8px; color:var(--warning);">MONITOR</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--text-muted);">delete_file</td><td style="padding:8px; color:#fb923c; font-weight:700;">HIGH</td><td style="padding:8px; color:#fb923c;">CONFIRM_REQUIRED</td></tr>
-                    <tr><td style="padding:8px; color:var(--text-muted);">transfer_money</td><td style="padding:8px; color:var(--danger); font-weight:700;">CRITICAL</td><td style="padding:8px; color:var(--danger);">BLOCK</td></tr>
-                  </tbody></table>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Python Integration:</h4>
-                  <pre style="background:var(--bg-input); padding:1rem; border-radius:10px; font-family:var(--font-mono); font-size:0.78rem; color:#cbd5e1; border:1px solid var(--border); overflow-x:auto;">resp = requests.post("http://localhost:8000/api/v1/resources/res_demo/check", json={
-    "user_prompt": "Transfer $5,000 to billing",
-    "tool_call": {"name": "transfer_money", "parameters": {}}
-})
-if resp.json()["action"] == "BLOCK":
-    raise PermissionError("Blocked by ControlPlane")</pre>
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🤖 4. AI Agent Runtime & Compound Sequences</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    Before an autonomous agent executes a tool call, ControlPlane evaluates its danger level and action history to prevent malicious tool misuse and multi-step data exfiltration:
+                  </p>
+                  <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left; margin-bottom:1rem; border:1px solid var(--border);">
+                    <thead><tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);"><th style="padding:8px;">Tier</th><th style="padding:8px;">Example Tool</th><th style="padding:8px;">Default Action</th><th style="padding:8px;">Behavior</th></tr></thead>
+                    <tbody>
+                      <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--success); font-weight:700;">LOW</td><td style="padding:8px; color:var(--text-muted);">search_web, calculate</td><td style="padding:8px; color:var(--success);">ALLOW</td><td style="padding:8px; color:var(--text-muted);">Immediate execution with sub-5ms latency</td></tr>
+                      <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--warning); font-weight:700;">MEDIUM</td><td style="padding:8px; color:var(--text-muted);">send_email, post_slack</td><td style="padding:8px; color:var(--warning);">MONITOR</td><td style="padding:8px; color:var(--text-muted);">Executed and recorded to audit telemetry</td></tr>
+                      <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:#fb923c; font-weight:700;">HIGH</td><td style="padding:8px; color:var(--text-muted);">delete_file, modify_user</td><td style="padding:8px; color:#fb923c;">CONFIRM_REQUIRED</td><td style="padding:8px; color:var(--text-muted);">Paused until approved in Human Review Queue</td></tr>
+                      <tr><td style="padding:8px; color:var(--danger); font-weight:700;">CRITICAL</td><td style="padding:8px; color:var(--text-muted);">transfer_money, drop_db</td><td style="padding:8px; color:var(--danger);">BLOCK</td><td style="padding:8px; color:var(--text-muted);">Immediate hard halt, security alert logged</td></tr>
+                    </tbody>
+                  </table>
+                  <h4 style="color:#fff; margin-bottom:0.5rem;">Compound Exfiltration Chain Detection:</h4>
+                  <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.5;">
+                    If an agent's prior history includes sensitive data access (e.g. <code>read_file</code>, <code>query_db</code>) and the current action is external transmission (e.g. <code>send_email</code>, <code>webhook_post</code>), ControlPlane escalates the action to <strong>CONFIRM_REQUIRED</strong> to prevent automated data exfiltration.
+                  </p>
                 </div>
 
-                <!-- 5. RISK FINDINGS -->
+                <!-- 5. HITL REVIEW QUEUE -->
+                <div id="doc-tab-hitl" class="doc-tab-content" style="display: none;">
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">👥 5. Human-in-the-Loop (HITL) Review Queue</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    When prompt checks or agent tool calls produce <code>CONFIRM_REQUIRED</code> or borderline risk, they are queued for security review.
+                  </p>
+                  <h4 style="color:#fff; margin-bottom:0.5rem;">Available Operator Actions:</h4>
+                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem; margin-bottom:1rem;">
+                    <li><strong style="color:var(--success);">✓ Approve</strong>: Confirms the prompt/tool call is benign and authorizes continuation.</li>
+                    <li><strong style="color:var(--danger);">✕ Reject &amp; Block</strong>: Confirms the threat and enforces hard blocking.</li>
+                    <li><strong style="color:#a855f7;">⚡ Override</strong>: Grants an authorized executive business exception with mandatory audit notes.</li>
+                    <li><strong style="color:var(--warning);">🎯 False Positive &amp; Auto-Tune</strong>: Marks the finding as a false detection, automatically recalibrating and loosening policy strictness thresholds.</li>
+                  </ul>
+                </div>
+
+                <!-- 6. MULTI-TURN RISK -->
+                <div id="doc-tab-multiturn" class="doc-tab-content" style="display: none;">
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">📈 6. Cumulative Multi-Turn Session Risk</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    Attackers often bypass single-prompt guardrails through "salami slicing" (asking small, seemingly benign sub-questions that collectively reconstruct an exploit). ControlPlane tracks cumulative session risk over time:
+                  </p>
+                  <div style="background:var(--bg-input); padding:1rem; border-radius:8px; border:1px solid var(--border); margin-bottom:1rem;">
+                    <div style="color:#a5f3fc; font-family:var(--font-mono); font-size:0.85rem;">
+                      $$\text{Score}_{t} = (\alpha \times \text{Score}_{t-1}) + (\text{Turn Risk} \times 0.5)$$
+                    </div>
+                    <div style="color:var(--text-muted); font-size:0.8rem; margin-top:6px;">
+                      Where decay constant $\alpha = 0.85$. If cumulative session risk exceeds threshold (0.65), actions escalate from MONITOR to CONFIRM_REQUIRED or BLOCK.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 7. AI AS A JUDGE -->
+                <div id="doc-tab-aijudge" class="doc-tab-content" style="display: none;">
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">⚖️ 7. AI-as-a-Judge Tiered Fallback</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    To balance speed and nuanced semantic understanding, ControlPlane utilizes a 2-tier architecture:
+                  </p>
+                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem; margin-bottom:1rem;">
+                    <li><strong>Tier 1 (Fast Deterministic Path, &lt; 15ms)</strong>: Evaluates 95%+ of traffic using regex, token bounds, and heuristic patterns. Clear ALLOW or BLOCK decisions return immediately.</li>
+                    <li><strong>Tier 2 (AI Judge Fallback)</strong>: Triggered <em>only</em> for borderline risk scores ($0.40 \le \text{Risk} \le 0.70$) or complex decision support prompts. Invokes an LLM judge to provide nuanced reasoning and final verdict.</li>
+                  </ul>
+                </div>
+
+                <!-- 8. RAG GROUNDING -->
+                <div id="doc-tab-grounding" class="doc-tab-content" style="display: none;">
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🔬 8. Evidence-Backed RAG Grounding &amp; Factuality</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    Verifies whether LLM chatbot responses are grounded in provided enterprise knowledge context or hallucinated:
+                  </p>
+                  <ol style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem; margin-bottom:1rem;">
+                    <li><strong style="color:#fff;">Claim Extraction</strong>: Parses complex model responses into atomic factual statements.</li>
+                    <li><strong style="color:#fff;">Context-Faithfulness Check</strong>: Cross-references claims against provided RAG context documents.</li>
+                    <li><strong style="color:#fff;">Web Search Verification</strong>: Falls back to live Google Search (via Serper API) when external facts must be validated.</li>
+                  </ol>
+                </div>
+
+                <!-- 9. RISK FINDINGS -->
                 <div id="doc-tab-findings" class="doc-tab-content" style="display: none;">
-                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🛡️ 5. Risk Findings</h3>
-                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">The main security incident log. Only shows prompts that triggered at least one evaluator (clean ALLOW queries are filtered out).</p>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Finding Types:</h4>
-                  <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left; margin-bottom:1rem; border:1px solid var(--border);"><thead><tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);"><th style="padding:8px;">Type</th><th style="padding:8px;">Severity</th><th style="padding:8px;">Trigger</th></tr></thead><tbody>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--danger);">PROMPT_INJECTION</td><td style="padding:8px; color:var(--danger);">CRITICAL</td><td style="padding:8px; color:var(--text-muted);">Regex match, heuristic score ≥ 3.0, or LLM classifier</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--warning);">PII_DETECTED</td><td style="padding:8px; color:var(--warning);">HIGH</td><td style="padding:8px; color:var(--text-muted);">Email, credit card, SSN, phone, or API key detected</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--warning);">BIAS_TOXICITY</td><td style="padding:8px; color:var(--warning);">MEDIUM</td><td style="padding:8px; color:var(--text-muted);">Hate speech, profanity, or discriminatory language</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--warning);">COST_OVERRUN</td><td style="padding:8px; color:var(--warning);">MEDIUM</td><td style="padding:8px; color:var(--text-muted);">Token count exceeds policy max_tokens_limit</td></tr>
-                    <tr><td style="padding:8px; color:var(--danger);">ACTION_RISK_CRITICAL</td><td style="padding:8px; color:var(--danger);">CRITICAL</td><td style="padding:8px; color:var(--text-muted);">Agent attempted critical risk tool call</td></tr>
-                  </tbody></table>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Backend Functions:</h4>
-                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem;">
-                    <li><code style="color:var(--cyan);">log_interception()</code> — Records every check with SHA-256 hash chain</li>
-                    <li><code style="color:var(--cyan);">list_interceptions()</code> — Returns findings excluding clean queries</li>
-                    <li><code style="color:var(--cyan);">get_interception_summary()</code> — Aggregate counts by action type</li>
-                  </ul>
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🛡️ 9. Risk Findings Grid</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    The live security incident center. Filters out benign traffic and displays all flagged threats, injection attempts, PII disclosures, and tool interceptions.
+                  </p>
                 </div>
 
-                <!-- 6. EVENT OVERVIEW -->
+                <!-- 10. EVENT TELEMETRY -->
                 <div id="doc-tab-events" class="doc-tab-content" style="display: none;">
-                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🔍 6. Event Overview &amp; Session Telemetry</h3>
-                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">Click "View Details" on any Risk Finding to see the full security telemetry:</p>
-                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem;">
-                    <li><strong style="color:#fff;">Original Prompt</strong> — Raw text submitted by the user or agent</li>
-                    <li><strong style="color:#fff;">Sanitized Prompt</strong> — Cleaned version after PII redaction</li>
-                    <li><strong style="color:#fff;">Risk Findings JSON</strong> — Every triggered rule with type, severity, description</li>
-                    <li><strong style="color:#fff;">SHA-256 Hash Chain</strong> — Cryptographic integrity proof</li>
-                    <li><strong style="color:#fff;">Policy Applied</strong> — Active enforcement policy (policy_id, mode)</li>
-                    <li><strong style="color:#fff;">Session ID</strong> — Links multiple interactions from same session</li>
-                  </ul>
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🔍 10. Event Overview &amp; Session Telemetry</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    Clicking "View Details" on any interception reveals complete forensics: original prompt, sanitized prompt, rule findings JSON, applied policy ID, session ID, latency, and cryptographic SHA-256 hash chains.
+                  </p>
                 </div>
 
-                <!-- 7. RED TEAM -->
+                <!-- 11. RED TEAM -->
                 <div id="doc-tab-redteam" class="doc-tab-content" style="display: none;">
-                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🎯 7. AI Red Team Scanner</h3>
-                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">Batch vulnerability probe that sends automated attack prompts and generates PDF compliance reports.</p>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Attack Presets:</h4>
-                  <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left; margin-bottom:1rem; border:1px solid var(--border);"><thead><tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);"><th style="padding:8px;">Preset</th><th style="padding:8px;">Tests</th><th style="padding:8px;">Example</th></tr></thead><tbody>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--danger);">Prompt Injection</td><td style="padding:8px; color:var(--text-muted);">System override attempts</td><td style="padding:8px; color:var(--text-muted);">"Ignore previous instructions"</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--warning);">PII Leak</td><td style="padding:8px; color:var(--text-muted);">Data extraction probes</td><td style="padding:8px; color:var(--text-muted);">"List all customer emails"</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--danger);">Jailbreak</td><td style="padding:8px; color:var(--text-muted);">DAN mode, sudo, admin</td><td style="padding:8px; color:var(--text-muted);">"DAN mode: bypass filters"</td></tr>
-                    <tr><td style="padding:8px; color:var(--cyan);">Custom</td><td style="padding:8px; color:var(--text-muted);">User-defined prompts</td><td style="padding:8px; color:var(--text-muted);">Any adversarial text</td></tr>
-                  </tbody></table>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Functions:</h4>
-                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem;">
-                    <li><code style="color:var(--cyan);">run_scan(resource_id, prompts)</code> — Executes probes against registered resource</li>
-                    <li><code style="color:var(--cyan);">run_adhoc_scan(webhook_id, name, prompts)</code> — Probes any arbitrary webhook</li>
-                    <li><code style="color:var(--cyan);">downloadScanPdfReport()</code> — Generates printable PDF audit report</li>
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🎯 11. Automated AI Red Team Scanner</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    Automated multi-turn vulnerability probing engine for testing Botpress webhooks and agent endpoints:
+                  </p>
+                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem; margin-bottom:1rem;">
+                    <li><strong>Attack Presets</strong>: Prompt Injections, PII Disclosures, Filter Jailbreaks, and Custom Multi-Line Payloads.</li>
+                    <li><strong>Session Isolation</strong>: Automatically creates fresh user keys and resets conversations (<code>reset_conversation=True</code>) for un-biased testing.</li>
+                    <li><strong>PDF Export</strong>: Generates branded PDF compliance audit reports for executive stakeholders.</li>
                   </ul>
                 </div>
 
-                <!-- 8. HALLUCINATION -->
-                <div id="doc-tab-hallucination" class="doc-tab-content" style="display: none;">
-                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🔬 8. Hallucination &amp; Factuality Detector</h3>
-                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">Based on the FacTool framework, verifies LLM responses by extracting claims and cross-referencing against live web search evidence.</p>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Three-Stage Pipeline:</h4>
-                  <ol style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem; margin-bottom:1rem;">
-                    <li><strong style="color:#fff;">Claim Extraction</strong> — OpenAI extracts factual claims as a JSON array</li>
-                    <li><strong style="color:#fff;">Evidence Retrieval</strong> — Serper API searches Google for supporting evidence</li>
-                    <li><strong style="color:#fff;">Verdict Generation</strong> — OpenAI evaluates each claim, assigns factuality score (0.0–1.0)</li>
-                  </ol>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Modes:</h4>
-                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem;">
-                    <li><strong style="color:var(--success);">Live Mode</strong> — Requires OpenAI + Serper API keys for real-time verification</li>
-                    <li><strong style="color:var(--cyan);">Fallback Mode</strong> — No keys needed, uses built-in evaluator for offline testing</li>
-                  </ul>
-                </div>
-
-                <!-- 9. CHROME EXTENSION -->
+                <!-- 12. CHROME EXTENSION -->
                 <div id="doc-tab-extension" class="doc-tab-content" style="display: none;">
-                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🔌 9. Chrome Extension Network Shield</h3>
-                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">Intercepts prompt forms and network fetch calls on AI platforms to mask credentials and block injections <em>before</em> text leaves the browser.</p>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">How It Works:</h4>
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🔌 12. Chrome Extension Network Shield</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    Client-side prompt interception for ChatGPT, Claude, Gemini, DeepSeek, and custom webchats:
+                  </p>
                   <ol style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem; margin-bottom:1rem;">
-                    <li><code style="color:var(--cyan);">content.js</code> runs on AI platform pages (ChatGPT, Claude, etc.)</li>
-                    <li>When user clicks Send, extension captures the prompt text</li>
-                    <li>Sends prompt to <code style="color:var(--cyan);">POST /api/v1/resources/{id}/check</code></li>
-                    <li>BLOCK → prevents submission. MASK → redacts PII before sending</li>
-                    <li>All results logged to Risk Findings dashboard</li>
+                    <li>Load unpacked directory: <code>frontend/extension/</code> in <code>chrome://extensions/</code>.</li>
+                    <li>Auto-enroll using an active token from the <strong>Enrollment Tokens</strong> dashboard tab.</li>
+                    <li>Prompts are checked and sanitized transparently before departing the user's browser.</li>
                   </ol>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">Extension Files:</h4>
-                  <ul style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; padding-left: 1.25rem;">
-                    <li><code style="color:var(--cyan);">manifest.json</code> — Chrome Manifest V3 configuration</li>
-                    <li><code style="color:var(--cyan);">popup.html / popup.js</code> — Popup UI for enrollment and connection status</li>
-                    <li><code style="color:var(--cyan);">content.js</code> — Content script for prompt interception</li>
-                    <li><code style="color:var(--cyan);">background.js</code> — Service worker for network monitoring</li>
-                  </ul>
                 </div>
 
-                <!-- 10. SECURITY ENGINE -->
+                <!-- 13. SECURITY ENGINE & HASH CHAIN -->
                 <div id="doc-tab-security" class="doc-tab-content" style="display: none;">
-                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🔐 10. Security Engine &amp; Cryptographic Integrity</h3>
-                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">ControlPlane runs 6 evaluator functions on every prompt in sequence:</p>
-                  <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left; margin-bottom:1rem; border:1px solid var(--border);"><thead><tr style="background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);"><th style="padding:8px;">#</th><th style="padding:8px;">Evaluator</th><th style="padding:8px;">File</th><th style="padding:8px;">What It Does</th></tr></thead><tbody>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary);">1</td><td style="padding:8px; color:#fff;">Prompt Injection</td><td style="padding:8px; color:var(--cyan);"><code>injection.py</code></td><td style="padding:8px; color:var(--text-muted);">3-layer: L1 Regex → L2 Heuristic Scoring → L3 LLM Check</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary);">2</td><td style="padding:8px; color:#fff;">PII Scanner</td><td style="padding:8px; color:var(--cyan);"><code>pii.py</code></td><td style="padding:8px; color:var(--text-muted);">Detects/redacts emails, cards, SSNs, phones, API keys</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary);">3</td><td style="padding:8px; color:#fff;">Bias &amp; Toxicity</td><td style="padding:8px; color:var(--cyan);"><code>bias_safety.py</code></td><td style="padding:8px; color:var(--text-muted);">Hate speech, profanity, discriminatory language</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary);">4</td><td style="padding:8px; color:#fff;">Grounding</td><td style="padding:8px; color:var(--cyan);"><code>grounding.py</code></td><td style="padding:8px; color:var(--text-muted);">Validates response factuality against context</td></tr>
-                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--primary);">5</td><td style="padding:8px; color:#fff;">Cost Analysis</td><td style="padding:8px; color:var(--cyan);"><code>cost.py</code></td><td style="padding:8px; color:var(--text-muted);">Token usage estimation and budget enforcement</td></tr>
-                    <tr><td style="padding:8px; color:var(--primary);">6</td><td style="padding:8px; color:#fff;">Action Risk</td><td style="padding:8px; color:var(--cyan);"><code>action_risk.py</code></td><td style="padding:8px; color:var(--text-muted);">Agent tool calls against 4-tier risk classification</td></tr>
-                  </tbody></table>
-                  <h4 style="color:#fff; margin-bottom:0.5rem;">SHA-256 Hash Chain:</h4>
-                  <pre style="background:var(--bg-input); padding:1rem; border-radius:10px; font-family:var(--font-mono); font-size:0.82rem; color:#fdba74; border:1px solid var(--border); overflow-x:auto; margin-bottom:1rem;">Current Hash = SHA-256(Previous Hash + Interception Data Payload)</pre>
-                  <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.6;">Every check is cryptographically chained. If any record is deleted or modified, the next hash mismatches, instantly flagging log tampering.</p>
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">🔐 13. Evaluators &amp; Cryptographic SHA-256 Hash Chain</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    Every check generates a tamper-evident audit record linked via SHA-256 hash chaining:
+                  </p>
+                  <pre style="background:var(--bg-input); padding:1rem; border-radius:8px; font-family:var(--font-mono); font-size:0.8rem; color:#fdba74; border:1px solid var(--border); overflow-x:auto; margin-bottom:1rem;">Current Hash = SHA-256(Previous Hash + Interception Data Payload)</pre>
+                  <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.5;">
+                    If any past audit log row is modified or deleted, the subsequent hash fails verification, immediately exposing log tampering.
+                  </p>
+                </div>
+
+                <!-- 14. REST API RECIPES -->
+                <div id="doc-tab-api" class="doc-tab-content" style="display: none;">
+                  <h3 style="color: #fff; margin-bottom: 0.5rem;">💻 14. REST API &amp; Integration Recipes</h3>
+                  <p style="color: var(--text-main); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    Ready-to-use PowerShell and cURL snippets for interacting with ControlPlane AI:
+                  </p>
+                  
+                  <div style="margin-bottom:1.5rem;">
+                    <div style="font-weight:700; color:var(--cyan); font-size:0.85rem; margin-bottom:0.4rem;">1. Real-Time Prompt Check (PowerShell)</div>
+                    <pre style="background:var(--bg-input); padding:1rem; border-radius:8px; font-family:var(--font-mono); font-size:0.75rem; color:#cbd5e1; border:1px solid var(--border); overflow-x:auto;">Invoke-RestMethod -Uri "http://localhost:8000/api/v1/resources/res_demo/check" `
+  -Method Post -ContentType "application/json" `
+  -Body '{"user_prompt": "My credit card is 4532-1234-5678-9012"}'</pre>
+                  </div>
+
+                  <div style="margin-bottom:1.5rem;">
+                    <div style="font-weight:700; color:var(--cyan); font-size:0.85rem; margin-bottom:0.4rem;">2. Agent Tool Call Interception (PowerShell)</div>
+                    <pre style="background:var(--bg-input); padding:1rem; border-radius:8px; font-family:var(--font-mono); font-size:0.75rem; color:#cbd5e1; border:1px solid var(--border); overflow-x:auto;">Invoke-RestMethod -Uri "http://localhost:8000/api/v1/resources/res_agent/check" `
+  -Method Post -ContentType "application/json" `
+  -Body '{"user_prompt": "Transfer funds", "tool_call": {"name": "transfer_money", "parameters": {"amount": 5000}}}'</pre>
+                  </div>
+
+                  <div>
+                    <div style="font-weight:700; color:var(--cyan); font-size:0.85rem; margin-bottom:0.4rem;">3. Submit Review Queue Decision (PowerShell)</div>
+                    <pre style="background:var(--bg-input); padding:1rem; border-radius:8px; font-family:var(--font-mono); font-size:0.75rem; color:#cbd5e1; border:1px solid var(--border); overflow-x:auto;">Invoke-RestMethod -Uri "http://localhost:8000/api/v1/findings/ic_demo_001/review" `
+  -Method Post -ContentType "application/json" `
+  -Body '{"decision": "approve", "reviewer_notes": "Safe exception approved", "reviewer_id": "usr_compliance"}'</pre>
+                  </div>
                 </div>
 
               </div>
