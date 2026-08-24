@@ -158,3 +158,31 @@ export async function updatePolicy(resourceId, policyData) {
     body: JSON.stringify(typeof policyData === 'object' ? policyData : { enforcement_mode: arguments[1], hallucination_threshold: arguments[2] }),
   });
 }
+
+export async function fetchReviewQueue(params = {}) {
+  const query = new URLSearchParams();
+  if (params.status) query.set('status', params.status);
+  if (params.severity) query.set('severity', params.severity);
+  if (params.use_case_type) query.set('use_case_type', params.use_case_type);
+  const qStr = query.toString();
+  return apiFetch(`/findings/review-queue${qStr ? '?' + qStr : ''}`);
+}
+
+export async function submitReviewDecision(findingId, decision, reviewerNotes = '', reviewerId = 'usr_reviewer') {
+  return apiFetch(`/findings/${findingId}/review`, {
+    method: 'POST',
+    body: JSON.stringify({ decision, reviewer_notes: reviewerNotes, reviewer_id: reviewerId }),
+  });
+}
+
+export async function submitFindingFeedback(findingId, feedbackType, notes = '') {
+  return apiFetch(`/findings/${findingId}/feedback`, {
+    method: 'POST',
+    body: JSON.stringify({ feedback_type: feedbackType, notes }),
+  });
+}
+
+export async function fetchTrustworthiness(tenantId = 'ankur-tenant-1') {
+  return apiFetch(`/analytics/trustworthiness?tenant_id=${encodeURIComponent(tenantId)}`);
+}
+

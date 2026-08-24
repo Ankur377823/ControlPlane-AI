@@ -3,10 +3,12 @@
  * Deep-dive telemetry for specific risk finding events & LLM Chat Sessions Table Modal Popup
  */
 
-import { fetchFindings, fetchFindingById, updateFindingStatus } from '../api.js';
+import { fetchFindings, fetchFindingById, updateFindingStatus, submitReviewDecision, submitFindingFeedback } from '../api.js';
 import { formatRelativeTime } from './findingsView.js';
+import { showToast } from '../toast.js';
 
 let sessionSearchTerm = '';
+
 
 export async function openEventOverviewModal(eventId = null, sessionId = null) {
   const modal = document.getElementById('event-overview-modal');
@@ -99,13 +101,16 @@ async function renderModalTelemetryContent(container, eventId, targetSessionId) 
             </div>
           </div>
 
-          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <button class="btn" onclick="navigate('#/security-center/risk-findings')" style="font-weight:700;">← Back to Findings</button>
-            <button class="btn-secondary" id="btn-ev-modal-resolve">Mark Resolved</button>
-            <button class="btn-secondary" id="btn-ev-modal-investigate">Mark Investigating</button>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <button class="btn" onclick="navigate('#/security-center/risk-findings')" style="font-weight:700;">← Back</button>
+            <button class="btn" id="btn-ev-approve" style="background:#10b981; color:#fff; border:none; padding:6px 12px; font-weight:700;" title="Approve this interaction">✓ Approve</button>
+            <button class="btn" id="btn-ev-reject" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; font-weight:700;" title="Reject and enforce hard block">✕ Reject</button>
+            <button class="btn-secondary" id="btn-ev-override" style="padding:6px 12px; font-weight:700;" title="Override with rationale">⚡ Override</button>
+            <button class="btn-secondary" id="btn-ev-feedback-fp" style="padding:6px 12px; color:#38bdf8; font-weight:700;" title="Flag as False Positive to auto-tune policies">🎯 False Positive</button>
           </div>
         </div>
       </div>
+
 
       <!-- CHATBOT TARGET & SESSION METRICS -->
       <div class="grid-4" style="margin-bottom: 1.5rem;">
@@ -204,16 +209,53 @@ async function renderModalTelemetryContent(container, eventId, targetSessionId) 
 
     container.innerHTML = html;
 
-    // Attach status update button listeners
-    document.getElementById('btn-ev-modal-resolve')?.addEventListener('click', async () => {
-      await updateFindingStatus(ev.id, 'resolved');
-      renderModalTelemetryContent(container, ev.id, ev.session_id);
+    // Attach Human Review Decision and Feedback Listeners
+    document.getElementById('btn-ev-approve')?.addEventListener('click', async () => {
+      try {
+        await submitReviewDecision(ev.id, 'approve', 'Approved by Human Reviewer');
+        showToast('✓ Interaction Approved', 'success');
+        renderModalTelemetryContent(container, ev.id, ev.session_id);
+      } catch (err) {
+        showToast(`Approval failed: ${err.message}`, 'error');
+      }
     });
 
-    document.getElementById('btn-ev-modal-investigate')?.addEventListener('click', async () => {
-      await updateFindingStatus(ev.id, 'investigating');
-      renderModalTelemetryContent(container, ev.id, ev.session_id);
+    document.getElementById('btn-ev-reject')?.addEventListener('click', async () => {
+      try {
+        await submitReviewDecision(ev.id, 'reject', 'Rejected by Human Reviewer');
+        showToast('✕ Interaction Rejected & Block Enforced', 'warning');
+        renderModalTelemetryContent(container, ev.id, ev.session_id);
+      } catch (err) {
+        showToast(`Rejection failed: ${err.message}`, 'error');
+      }
     });
+
+    document.getElementById('btn-ev-override')?.addEventListener('click', async () => {
+      const notes = prompt('Enter justification notes for overriding policy on this event:', 'Business exception approved');
+      if (notes !== null) {
+        try {
+          await submitReviewDecision(ev.id, 'override', notes);
+          showToast('⚡ Policy Override Logged to Audit Trail', 'info');
+          renderModalTelemetryContent(container, ev.id, ev.session_id);
+        } catch (err) {
+          showToast(`Override failed: ${err.message}`, 'error');
+        }
+      }
+    });
+
+    document.getElementById('btn-ev-feedback-fp')?.addEventListener('click', async () => {
+      const notes = prompt('Please describe why this was a False Positive (this will auto-tune detector thresholds):', 'Standard user query misclassified as risk');
+      if (notes !== null) {
+        try {
+          const res = await submitFindingFeedback(ev.id, 'false_positive', notes);
+          showToast('🎯 False Positive Logged. Policy thresholds auto-tuned!', 'success');
+          renderModalTelemetryContent(container, ev.id, ev.session_id);
+        } catch (err) {
+          showToast(`Feedback logging failed: ${err.message}`, 'error');
+        }
+      }
+    });
+
 
     // Session Table search listener
     document.getElementById('ev-modal-session-search')?.addEventListener('input', (e) => {

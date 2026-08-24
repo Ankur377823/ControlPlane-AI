@@ -67,6 +67,10 @@ class AdhocScanRequest(BaseModel):
 class CheckRequest(BaseModel):
     user_prompt: str = Field(..., min_length=1)
     raw_response: Optional[str] = None
+    tool_call: Optional[dict] = None
+    context_docs: Optional[list[str]] = None
+    session_id: Optional[str] = None
+    tool_history: Optional[list[dict]] = None
 
 
 class UpdatePolicyRequest(BaseModel):
@@ -274,9 +278,16 @@ def check_guardrail(resource_id: str, payload: CheckRequest):
     policy = db.get_policy_for_resource(resource_id)
 
     guardrail = ControlPlaneGuardrail(policy)
-    eval_result = guardrail.evaluate(payload.user_prompt, payload.raw_response)
+    eval_result = guardrail.evaluate(
+        user_prompt=payload.user_prompt,
+        raw_response=payload.raw_response,
+        tool_call=payload.tool_call,
+        context_docs=payload.context_docs,
+        session_id=payload.session_id,
+        tool_history=payload.tool_history,
+    )
 
-    # Persist interception event & risk findings to SQLite
+    # Persist interception event & risk findings to database
     intercept = db.log_interception(
         resource_id=resource_id,
         user_prompt=payload.user_prompt,
@@ -291,6 +302,7 @@ def check_guardrail(resource_id: str, payload: CheckRequest):
         responsibility_score=eval_result["responsibility_score"],
         triggered_rules=eval_result["triggered_rules"],
         risk_findings=eval_result["risk_findings"],
+        session_id=payload.session_id,
     )
 
     return {
@@ -310,8 +322,12 @@ def check_guardrail(resource_id: str, payload: CheckRequest):
         },
         "triggered_rules": eval_result["triggered_rules"],
         "risk_findings": eval_result["risk_findings"],
+        "grounding_details": eval_result.get("grounding_details"),
+        "session_telemetry": eval_result.get("session_telemetry"),
+        "ai_judge_verdict": eval_result.get("ai_judge_verdict"),
         "policy_applied": eval_result["policy_applied"],
     }
+
 
 
 @router.get("/resources/{resource_id}/policy")

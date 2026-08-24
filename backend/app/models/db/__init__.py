@@ -49,6 +49,11 @@ from .interceptions import (
     get_analytics_summary,
     record_feedback,
 )
+from .reviews import (
+    list_review_queue,
+    process_review_decision,
+    get_trustworthiness_metrics,
+)
 from .tokens import (
     generate_token,
     list_tokens,
@@ -56,3 +61,4 @@ from .tokens import (
     get_active_token,
     validate_token_key,
 )
+

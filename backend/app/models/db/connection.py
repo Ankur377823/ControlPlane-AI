@@ -372,6 +372,9 @@ def _seed_default_policies(conn) -> None:
         ("pol_customer_support", "Customer Support Policy", "customer_support", "block", 1, "high", "block", 0.65, 2048, 0.75),
         ("pol_internal_copilot", "Internal Employee Copilot", "internal_copilot", "mask", 1, "medium", "flag", 0.50, 4096, 0.60),
         ("pol_decision_support", "Regulated Decision Support", "decision_support", "monitor", 1, "high", "block", 0.80, 8192, 0.85),
+        ("pol_ai_agent", "Autonomous Agent Trajectory Policy", "agent", "confirm_required", 1, "high", "block", 0.70, 4096, 0.80),
+        ("pol_eu_gdpr", "EU GDPR Strict Privacy Policy", "customer_support", "mask", 1, "critical", "block", 0.70, 2048, 0.80),
+        ("pol_us_hipaa", "US HIPAA Healthcare Compliance", "decision_support", "block", 1, "critical", "block", 0.85, 4096, 0.90),
     ]
     now = _now()
     for pol_id, name, uc_type, enf_mode, pii_en, pii_sens, inj_act, hal_thresh, max_tok, rev_thresh in defaults:
@@ -397,6 +400,7 @@ def _seed_default_resource(conn) -> None:
         ("res_gemini", "Google Cloud Vertex", "Gemini Pro (Google AI)", "gemini-endpoint-003", "decision_support", "pol_decision_support", "google", "validated"),
         ("res_deepseek", "DeepSeek AI Cloud", "DeepSeek-V3 Security Guardrail", "deepseek-endpoint-004", "customer_support", "pol_customer_support", "deepseek", "validated"),
         ("res_copilot", "Microsoft Azure", "Internal Copilot Studio", "copilot-endpoint-005", "internal_copilot", "pol_internal_copilot", "copilot", "validated"),
+        ("res_agent", "Autonomous AI Agents", "Multi-Step Agent Runner", "agent-endpoint-006", "agent", "pol_ai_agent", "custom", "validated"),
     ]
     now = _now()
     for r_id, acc, r_name, wh_id, uc_type, pol_id, provider, v_status in defaults:

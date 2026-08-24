@@ -22,6 +22,7 @@ class VerifyRequest(BaseModel):
     prompt: str
     response: str
     category: str = "kbqa"  # kbqa, code, math, scientific
+    context_docs: Optional[List[str]] = None
     openai_api_key: Optional[str] = None
     serper_api_key: Optional[str] = None
     foundation_model: str = "gpt-3.5-turbo"
@@ -32,6 +33,41 @@ def verify_hallucination(req: VerifyRequest):
     if not req.prompt.strip() or not req.response.strip():
         raise HTTPException(status_code=400, detail="Both prompt and response are required.")
 
+    # Check if RAG context docs are provided for trusted enterprise source verification
+    if req.context_docs:
+        from ..connector.evaluators.grounding import evaluate_grounding
+        ground_res = evaluate_grounding(req.prompt, req.response, context_docs=req.context_docs)
+        claim_level = []
+        for vc in ground_res.get("verified_claims", []):
+            claim_level.append({
+                "claim": vc["claim"],
+                "factuality": True,
+                "confidence": vc["confidence"],
+                "evidence_snippet": vc.get("evidence_snippet"),
+                "reasoning": "Claim is supported by provided enterprise reference documentation."
+            })
+        for uc in ground_res.get("ungrounded_claims", []):
+            claim_level.append({
+                "claim": uc["claim"],
+                "factuality": False,
+                "confidence": uc["confidence"],
+                "evidence_snippet": None,
+                "reasoning": "Claim lacks grounding or context support in reference materials."
+            })
+        return {
+            "average_claim_level_factuality": ground_res["grounding_score"],
+            "average_response_level_factuality": 1.0 if ground_res["is_grounded"] else 0.0,
+            "verification_mode": "enterprise_rag_grounding",
+            "detailed_information": [{
+                "prompt": req.prompt,
+                "response": req.response,
+                "category": req.category,
+                "claims": [{"claim": c["claim"]} for c in claim_level],
+                "claim_level_factuality": claim_level,
+                "response_level_factuality": ground_res["is_grounded"]
+            }]
+        }
+
     # 1. Set API keys if provided in request
     if req.openai_api_key and req.openai_api_key.strip():
         os.environ["OPENAI_API_KEY"] = req.openai_api_key.strip()
@@ -40,6 +76,7 @@ def verify_hallucination(req: VerifyRequest):
 
     openai_key = os.environ.get("OPENAI_API_KEY", "")
     serper_key = os.environ.get("SERPER_API_KEY", "")
+
 
     live_error = None
     

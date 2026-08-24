@@ -6,6 +6,9 @@ Evaluates AI Agent Tool/API calls and assigns Action Risk Tiers:
 - MEDIUM: Write/Send operations -> MONITOR (Audit Log)
 - HIGH: Delete/Execute operations -> CONFIRM_REQUIRED (User Modal Approval)
 - CRITICAL: Financial/System destruction -> BLOCK (Hard Block & Admin Approval)
+
+Also evaluates Compound Tool-Chain sequences:
+- e.g. Data Read -> External Send / Export -> Escalates to CONFIRM_REQUIRED / BLOCK
 """
 
 from __future__ import annotations
@@ -32,8 +35,54 @@ LOW_TOOLS = {
     "list_directory", "fetch_url", "get_status"
 }
 
+DATA_READ_TOOLS = {"query_db", "read_file", "read_email", "access_credentials", "export_csv", "fetch_url"}
+DATA_EXFIL_TOOLS = {"send_email", "post_message", "send_slack_msg", "post_tweet", "download_file"}
 
-def evaluate_action_risk(tool_call: Optional[Dict[str, Any]], user_prompt: str = "") -> Dict[str, Any]:
+
+def evaluate_compound_sequence(current_tool: str, tool_history: Optional[List[Dict[str, Any]]]) -> Optional[Dict[str, Any]]:
+    """
+    Check if sequence of actions forms a high-risk compound trajectory.
+    E.g. Read DB -> Export -> Send Email = Potential Data Exfiltration
+    """
+    if not tool_history or not isinstance(tool_history, list):
+        return None
+
+    past_names = [str(t.get("name", "")).lower().strip() for t in tool_history if isinstance(t, dict)]
+    
+    # Check 1: Exfiltration chain
+    has_prior_read = any(pt in DATA_READ_TOOLS for pt in past_names)
+    is_current_exfil = current_tool in DATA_EXFIL_TOOLS
+    
+    if has_prior_read and is_current_exfil:
+        return {
+            "compound_risk_detected": True,
+            "severity": "HIGH",
+            "rule": "Compound Data Exfiltration Chain",
+            "description": f"Tool call '{current_tool}' follows prior data read operations in trajectory. Requires human approval to prevent unauthorized data exfiltration.",
+            "prior_tools": past_names[-3:],
+            "escalated_action": "CONFIRM_REQUIRED"
+        }
+    
+    # Check 2: Repeated rapid writes/modifications
+    recent_writes = sum(1 for pt in past_names[-4:] if pt in MEDIUM_TOOLS or pt in HIGH_TOOLS)
+    if recent_writes >= 3 and current_tool in MEDIUM_TOOLS:
+        return {
+            "compound_risk_detected": True,
+            "severity": "HIGH",
+            "rule": "High-Velocity State Modification Sequence",
+            "description": f"Multiple consecutive write/modify actions detected ({recent_writes} actions). Escalated to prevent runaway agent loops.",
+            "prior_tools": past_names[-4:],
+            "escalated_action": "CONFIRM_REQUIRED"
+        }
+
+    return None
+
+
+def evaluate_action_risk(
+    tool_call: Optional[Dict[str, Any]], 
+    user_prompt: str = "",
+    tool_history: Optional[List[Dict[str, Any]]] = None
+) -> Dict[str, Any]:
     if not tool_call or not isinstance(tool_call, dict):
         return {
             "tool_call": None,
@@ -83,7 +132,6 @@ def evaluate_action_risk(tool_call: Optional[Dict[str, Any]], user_prompt: str =
             "risk_findings": risk_findings
         }
 
-
     # 1. Critical Tier Check
     if any(ct in tool_name or ct in params_str or ct in prompt_str for ct in CRITICAL_TOOLS):
         risk_tier = "CRITICAL"
@@ -131,6 +179,22 @@ def evaluate_action_risk(tool_call: Optional[Dict[str, Any]], user_prompt: str =
         risk_tier = "LOW"
         action = "ALLOW"
         score = 10.0
+
+    # 5. Check Compound Trajectory if history provided
+    compound_res = evaluate_compound_sequence(tool_name, tool_history)
+    if compound_res:
+        if risk_tier in ("LOW", "MEDIUM"):
+            risk_tier = compound_res["severity"]
+            action = compound_res["escalated_action"]
+            score = max(score, 78.0)
+            risk_findings.append({
+                "category": "compound_action_risk",
+                "severity": compound_res["severity"],
+                "rule": compound_res["rule"],
+                "description": compound_res["description"],
+                "tool_name": tool_name,
+                "parameters": parameters
+            })
 
     return {
         "tool_call": {

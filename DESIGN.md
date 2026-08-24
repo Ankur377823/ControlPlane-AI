@@ -2,13 +2,16 @@
 
 ## 1. Executive Overview
 
-**ControlPlane AI** is an enterprise AI security control plane, real-time guardrail shield, and telemetry monitoring platform. It provides a uniform interface to evaluate, audit, and intercept AI chatbot agents (such as Botpress Cloud Webhooks) and autonomous LLM tool use (such as LegionForge agent calls) without exposing platform-specific details to user-facing clients.
+**ControlPlane AI** is an enterprise Responsible AI (RAI) Governance Control Plane, real-time guardrail shield, and telemetry monitoring platform. It provides a uniform interface to evaluate, audit, and intercept AI chatbot agents (such as Botpress Cloud Webhooks, OpenAI GPT-4o, Claude 3.5, Gemini, DeepSeek) and autonomous LLM tool chains without exposing platform-specific details to user-facing clients.
 
-The **Botpress Connector** isolates platform-specific complexity behind a clean, modular interface:
+ControlPlane AI isolates platform-specific complexity behind clean, modular layers:
 1. `validate_target()`: Validates webhook target connectivity.
 2. `execute_test()`: Runs adversarial scans and extracts chatbot text responses.
 3. `reset_conversation()`: Ensures scan prompt isolation by resetting conversation context.
 4. `get_platform_metadata()`: Exposes platform capabilities, delivery mode, and metadata.
+5. `evaluate_grounding()`: Context-faithfulness verification against enterprise RAG reference documents.
+6. `update_multi_turn_risk()`: Session-level cumulative risk tracking across conversation trajectories.
+7. `process_review_decision()`: Human-in-the-Loop review and feedback auto-tuning engine.
 
 ---
 
@@ -16,24 +19,20 @@ The **Botpress Connector** isolates platform-specific complexity behind a clean,
 
 ```
 ┌─────────────────┐    HTTP/JSON     ┌──────────────────────┐    imports     ┌────────────────────────┐
-│  ControlPlane   │ ───────────────► │  FastAPI Backend API │ ─────────────► │  BotpressScanner       │
-│  Frontend SPA   │                  │  (app/main.py)       │                │  (orchestration)       │
-│  (index.html +  │ ◄─────────────── │  routes/resources.py │ ◄───────────── │  └─ BotpressChatClient │
-│   JS Modules)   │                  │  models/db/          │    dict        │     (HTTP Client)      │
-└─────────────────┘                  └──────────────────────┘                └───────────┬────────────┘
-                                                                                         │ HTTPS
-                                                                                         ▼
-                                                                             ┌────────────────────────┐
-                                                                             │ Botpress Chat API      │
-                                                                             │ chat.botpress.cloud/   │
+│  ControlPlane   │ ───────────────► │  FastAPI Backend API │ ─────────────► │  Responsible AI Engine │
+│  Frontend SPA   │                  │  (app/main.py)       │                │  (guardrail.py)        │
+│  (index.html +  │ ◄─────────────── │  routes/resources.py │ ◄───────────── │  ├─ grounding.py       │
+│   JS Modules)   │                  │  routes/findings.py  │    dict        │  ├─ multi_turn_risk.py │
+└─────────────────┘                  │  models/db/          │                │  ├─ ai_judge.py        │
+                                     └──────────────────────┘                │  └─ action_risk.py     │
                                                                              └────────────────────────┘
 ```
 
 ---
 
-## 3. Database Specifications & Dual Persistence Architecture
+## 3. Database Specifications & Modular Persistence Architecture
 
-ControlPlane AI abstracts database operations inside the [backend/app/models/db/](file:///c:/ControlPlane/backend/app/models/db/) package directory (modularized into connection, users, resources, policies, scans, interceptions, and tokens sub-modules) to support dual database execution environments:
+ControlPlane AI abstracts database operations inside the [backend/app/models/db/](file:///c:/ControlPlane/backend/app/models/db/) package directory (modularized into connection, users, resources, policies, scans, interceptions, reviews, and tokens sub-modules) to support dual database execution environments:
 
 ### 1. Storage Drivers & Configuration
 * **SQLite Mode (Default Local)**:
@@ -58,112 +57,57 @@ ControlPlane AI abstracts database operations inside the [backend/app/models/db/
 │ role         │         │ use_case_type  │         │ sanitized_prompt│
 │ tenant_id    │         │ policy_id (FK) │         │ action          │
 └──────────────┘         └───────┬────────┘         │ session_id      │
-                                 │                  │ tenant_id       │
-                                 ▼                  └─────────────────┘
-                         ┌────────────────┐
-                         │    policies    │
-                         ├────────────────┤
-                         │ id (PK)        │
-                         │ name           │
-                         │ use_case_type  │
-                         │ enforcement    │
-                         └────────────────┘
+                                 │                  │ hash_chain      │
+                                 ▼                  │ status          │
+                         ┌────────────────┐         └────────┬────────┘
+                         │    policies    │                  │
+                         ├────────────────┤                  ▼
+                         │ id (PK)        │         ┌─────────────────┐
+                         │ name           │         │ review_decisions│
+                         │ use_case_type  │         ├─────────────────┤
+                         │ enforcement    │         │ id (PK)         │
+                         │ pii_redaction  │         │ interception_id │
+                         │ hallucination  │         │ reviewer_id     │
+                         └────────────────┘         │ decision        │
+                                                    │ reviewer_notes  │
+                                                    └─────────────────┘
 ```
 
 ### 3. Package File Split & Individual Responsibilities
 * [`connection.py`](file:///c:/ControlPlane/backend/app/models/db/connection.py): Holds SQLite/Postgres selection parameters, transaction decorator (`get_conn`), migrations run, and initial database setup seeds.
 * [`users.py`](file:///c:/ControlPlane/backend/app/models/db/users.py): User verification database listings, sign-ins, and registrations.
 * [`resources.py`](file:///c:/ControlPlane/backend/app/models/db/resources.py): Monitored chatbot webhooks CRUD.
-* [`policies.py`](file:///c:/ControlPlane/backend/app/models/db/policies.py): Policy guardrail configurations CRUD.
+* [`policies.py`](file:///c:/ControlPlane/backend/app/models/db/policies.py): Policy guardrail configurations CRUD for Customer Support, Copilot, Decision Support, and Agents.
+* [`reviews.py`](file:///c:/ControlPlane/backend/app/models/db/reviews.py): Dedicated Human-in-the-Loop review queue, decision overrides, and real-time Trustworthiness Analytics.
 * [`scans.py`](file:///c:/ControlPlane/backend/app/models/db/scans.py): Audit scanner entries CRUD.
 * [`interceptions.py`](file:///c:/ControlPlane/backend/app/models/db/interceptions.py): Telemetry interceptions logs and analytics summary metrics.
 * [`tokens.py`](file:///c:/ControlPlane/backend/app/models/db/tokens.py): Activation tokens management CRUD.
 
 ---
 
-## 4. Onboarding & Security Specification
+## 4. Evaluators & Decision Pipeline
 
-### Onboarding Schema (`POST /api/v1/resources`)
+The evaluator layer is organized in [backend/app/connector/evaluators/](file:///c:/ControlPlane/backend/app/connector/evaluators/):
 
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| `account_name` | String | Yes | Workspace or organization grouping label |
-| `resource_name` | String | Yes | Name of the Botpress Chatbot resource |
-| `webhook_id` | String | Yes | Botpress Webhook Identifier |
-| `use_case_type` | String | No | Security category (`customer_support`, `internal_copilot`, `decision_support`) |
-| `ai_provider` | String | No | Default provider (`botpress`) |
-| `reply_timeout_sec` | Integer | No (Default: 60) | Timeout waiting for bot response |
-| `poll_interval_sec` | Integer | No (Default: 2) | Polling interval duration |
-
-### Security Controls:
-* **Secret Redaction**: Webhook IDs are stored safely and redacted in API responses (`redact_webhook_id`: first 4 + `...` + last 4 characters).
-* **SSRF Prevention**: Webhook IDs are appended strictly as path components to the hardcoded domain `https://chat.botpress.cloud/`.
-* **Session Security**: Supports both `sessionStorage` and `localStorage` with a **"Remember Me"** toggle to prevent unauthorized session persistence across browser restarts.
-
----
-
-## 5. Guardrail Evaluation & Policy Engine
-
-When a prompt is evaluated via `POST /api/v1/resources/{id}/check`:
-
-1. **Rule Processing**: Evaluates input against active guardrail policies (`PII_SSN_REDACT`, `PII_EMAIL_MASK`, `PROMPT_INJECTION_SHIELD`, `SECRET_KEY_RULE`).
-2. **Action Determination**:
-   * `BLOCK`: Halts harmful prompts (e.g. database password extraction, system prompt overrides).
-   * `MASK` / `REDACT`: Sanitizes sensitive PII replacing them with `[REDACTED_*]` tokens.
-   * `MONITOR`: Allows prompts while recording audit telemetry.
-   * `ALLOW`: Passes clean queries with sub-15ms latency.
-3. **Governance Scoring**: Calculates Performance (P), Cost ($), and Responsibility (R) metrics:
-   * **Performance Score (P)**: Evaluates prompt structure and factuality indicators.
-   * **Cost Score ($)**: Monitors tokens count against maximum budget constraints.
-   * **Responsibility Score (R)**: Aggregates toxicity, injection, and data disclosure ratings.
-4. **Session Tracking**: Assigns a unique Session ID (`sess_botpress_...`) for multi-turn session auditability.
+1. **Fast Deterministic Security Checks** (Sub-15ms):
+   * [`pii.py`](file:///c:/ControlPlane/backend/app/connector/evaluators/pii.py): Regex matching and redaction for SSNs, credit cards, phones, and emails.
+   * [`injection.py`](file:///c:/ControlPlane/backend/app/connector/evaluators/injection.py): DAN overrides, system prompt extraction, and jailbreak detection.
+   * [`bias_safety.py`](file:///c:/ControlPlane/backend/app/connector/evaluators/bias_safety.py): Hate speech, toxicity, and discriminatory keyword filters.
+   * [`cost.py`](file:///c:/ControlPlane/backend/app/connector/evaluators/cost.py): Token budget limits and cost forecasting.
+2. **Evidence & RAG Grounding**:
+   * [`grounding.py`](file:///c:/ControlPlane/backend/app/connector/evaluators/grounding.py): Atomic claim extraction and context-faithfulness verification against enterprise knowledge documents.
+3. **Compound Agent-Action Risk**:
+   * [`action_risk.py`](file:///c:/ControlPlane/backend/app/connector/evaluators/action_risk.py): Action tier classification (LOW/MEDIUM/HIGH/CRITICAL) and tool sequence state-machine (e.g. data read $\rightarrow$ external exfiltration).
+4. **Cumulative Multi-Turn Session Risk**:
+   * [`multi_turn_risk.py`](file:///c:/ControlPlane/backend/app/connector/evaluators/multi_turn_risk.py): Time-decayed rolling session score tracker for gradual probing and boundary drift.
+5. **AI-as-a-Judge Tiered Fallback**:
+   * [`ai_judge.py`](file:///c:/ControlPlane/backend/app/connector/evaluators/ai_judge.py): Secondary model evaluation invoked *only* for ambiguous scores ($0.40 - 0.70$).
+6. **Master Orchestrator**:
+   * [`guardrail.py`](file:///c:/ControlPlane/backend/app/connector/guardrail.py): Combines all signals into unified Governance Scores (P, C, R) and outputs the action (`ALLOW`, `MASK`, `CONFIRM_REQUIRED`, `BLOCK`, `MONITOR`).
 
 ---
 
-## 6. Error Handling Matrix
-
-| Botpress HTTP Status | Internal Exception | User-Facing Sanitized Message |
-|---|---|---|
-| 400 | `BotpressError` | "The Botpress API rejected the request as malformed." |
-| 401 / 403 | `BotpressAuthError` | "Authentication failed. Access to Botpress resource is forbidden." |
-| 404 | `BotpressNotFoundError` | "Webhook ID not found. Verify the Chat integration is enabled." |
-| 429 | `BotpressRateLimitError` | "Botpress rate limit or free-tier quota exceeded." |
-| 5xx | `BotpressServerError` | "Botpress returned a server error. Platform temporarily unavailable." |
-| Timeout | `BotpressTimeoutError` | "Timed out waiting for a response from Botpress." |
-| Connection Error | `BotpressConnectionError` | "Could not connect to the Botpress Chat API." |
-
----
-
-## 7. Testing & Verification
-
-The codebase enforces 100% clean test coverage:
-* **Unit Tests (`tests/test_scanner.py`, `test_guardrail.py` & `test_guardian.py`)**: Tests `BotpressScanner`, text extraction, error sanitization, policy scoring, 7 deterministic checks, and hash chaining.
-* **API & Integration Tests (`tests/test_api.py` & `test_full_suite.py`)**: End-to-end REST API verification using FastAPI `TestClient` and mock Botpress server endpoints (`mock_botpress.py`).
-* **Pass Criteria**: `59 passed` in `pytest`.
-
----
-
-## 8. LegionForge Guardian 7-Check Engine & REST API Design
-
-To protect autonomous LLM agents against prompt injection and unauthorized capability use, we run 7 deterministic, zero-LLM checks in a sequential pipeline before executing any tool call.
-
-### Endpoints:
-1. `POST /check`: Accepts `tool_id`, `action`, `args`, `agent_id`, `run_id`, `sequence_so_far`, and `tool_schema_hash`. Checks are executed in sequence, returning `allowed: false` at the first check failure.
-2. `POST /report`: Asynchronously ingests security threat reports generated by LLM agent runtimes.
-3. `GET /rules`: Exposes a read-only list of configured tool schemas, plays, and active capabilities.
-
-### The 7 Checks in Order:
-1. **Tool Schema Validation**: Verifies that arguments strictly conform to parameter JSON Schemas.
-2. **Capability Check**: Asserts the active agent's role configuration permits executing the given tool name.
-3. **Resource Bound Validation**: Confirms parameters do not violate filesystem boundaries or numeric allocations.
-4. **Data Sanitization**: Automatically scrubs outbound queries for PII (SSNs, cards) before sending to external services.
-5. **Playbook Alignment**: Checks current sequential actions flow against predefined playbooks state trees.
-6. **Human-in-the-Loop Intercept**: Blocks execution on highly critical operations until approved by an administrator.
-7. **Anomaly Detection**: Evaluates query volumes bounds to intercept loops and rate overflow.
-
----
-
-## 9. Cryptographic Log Integrity (SHA-256 Hash Chain)
+## 5. Cryptographic Log Integrity (SHA-256 Hash Chain)
 
 All telemetry interceptions are chained cryptographically to ensure audit records cannot be retroactively modified or deleted.
 
@@ -173,3 +117,19 @@ $$\text{Current Hash} = \text{SHA-256}(\text{Previous Hash} + \text{Interception
 * **Seed Value**: The genesis hash is `"GENESIS_HASH_00000000000000000000000000000000"` for the first entry.
 * **Ordering Verification**: Hash chains are constructed dynamically by querying `ORDER BY rowid DESC LIMIT 1` from the database.
 * **Tamper Evidence**: Any modification to a log entry causes a hash mismatch in all subsequent nodes, rendering the violation instantly evident.
+
+---
+
+## 6. Testing & Verification
+
+The test suite in [backend/tests/](file:///c:/ControlPlane/backend/tests/) validates all system layers:
+* `test_action_risk.py` & `test_compound_action.py`: Action tiers and compound sequence exfiltration triggers.
+* `test_grounding.py` & `test_hallucination.py`: Claim extraction, RAG context-faithfulness, and Serper API search verification.
+* `test_multi_turn_risk.py`: Cumulative risk decay and multi-turn escalation.
+* `test_ai_judge.py`: Ambiguity band triggers and judge reasoning.
+* `test_review_queue.py`: Human-in-the-Loop review lifecycle and Trustworthiness Analytics APIs.
+* `test_guardian.py`: 7-check deterministic zero-LLM agent security layers.
+* `test_guardrail.py`: Real-time guardrail orchestrator and enforcement modes.
+* `test_full_suite.py` & `test_api.py`: Comprehensive end-to-end integration flows.
+
+**Pass Criteria**: `75 passed` in `pytest`.

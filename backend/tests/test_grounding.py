@@ -1,0 +1,65 @@
+"""
+Unit Tests for Evidence-Backed Grounding & RAG Factuality Evaluator
+"""
+
+from app.connector.evaluators.grounding import extract_claims, verify_against_context, evaluate_grounding
+from fastapi.testclient import TestClient
+from app.main import app
+
+client = TestClient(app)
+
+
+def test_claim_extraction():
+    text = "Hello! The Eiffel Tower was built in 1889. It is located in Paris, France. Let me know if you need anything else!"
+    claims = extract_claims(text)
+    assert len(claims) == 2
+    assert "The Eiffel Tower was built in 1889." in claims
+    assert "It is located in Paris, France." in claims
+
+
+def test_rag_context_verification_grounded():
+    context = [
+        "Refund Policy: Customers can request a full refund within 30 days of purchase with original receipt.",
+        "Shipping takes 3-5 business days across the continental US."
+    ]
+    claim = "Customers can request a refund within 30 days of purchase."
+    is_grounded, conf, snippet = verify_against_context(claim, context)
+    assert is_grounded is True
+    assert conf >= 0.70
+    assert snippet is not None
+
+
+def test_rag_context_verification_ungrounded():
+    context = [
+        "Our software runs exclusively on Ubuntu 22.04 LTS.",
+    ]
+    claim = "Our software runs on Windows 95 and Apple macOS 9."
+    is_grounded, conf, snippet = verify_against_context(claim, context)
+    assert is_grounded is False
+
+
+def test_evaluate_grounding_pipeline():
+    context = ["Acme Enterprise Guardrail provides real-time PII redaction and latency monitoring."]
+    res = evaluate_grounding(
+        prompt="Tell me about Acme Guardrail",
+        response="Acme Enterprise Guardrail provides real-time PII redaction and latency monitoring.",
+        context_docs=context
+    )
+    assert res["is_grounded"] is True
+    assert res["grounding_score"] >= 0.80
+    assert res["risk_tier"] == "LOW"
+    assert res["action"] == "ALLOW"
+
+
+def test_hallucination_endpoint_with_context_docs():
+    payload = {
+        "prompt": "What is the return window?",
+        "response": "You have 30 days to return any item in its original condition.",
+        "context_docs": ["Return window is 30 days from delivery date in original condition."]
+    }
+    res = client.post("/api/v1/hallucination/verify", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["verification_mode"] == "enterprise_rag_grounding"
+    assert data["average_claim_level_factuality"] >= 0.80
+    assert len(data["detailed_information"][0]["claim_level_factuality"]) > 0
