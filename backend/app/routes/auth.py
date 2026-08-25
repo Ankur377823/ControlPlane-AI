@@ -31,8 +31,9 @@ def login(payload: LoginRequest):
         if not user:
             raise HTTPException(
                 status_code=401,
-                detail="Invalid credentials. Valid accounts: ankur@acme.com, john@acme.com, alice@globex.com (Password: password123)",
+                detail="Invalid username or password.",
             )
+
         return {
             "access_token": user.get("token", "cp_jwt_token_demo"),
             "token_type": "bearer",

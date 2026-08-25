@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { BrandLogo } from '../common/BrandLogo';
-import { Eye, EyeOff, Lock, User, Sun, Moon, Shield, Key } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, Sun, Moon, Key } from 'lucide-react';
 
 export function LoginScreen() {
   const { login, googleLogin } = useAuth();
@@ -21,10 +21,6 @@ export function LoginScreen() {
     setLoading(false);
   };
 
-  const handleQuickFill = (u, p) => {
-    setUsername(u);
-    setPassword(p);
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-dark-900/80 backdrop-blur-xl animate-fade-in transition-colors">
@@ -54,41 +50,8 @@ export function LoginScreen() {
           </button>
         </div>
 
-        {/* Preset Credential Chips */}
-        <div className="mb-6 p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 space-y-2">
-          <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
-            <span>Quick Login Presets:</span>
-            <span className="font-mono text-primary dark:text-accent-cyan">pwd: password123</span>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              type="button"
-              onClick={() => handleQuickFill('ankur@acme.com', 'password123')}
-              className="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/25 text-primary dark:text-primary-light text-[11px] font-semibold transition-colors flex items-center gap-1"
-            >
-              <Shield className="w-3 h-3" />
-              <span>Admin (Ankur)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickFill('john@acme.com', 'password123')}
-              className="px-2.5 py-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-300 text-[11px] font-medium transition-colors flex items-center gap-1"
-            >
-              <User className="w-3 h-3" />
-              <span>John (Acme)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickFill('alice@globex.com', 'password123')}
-              className="px-2.5 py-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-300 text-[11px] font-medium transition-colors flex items-center gap-1"
-            >
-              <User className="w-3 h-3" />
-              <span>Alice (Globex)</span>
-            </button>
-          </div>
-        </div>
-
         {/* Login Form */}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
