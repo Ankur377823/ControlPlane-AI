@@ -24,23 +24,23 @@ The Chrome Extension is pre-packaged inside this repository in the `frontend/ext
 
 ## ⚙️ 2. Configuration & Enrollment
 
-Once loaded, you need to enroll the extension with your local ControlPlane security server:
+Once loaded, enroll the extension with your local ControlPlane security server:
 
 1. Locate the puzzle piece icon 🧩 in the top-right corner of your browser toolbar.
-2. Click the icon and select **ControlPlane AI Guardrail** (you can pin it for easy access).
-3. Open the extension popup:
+2. Click the icon and select **ControlPlane AI Guardrail** (you can pin it for quick access).
+3. Open the extension popup (styled in sleek dark theme):
    * **Server URL**: Keep as `http://localhost:8000` (or your production server URL).
-   * **Tenant ID**: Enter your workspace identifier (default: `acme-tenant-1`).
-4. Click **⚡ Auto-Enroll Extension**:
-   * The extension will automatically call `/api/v1/tokens/active` to fetch your active 48-day activation token and configure itself.
-   * If successful, the status indicator will switch to **CONNECTED** 🟢.
-   * Alternatively, you can copy an enrollment token from the **Enrollment Tokens** tab of the dashboard and paste it into the **Activation Token** field manually, then click **Save Configuration**.
+   * **Tenant ID**: Enter your workspace identifier (default: `ankur-tenant-1`).
+4. Click **⚡ Auto-Enroll**:
+   * The extension will automatically query `/api/v1/tokens/active` to fetch your active 48-day activation token and configure itself.
+   * If successful, the status indicator will switch to **CONNECTED 🟢**.
+   * Alternatively, you can copy an enrollment token from the **Enrollment Tokens** tab of the dashboard and paste it into the **Enrollment Token** field manually, then click **Connect**.
 
 ---
 
 ## 🛡️ 3. Verification & Live Interception
 
-The extension automatically injects a network shield on supported LLM chat portals (ChatGPT, Claude, Gemini, DeepSeek, Kimi, and Botpress) and displays a yellow banner at the top showing **"ControlPlane AI Monitoring Enabled"**.
+The extension automatically injects a network shield on supported LLM chat portals (ChatGPT, Claude, Gemini, DeepSeek, Kimi, and Botpress) and displays a monitoring banner showing **"ControlPlane AI Monitoring Enabled"**.
 
 ### Test Interception:
 1. Open ChatGPT ([https://chatgpt.com/](https://chatgpt.com/)) or Claude ([https://claude.ai/](https://claude.ai/)).

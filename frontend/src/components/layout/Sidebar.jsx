@@ -1,0 +1,165 @@
+import React from 'react';
+import { useAuth } from '../../context/AuthContext';
+import {
+  LayoutDashboard,
+  Boxes,
+  Bot,
+  ShieldAlert,
+  SearchCheck,
+  Sliders,
+  KeyRound,
+  Laptop,
+  Crosshair,
+  Microscope,
+  BookOpen,
+  LogOut,
+  Users,
+  Zap,
+} from 'lucide-react';
+
+const NAV_GROUPS = [
+  {
+    title: 'Main Overview',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'inventory', label: 'Monitored Resources', icon: Boxes },
+      { id: 'agent-runtime', label: 'AI Agent Runtime', icon: Bot },
+    ],
+  },
+  {
+    title: 'Security Center',
+    items: [
+      { id: 'security-center/risk-findings', label: 'Risk Findings', icon: ShieldAlert },
+      { id: 'security-center/event-overview', label: 'Event Overview & Sessions', icon: SearchCheck },
+      { id: 'security-center/policies', label: 'Security Policies', icon: Sliders },
+    ],
+  },
+  {
+    title: 'Connectors & Keys',
+    items: [
+      { id: 'tokens', label: 'Enrollment Tokens', icon: KeyRound },
+      { id: 'endpoint-ai', label: 'Extension & Endpoint AI', icon: Laptop },
+    ],
+  },
+  {
+    title: 'Audit Tools',
+    items: [
+      { id: 'ai-red-team', label: 'AI Red Team Scanner', icon: Crosshair },
+      { id: 'hallucinations', label: 'Hallucination Detector', icon: Microscope },
+      { id: 'documentation', label: 'Documentation', icon: BookOpen },
+    ],
+  },
+];
+
+export function Sidebar({ activeRoute, onNavigate }) {
+  const { user, isAdmin, logout, setIsUserMgmtOpen } = useAuth();
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .map((p) => p[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+  };
+
+  return (
+    <aside className="w-64 bg-white dark:bg-dark-900 border-r border-slate-200 dark:border-white/10 flex flex-col flex-shrink-0 select-none transition-colors">
+      {/* Brand Header */}
+      <div className="h-16 flex items-center gap-3 px-5 border-b border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-dark-850/50">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-accent-cyan flex items-center justify-center font-brand font-black text-white text-base shadow-md shadow-primary/20">
+          CP
+        </div>
+        <div>
+          <div className="font-brand font-bold text-slate-900 dark:text-white tracking-wide text-base leading-tight">
+            ControlPlane
+          </div>
+          <div className="text-[10px] text-primary dark:text-accent-cyan font-mono font-semibold tracking-wider uppercase">
+            AI Security Studio
+          </div>
+        </div>
+      </div>
+
+      {/* Nav Scroll Area */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.title}>
+            <div className="px-3 text-[11px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-2">
+              {group.title}
+            </div>
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const isActive =
+                  activeRoute === item.id || (item.id === 'inventory' && activeRoute === 'inventory/add');
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onNavigate(item.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-150 text-left ${
+                      isActive
+                        ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-white border border-primary/30 dark:border-primary/40 font-semibold shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-slate-400 dark:text-slate-500'}`} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer User Info */}
+      <div className="p-3 border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-dark-850/70 space-y-2">
+        <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.02] border border-slate-200/60 dark:border-transparent">
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-xs ring-1 ring-black/10 dark:ring-white/20 flex-shrink-0">
+              {getInitials(user?.name || user?.username)}
+            </div>
+            <div className="overflow-hidden">
+              <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                {user?.name || user?.username || 'User'}
+              </div>
+              <div className="text-[10px] text-primary dark:text-accent-cyan font-mono font-medium truncate">
+                {user?.role || 'USER'} ({user?.auth_provider === 'google' ? 'Google' : 'Local'})
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={logout}
+            title="Sign Out"
+            className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:text-slate-400 dark:hover:text-rose-400 dark:hover:bg-rose-500/10 rounded-lg transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="flex gap-1.5 pt-1">
+          {isAdmin && (
+            <button
+              onClick={() => setIsUserMgmtOpen(true)}
+              className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/25 text-[11px] font-semibold transition-colors"
+              title="Admin User Approvals & Account Management"
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>Approvals</span>
+            </button>
+          )}
+          <button
+            onClick={() => setIsUserMgmtOpen(true)}
+            className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-200/80 hover:bg-slate-300 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-white/10 text-[11px] font-semibold transition-colors"
+            title="Switch User Account"
+          >
+            <Zap className="w-3.5 h-3.5" />
+            <span>Switch</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+}

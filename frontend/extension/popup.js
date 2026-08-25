@@ -10,9 +10,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const autoBtn = document.getElementById("auto-token-btn");
   const disconnectBtn = document.getElementById("disconnect-btn");
   const resetBtn = document.getElementById("reset-btn");
-  const testBtn = document.getElementById("test-guardrail-btn");
-  const testInput = document.getElementById("test-prompt-input");
-  const testBox = document.getElementById("test-result-box");
   
   // Status panel elements
   const statusPill = document.getElementById("token-status-pill");
@@ -75,7 +72,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (storedData.cp_device_id) {
     deviceId = storedData.cp_device_id;
   } else {
-    // Generate simulated UUID
     deviceId = 'device_' + 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
@@ -85,10 +81,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (statusDeviceId) statusDeviceId.innerText = deviceId;
 
   // Load existing configuration
-  if (storedData.cp_token) {
+  if (storedData.cp_token && tokenInput) {
     tokenInput.value = storedData.cp_token;
   }
-  if (storedData.cp_tenant_id) {
+  if (storedData.cp_tenant_id && tenantInput) {
     tenantInput.value = storedData.cp_tenant_id;
   }
   
@@ -99,11 +95,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Update connection status layout
   updateStatusDisplay();
 
-  // Helper to sync status details based on current input values
   function updateStatusDisplay() {
-    const serverVal = serverInput.value.trim();
-    const tokenVal = tokenInput.value.trim();
-    const tenantVal = tenantInput.value.trim();
+    const serverVal = serverInput ? serverInput.value.trim() : defaultServerUrl;
+    const tokenVal = tokenInput ? tokenInput.value.trim() : "";
+    const tenantVal = tenantInput ? tenantInput.value.trim() : "ankur-tenant-1";
 
     if (statusServerUrl) statusServerUrl.innerText = serverVal;
 
@@ -137,63 +132,68 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Connect Button Handler
-  saveBtn.addEventListener("click", async () => {
-    const serverVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
-    const tokenVal = tokenInput.value.trim();
-    const tenantVal = tenantInput ? tenantInput.value.trim() : "acme-tenant-1";
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      const serverVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
+      const tokenVal = tokenInput ? tokenInput.value.trim() : "";
+      const tenantVal = tenantInput ? tenantInput.value.trim() : "ankur-tenant-1";
 
-    if (!tokenVal || !tenantVal || !serverVal) {
-      showPopupToast("Please fill in Server URL, Tenant ID, and Enrollment Token", "rgba(239, 68, 68, 0.15)", "var(--accent-red)");
-      return;
-    }
+      if (!tokenVal || !tenantVal || !serverVal) {
+        showPopupToast("Please fill in Server URL, Tenant ID, and Enrollment Token", "rgba(239, 68, 68, 0.15)", "var(--accent-red)");
+        return;
+      }
 
-    if (serverInput) serverInput.value = serverVal;
+      if (serverInput) serverInput.value = serverVal;
 
-    await setStorageData({
-      cp_token: tokenVal,
-      cp_tenant_id: tenantVal,
-      cp_server_url: serverVal
+      await setStorageData({
+        cp_token: tokenVal,
+        cp_tenant_id: tenantVal,
+        cp_server_url: serverVal
+      });
+
+      if (dashboardLink) dashboardLink.href = `${serverVal}/#/dashboard`;
+      updateStatusDisplay();
+      showPopupToast("Connected successfully to ControlPlane!", "rgba(16, 185, 129, 0.15)", "var(--accent-green)");
     });
-
-    if (dashboardLink) dashboardLink.href = `${serverVal}/#/dashboard`;
-    updateStatusDisplay();
-    showPopupToast(`Connected successfully to workspace "${tenantVal}"!`, "rgba(16, 185, 129, 0.15)", "var(--accent-green)");
-  });
+  }
 
   // Disconnect Button Handler
-  disconnectBtn.addEventListener("click", async () => {
-    tokenInput.value = "";
-    await removeStorageData(["cp_token"]);
-    updateStatusDisplay();
-    showPopupToast("Disconnected browser from ControlPlane.", "rgba(255, 255, 255, 0.05)", "var(--text-muted)");
-  });
+  if (disconnectBtn) {
+    disconnectBtn.addEventListener("click", async () => {
+      if (tokenInput) tokenInput.value = "";
+      await removeStorageData(["cp_token"]);
+      updateStatusDisplay();
+      showPopupToast("Disconnected from ControlPlane.", "rgba(239, 68, 68, 0.15)", "var(--accent-red)");
+    });
+  }
 
   // Reset Button Handler
-  resetBtn.addEventListener("click", async () => {
-    serverInput.value = defaultServerUrl;
-    tenantInput.value = "acme-tenant-1";
-    tokenInput.value = "";
-    
-    await removeStorageData(["cp_token", "cp_tenant_id", "cp_server_url"]);
-    
-    if (dashboardLink) dashboardLink.href = `${defaultServerUrl}/#/dashboard`;
-    updateStatusDisplay();
-    showPopupToast("Configuration settings reset to default values.", "rgba(239, 68, 68, 0.15)", "var(--accent-red)");
-  });
+  if (resetBtn) {
+    resetBtn.addEventListener("click", async () => {
+      await removeStorageData(["cp_token", "cp_tenant_id", "cp_server_url"]);
+      if (tokenInput) tokenInput.value = "";
+      if (tenantInput) tenantInput.value = "ankur-tenant-1";
+      if (serverInput) serverInput.value = defaultServerUrl;
+      if (dashboardLink) dashboardLink.href = `${defaultServerUrl}/#/dashboard`;
+      updateStatusDisplay();
+      showPopupToast("Configuration reset to defaults.", "rgba(99, 102, 241, 0.15)", "var(--primary)");
+    });
+  }
 
-  // Auto-Enroll Handler (Fetches active token and connects to tenant)
-  autoBtn.addEventListener("click", async () => {
-    try {
-      const inputVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
+  // Auto-Enroll Button Handler
+  if (autoBtn) {
+    autoBtn.addEventListener("click", async () => {
+      const serverVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
       const candidates = Array.from(new Set([
-        inputVal,
+        serverVal,
         "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        "https://controlplane-botpress-connector.onrender.com"
+        "http://127.0.0.1:8000"
       ]));
 
-      let workingUrl = null;
+      showPopupToast("Locating active token from API...", "rgba(8, 145, 178, 0.15)", "var(--accent-cyan)");
+
       let data = null;
+      let workingUrl = "";
 
       for (const base of candidates) {
         try {
@@ -208,11 +208,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
 
-      const tenantVal = tenantInput ? (tenantInput.value.trim() || "acme-tenant-1") : "acme-tenant-1";
+      const tenantVal = tenantInput ? (tenantInput.value.trim() || "ankur-tenant-1") : "ankur-tenant-1";
 
       if (workingUrl && data) {
         if (serverInput) serverInput.value = workingUrl;
-        tokenInput.value = data.token_key;
+        if (tokenInput) tokenInput.value = data.token_key;
         if (daysTag) daysTag.innerText = `${data.days_valid || 48} Days Active`;
         
         await setStorageData({
@@ -225,55 +225,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateStatusDisplay();
         showPopupToast(`Auto-enrolled successfully at ${workingUrl}!`, "rgba(16, 185, 129, 0.15)", "var(--accent-green)");
       } else {
-        showPopupToast("API unreachable. Verify your local server is running.", "rgba(239, 68, 68, 0.15)", "var(--accent-red)");
-      }
-    } catch (err) {
-      showPopupToast("Connection failed. Verify server URL.", "rgba(239, 68, 68, 0.15)", "var(--accent-red)");
-    }
-  });
-
-  // In-Extension Guardrail Tester
-  if (testBtn) {
-    testBtn.addEventListener("click", async () => {
-      const prompt = testInput.value.trim();
-      if (!prompt) return;
-
-      const serverVal = cleanUrl(serverInput ? serverInput.value : defaultServerUrl);
-      const candidates = Array.from(new Set([
-        serverVal,
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        "https://controlplane-botpress-connector.onrender.com"
-      ]));
-
-      testBox.style.display = "block";
-      testBox.innerHTML = '<span style="color: var(--accent-cyan);">⏳ Evaluating prompt...</span>';
-
-      let data = null;
-      for (const base of candidates) {
-        try {
-          const res = await fetch(`${base}/api/v1/resources/res_demo/check`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_prompt: prompt })
-          });
-          if (res.ok) {
-            data = await res.json();
-            break;
-          }
-        } catch (e) {
-          // Try next candidate
-        }
-      }
-
-      if (data) {
-        testBox.innerHTML = `
-          <div style="margin-bottom: 4px;">Action: <strong style="color: ${data.action === 'BLOCK' ? 'var(--accent-red)' : 'var(--accent-green)'}">${data.action}</strong></div>
-          <div style="margin-bottom: 4px; color: var(--text-muted);">Sanitized: ${escapeHtml(data.sanitized_prompt || data.user_prompt)}</div>
-          <div style="color: var(--text-muted);">Scores (P/$/R): ${data.scores.performance_p}% / ${data.scores.cost_dollars}% / ${data.scores.responsibility_r}%</div>
-        `;
-      } else {
-        testBox.innerText = "Evaluation failed. Make sure local server is running at http://localhost:8000";
+        showPopupToast("API unreachable. Verify your backend server is running on port 8000.", "rgba(239, 68, 68, 0.15)", "var(--accent-red)");
       }
     });
   }
@@ -288,8 +240,4 @@ function showPopupToast(msg, bg, border) {
   el.style.color = border || "var(--accent-green)";
   el.style.display = "block";
   setTimeout(() => { el.style.display = "none"; }, 3500);
-}
-
-function escapeHtml(str) {
-  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }

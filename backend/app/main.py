@@ -90,13 +90,17 @@ if frontend_env:
 if not _FRONTEND_DIR or not _FRONTEND_DIR.exists():
     base_root = Path(__file__).resolve().parents[2]
     candidates = [
+        base_root / "frontend" / "dist",
         base_root / "frontend",
+        Path.cwd() / "frontend" / "dist",
         Path.cwd() / "frontend",
+        Path("/app/frontend/dist"),
         Path("/app/frontend"),
+        Path("./frontend/dist").resolve(),
         Path("./frontend").resolve()
     ]
     for cand in candidates:
-        if cand.exists():
+        if cand.exists() and (cand / "index.html").exists():
             _FRONTEND_DIR = cand
             break
 

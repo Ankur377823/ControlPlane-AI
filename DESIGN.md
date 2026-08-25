@@ -2,7 +2,7 @@
 
 ## 1. Executive Overview
 
-**ControlPlane AI** is an enterprise Responsible AI (RAI) Governance Control Plane, real-time guardrail shield, and telemetry monitoring platform. It provides a uniform interface to evaluate, audit, and intercept AI chatbot agents (such as Botpress Cloud Webhooks, OpenAI GPT-4o, Claude 3.5, Gemini, DeepSeek) and autonomous LLM tool chains without exposing platform-specific details to user-facing clients.
+**ControlPlane AI** is an enterprise Responsible AI (RAI) Governance Control Plane, real-time guardrail shield, and telemetry monitoring studio. It provides a uniform interface to evaluate, audit, and intercept AI chatbot agents (such as Botpress Cloud Webhooks, OpenAI GPT-4o, Claude 3.5, Gemini, DeepSeek) and autonomous LLM tool chains without exposing platform-specific details to user-facing clients.
 
 ControlPlane AI isolates platform-specific complexity behind clean, modular layers:
 1. `validate_target()`: Validates webhook target connectivity.
@@ -18,21 +18,51 @@ ControlPlane AI isolates platform-specific complexity behind clean, modular laye
 ## 2. System Architecture & Component Interaction
 
 ```
-┌─────────────────┐    HTTP/JSON     ┌──────────────────────┐    imports     ┌────────────────────────┐
-│  ControlPlane   │ ───────────────► │  FastAPI Backend API │ ─────────────► │  Responsible AI Engine │
-│  Frontend SPA   │                  │  (app/main.py)       │                │  (guardrail.py)        │
-│  (index.html +  │ ◄─────────────── │  routes/resources.py │ ◄───────────── │  ├─ grounding.py       │
-│   JS Modules)   │                  │  routes/findings.py  │    dict        │  ├─ multi_turn_risk.py │
-└─────────────────┘                  │  models/db/          │                │  ├─ ai_judge.py        │
-                                     └──────────────────────┘                │  └─ action_risk.py     │
-                                                                             └────────────────────────┘
+┌──────────────────────────────────────┐    HTTP/JSON     ┌──────────────────────┐    imports     ┌────────────────────────┐
+│  ControlPlane React Studio           │ ───────────────► │  FastAPI Backend API │ ─────────────► │  Responsible AI Engine │
+│  (React 18 + Vite + Tailwind CSS)    │                  │  (app/main.py)       │                │  (guardrail.py)        │
+│  ├─ Dual Theme (Light/Dark Mode)     │ ◄─────────────── │  routes/resources.py │ ◄───────────── │  ├─ grounding.py       │
+│  ├─ Auth & Toast Contexts            │                  │  routes/findings.py  │    dict        │  ├─ multi_turn_risk.py │
+│  └─ Modular Views & Telemetry Modals │                  │  models/db/          │                │  ├─ ai_judge.py        │
+└──────────────────────────────────────┘                  └──────────────────────┘                │  └─ action_risk.py     │
+                                                                                                  └────────────────────────┘
 ```
 
 ---
 
-## 3. Database Specifications & Modular Persistence Architecture
+## 3. Frontend Architecture (React + Vite + Tailwind CSS)
 
-ControlPlane AI abstracts database operations inside the [backend/app/models/db/](file:///c:/ControlPlane/backend/app/models/db/) package directory (modularized into connection, users, resources, policies, scans, interceptions, reviews, and tokens sub-modules) to support dual database execution environments:
+The user interface has been decomposed from a monolithic single-file layout into a modern componentized **React SPA**:
+
+### Component Structure:
+* **Context Layer**:
+  * [`AuthContext.jsx`](file:///c:/ControlPlane/frontend/src/context/AuthContext.jsx): Session persistence, tenant switching, role enforcement (`ADMIN` / `USER`), and admin approvals.
+  * [`ThemeContext.jsx`](file:///c:/ControlPlane/frontend/src/context/ThemeContext.jsx): Dual Light / Dark mode management with `localStorage` persistence and dynamic `<html>` class toggling.
+  * [`ToastContext.jsx`](file:///c:/ControlPlane/frontend/src/context/ToastContext.jsx): Global floating notifications.
+* **Layout & Shell**:
+  * [`AppShell.jsx`](file:///c:/ControlPlane/frontend/src/components/layout/AppShell.jsx): Main layout frame.
+  * [`Sidebar.jsx`](file:///c:/ControlPlane/frontend/src/components/layout/Sidebar.jsx): Multi-group navigation, active item highlight, and user profile switcher.
+  * [`Header.jsx`](file:///c:/ControlPlane/frontend/src/components/layout/Header.jsx): Dynamic route breadcrumbs, live tenant switcher, and Theme Toggle button (☀️ / 🌙).
+* **View Modules**:
+  * `DashboardView.jsx`: High-level metrics, trust score, P/C/R gauges, velocity, and enforcement action breakdown.
+  * `RiskFindingsView.jsx`: Real-time finding telemetry, search input, severity dropdown, and source filter tabs.
+  * `EventOverviewView.jsx`: Interception details, raw/masked payload diffs, and Human-in-the-Loop review actions.
+  * `InventoryView.jsx` & `OnboardResourceView.jsx`: AI chatbot resources directory and preset connector forms.
+  * `AgentRuntimeView.jsx`: Autonomous agent action risk sandbox with Action Risk Tier evaluation.
+  * `PoliciesView.jsx`: Security guardrail policy configurator with PII sensitivity, token limits, and GDPR/HIPAA presets.
+  * `EnrollmentTokensView.jsx`: Extension activation tokens management and revocation.
+  * `EndpointAIView.jsx`: Extension connection status and setup guide.
+  * `RedTeamScannerView.jsx`: Adversarial vulnerability probes and PDF compliance report generation.
+  * `HallucinationsView.jsx`: FacTool factuality verifier with sample presets.
+  * `DocumentationView.jsx`: 14 interactive documentation chapters and REST API recipes.
+* **Chrome Extension**:
+  * Located in [`frontend/extension/`](file:///c:/ControlPlane/frontend/extension/) with a permanent sleek dark-mode popup and client-side prompt interception.
+
+---
+
+## 4. Database Specifications & Modular Persistence Architecture
+
+ControlPlane AI abstracts database operations inside the [backend/app/models/db/](file:///c:/ControlPlane/backend/app/models/db/) package directory to support dual database execution environments:
 
 ### 1. Storage Drivers & Configuration
 * **SQLite Mode (Default Local)**:
@@ -73,19 +103,9 @@ ControlPlane AI abstracts database operations inside the [backend/app/models/db/
                                                     └─────────────────┘
 ```
 
-### 3. Package File Split & Individual Responsibilities
-* [`connection.py`](file:///c:/ControlPlane/backend/app/models/db/connection.py): Holds SQLite/Postgres selection parameters, transaction decorator (`get_conn`), migrations run, and initial database setup seeds.
-* [`users.py`](file:///c:/ControlPlane/backend/app/models/db/users.py): User verification database listings, sign-ins, and registrations.
-* [`resources.py`](file:///c:/ControlPlane/backend/app/models/db/resources.py): Monitored chatbot webhooks CRUD.
-* [`policies.py`](file:///c:/ControlPlane/backend/app/models/db/policies.py): Policy guardrail configurations CRUD for Customer Support, Copilot, Decision Support, and Agents.
-* [`reviews.py`](file:///c:/ControlPlane/backend/app/models/db/reviews.py): Dedicated Human-in-the-Loop review queue, decision overrides, and real-time Trustworthiness Analytics.
-* [`scans.py`](file:///c:/ControlPlane/backend/app/models/db/scans.py): Audit scanner entries CRUD.
-* [`interceptions.py`](file:///c:/ControlPlane/backend/app/models/db/interceptions.py): Telemetry interceptions logs and analytics summary metrics.
-* [`tokens.py`](file:///c:/ControlPlane/backend/app/models/db/tokens.py): Activation tokens management CRUD.
-
 ---
 
-## 4. Evaluators & Decision Pipeline
+## 5. Evaluators & Decision Pipeline
 
 The evaluator layer is organized in [backend/app/connector/evaluators/](file:///c:/ControlPlane/backend/app/connector/evaluators/):
 
@@ -107,43 +127,30 @@ The evaluator layer is organized in [backend/app/connector/evaluators/](file:///
 
 ---
 
-## 5. Botpress Connector & AI Red Team Scanner Architecture
+## 6. Botpress Connector & AI Red Team Scanner Architecture
 
 The **Botpress Connector** ([`backend/app/connector/scanner.py`](file:///c:/ControlPlane/backend/app/connector/scanner.py)) isolates platform-specific Chat API complexities behind a clean interface:
 
 ### 1. Core Connector Contract:
-* `validate_target()`: Probes `/hello` and conversation initialization. Returns boolean without surfacing raw network exceptions.
+* `validate_target()`: Probes connectivity and conversation initialization. Returns boolean without surfacing raw network exceptions.
 * `execute_test(vulnerability_id, attack_id, test_input)`: Sends adversarial probes, polls for bot replies, and packages execution time, status, and metadata.
 * `reset_conversation()`: Establishes test isolation between attack runs to prevent conversational bias.
 * `get_platform_metadata()`: Returns platform identity (`botpress`), delivery mode (`poll`), and redacted webhook identifier.
 
-### 2. Error Sanitization Matrix:
-| Botpress HTTP Status | Internal Connector Error | Sanitized User Message |
-|---|---|---|
-| 400 | `BotpressError` | "The Botpress API rejected the request as malformed." |
-| 401 / 403 | `BotpressAuthError` | "Authentication failed. Access to Botpress resource is forbidden." |
-| 404 | `BotpressNotFoundError` | "Webhook ID not found. Verify the Chat integration is enabled." |
-| 429 | `BotpressRateLimitError` | "Botpress rate limit or free-tier quota exceeded." |
-| 5xx | `BotpressServerError` | "Botpress returned a server error. Platform temporarily unavailable." |
-| Timeout | `BotpressTimeoutError` | "Timed out waiting for a response from Botpress." |
-| Connection Failure | `BotpressConnectionError` | "Could not connect to the Botpress Chat API." |
-
 ---
 
-## 6. Cryptographic Log Integrity (SHA-256 Hash Chain)
+## 7. Cryptographic Log Integrity (SHA-256 Hash Chain)
 
-All telemetry interceptions are chained cryptographically to ensure audit records cannot be retroactively modified or deleted.
+All telemetry interceptions are chained cryptographically to ensure audit records cannot be retroactively modified or deleted:
 
 $$\text{Current Hash} = \text{SHA-256}(\text{Previous Hash} + \text{Interception Payload})$$
 
-### Implementation Details:
 * **Seed Value**: The genesis hash is `"GENESIS_HASH_00000000000000000000000000000000"` for the first entry.
-* **Ordering Verification**: Hash chains are constructed dynamically by querying `ORDER BY rowid DESC LIMIT 1` from the database.
 * **Tamper Evidence**: Any modification to a log entry causes a hash mismatch in all subsequent nodes, rendering the violation instantly evident.
 
 ---
 
-## 7. Testing & Verification
+## 8. Testing & Verification
 
 The test suite in [backend/tests/](file:///c:/ControlPlane/backend/tests/) validates all system layers:
 * `test_action_risk.py` & `test_compound_action.py`: Action tiers and compound sequence exfiltration triggers.
@@ -157,4 +164,3 @@ The test suite in [backend/tests/](file:///c:/ControlPlane/backend/tests/) valid
 * `test_scanner.py`: Botpress scanner error mapping and rate limit handling.
 
 **Pass Criteria**: `75 passed` in `pytest`.
-
