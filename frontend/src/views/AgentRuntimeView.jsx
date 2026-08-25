@@ -48,14 +48,7 @@ export function AgentRuntimeView() {
   };
 
   const actionColor = (act) => {
-    switch (act) {
-      case 'BLOCK':
-        return 'text-rose-700 dark:text-rose-400 border-rose-500/30 bg-rose-500/10';
-      case 'CONFIRM_REQUIRED':
-        return 'text-amber-700 dark:text-amber-400 border-amber-500/30 bg-amber-500/10';
-      default:
-        return 'text-emerald-700 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10';
-    }
+    return 'text-orange-700 dark:text-orange-300 border-orange-500/30 bg-orange-500/10';
   };
 
   return (
@@ -72,7 +65,7 @@ export function AgentRuntimeView() {
       </div>
 
       {/* Sandbox Card */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm space-y-6">
+      <div className="glass-panel p-6 sm:p-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm space-y-6">
         <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
           <h3 className="font-brand font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
             <Shield className="w-4 h-4 text-primary" />
@@ -88,28 +81,28 @@ export function AgentRuntimeView() {
           <button
             type="button"
             onClick={() => handlePreset('delete_file')}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm"
+            className="px-3 py-2 rounded-md bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-500/30 text-xs font-semibold transition-colors shadow-sm"
           >
             Preset 1: Delete Email (HIGH Risk)
           </button>
           <button
             type="button"
             onClick={() => handlePreset('search_web')}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm"
+            className="px-3 py-2 rounded-md bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-500/30 text-xs font-semibold transition-colors shadow-sm"
           >
             Preset 2: Web Search (LOW Risk)
           </button>
           <button
             type="button"
             onClick={() => handlePreset('transfer_money')}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm"
+            className="px-3 py-2 rounded-md bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-500/30 text-xs font-semibold transition-colors shadow-sm"
           >
             Preset 3: Wire Transfer (CRITICAL)
           </button>
           <button
             type="button"
             onClick={() => handlePreset('send_email')}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm"
+            className="px-3 py-2 rounded-md bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-500/30 text-xs font-semibold transition-colors shadow-sm"
           >
             Preset 4: Broadcast Email (MEDIUM)
           </button>
@@ -127,7 +120,7 @@ export function AgentRuntimeView() {
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="e.g. Find suspicious email and delete it permanently (or click a sample preset above)..."
                 required
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-primary shadow-sm"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-md px-3.5 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-primary shadow-sm"
               />
             </div>
 
@@ -138,7 +131,7 @@ export function AgentRuntimeView() {
               <select
                 value={toolAction}
                 onChange={(e) => setToolAction(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-primary shadow-sm"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-md px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-primary shadow-sm"
               >
                 <option value="search_web">search_web (LOW Risk -&gt; ALLOW)</option>
                 <option value="send_email">send_email (MEDIUM Risk -&gt; MONITOR)</option>
@@ -152,7 +145,7 @@ export function AgentRuntimeView() {
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md shadow-primary/25 transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-md bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md shadow-primary/25 transition-colors flex items-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -170,7 +163,7 @@ export function AgentRuntimeView() {
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-600 dark:text-slate-400">Enforcement Action:</span>
-                <span className={`px-2.5 py-0.5 rounded text-xs font-bold border ${actionColor(result.action)}`}>
+                <span className={`px-2.5 py-1 rounded-md text-xs font-bold border ${actionColor(result.action)}`}>
                   {result.action}
                 </span>
               </div>
@@ -178,13 +171,7 @@ export function AgentRuntimeView() {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-600 dark:text-slate-400">Action Risk Tier:</span>
                 <span
-                  className={`px-2.5 py-0.5 rounded text-xs font-bold ${
-                    result.action_risk_tier === 'CRITICAL'
-                      ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/30'
-                      : result.action_risk_tier === 'HIGH'
-                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30'
-                      : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
-                  }`}
+                  className="px-2.5 py-1 rounded-md text-xs font-bold bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-500/30"
                 >
                   {result.action_risk_tier || 'LOW'}
                 </span>
@@ -205,19 +192,19 @@ export function AgentRuntimeView() {
             </div>
 
             <div>
-              <div className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">
+              <div className="text-xs font-bold text-orange-700 dark:text-orange-300 mb-1">
                 Triggered Security Rules & Findings:
               </div>
               <div className="text-xs text-slate-700 dark:text-slate-300 space-y-1">
                 {result.triggered_rules && result.triggered_rules.length > 0 ? (
                   result.triggered_rules.map((rule, idx) => (
                     <div key={idx} className="flex items-center gap-2">
-                      <span className="text-amber-500">•</span>
+                      <span className="text-orange-500">•</span>
                       <span>{rule}</span>
                     </div>
                   ))
                 ) : (
-                  <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                  <span className="text-orange-700 dark:text-orange-300 font-medium">
                     None (Clean Query passed all guardrails)
                   </span>
                 )}
