@@ -151,34 +151,115 @@ export function EventOverviewView({ eventId, sessionId, onBack }) {
         </div>
       </div>
 
-      {/* Raw vs Sanitized Comparison */}
+      {/* Raw vs Sanitized Prompt & AI Model Response */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-panel p-5 rounded-3xl space-y-2">
-          <div className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
-            <span>⚠️</span>
-            <span>Intercepted Raw User Prompt</span>
+        {/* User Prompt */}
+        <div className="glass-panel p-5 rounded-3xl space-y-2 border border-slate-200 dark:border-white/10">
+          <div className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <span>⚠️</span>
+              <span>Intercepted Raw User Prompt</span>
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-bold">
+              INPUT
+            </span>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-dark-900/90 border border-slate-200 dark:border-white/10 text-xs font-mono text-slate-800 dark:text-slate-200 whitespace-pre-wrap min-h-[140px]">
-            {activeEvent.prompt_text || activeEvent.evidence || 'No prompt content logged'}
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-dark-900/90 border border-slate-200 dark:border-white/10 text-xs font-mono text-slate-800 dark:text-slate-200 whitespace-pre-wrap min-h-[110px] leading-relaxed">
+            {activeEvent.user_prompt || activeEvent.prompt_text || activeEvent.evidence || 'No prompt content logged'}
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-3xl space-y-2">
-          <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-            <span>🛡️</span>
-            <span>Sanitized Guardrail Prompt Passed to LLM</span>
+        {/* AI Model Response */}
+        <div className="glass-panel p-5 rounded-3xl space-y-2 border border-slate-200 dark:border-white/10">
+          <div className="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <span>🤖</span>
+              <span>AI Model Response Received</span>
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 font-bold">
+              OUTPUT
+            </span>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-dark-900/90 border border-slate-200 dark:border-white/10 text-xs font-mono text-emerald-800 dark:text-emerald-300 whitespace-pre-wrap min-h-[140px]">
-            {activeEvent.masked_text || activeEvent.sanitized_prompt || '[Sanitized / Redacted]'}
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-dark-900/90 border border-slate-200 dark:border-white/10 text-xs font-mono text-cyan-800 dark:text-cyan-300 whitespace-pre-wrap min-h-[110px] leading-relaxed">
+            {activeEvent.raw_response || activeEvent.sanitized_response || '(No model response generated or blocked pre-execution)'}
+          </div>
+        </div>
+
+        {/* Sanitized Outgoing Prompt */}
+        <div className="glass-panel p-5 rounded-3xl space-y-2 border border-slate-200 dark:border-white/10">
+          <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <span>🛡️</span>
+              <span>Sanitized Guardrail Prompt Passed to LLM</span>
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold">
+              SANITIZED
+            </span>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-dark-900/90 border border-slate-200 dark:border-white/10 text-xs font-mono text-emerald-800 dark:text-emerald-300 whitespace-pre-wrap min-h-[110px] leading-relaxed">
+            {activeEvent.sanitized_prompt || activeEvent.masked_text || activeEvent.user_prompt || '[Sanitized / Redacted]'}
+          </div>
+        </div>
+
+        {/* Grounding & Factuality Telemetry */}
+        <div className="glass-panel p-5 rounded-3xl space-y-2 border border-slate-200 dark:border-white/10">
+          <div className="text-xs font-bold text-primary uppercase tracking-wider flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <span>🔬</span>
+              <span>Factuality & Grounding Evaluation</span>
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 font-bold font-mono">
+              SCORE: {activeEvent.performance_score !== undefined ? `${activeEvent.performance_score}%` : 'N/A'}
+            </span>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-dark-900/90 border border-slate-200 dark:border-white/10 text-xs font-sans text-slate-800 dark:text-slate-200 min-h-[110px] space-y-2">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+              <span>Verification Source: <strong>{activeEvent.source === 'ChatGPT Extension Listener' ? 'Google Search / Serper' : 'Enterprise Context Docs'}</strong></span>
+              <span className={activeEvent.performance_score < 65 ? 'text-rose-500 font-bold' : 'text-emerald-500 font-bold'}>
+                {activeEvent.performance_score < 65 ? '⚠️ Hallucination Risk' : '✅ Verified Grounded'}
+              </span>
+            </div>
+            {activeEvent.risk_findings && activeEvent.risk_findings.length > 0 ? (
+              <div className="space-y-1.5 pt-1">
+                {activeEvent.risk_findings.map((rf, idx) => (
+                  <div key={idx} className="p-2 rounded-xl bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/20 text-[11px]">
+                    <div className="font-bold text-rose-700 dark:text-rose-400">{rf.description || rf.type}</div>
+                    {rf.snippet && <div className="text-slate-600 dark:text-slate-400 font-mono text-[10px] mt-0.5">Evidence: "{rf.snippet}"</div>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-slate-500 dark:text-slate-400 text-xs italic pt-2">
+                All claims in this session were verified safe against reference knowledge.
+              </div>
+            )}
           </div>
         </div>
       </div>
 
+      {/* Triggered Rules Breakdown */}
+      {activeEvent.triggered_rules && activeEvent.triggered_rules.length > 0 && (
+        <div className="glass-panel p-5 rounded-3xl space-y-2 border border-slate-200 dark:border-white/10">
+          <div className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+            <span>🚨</span>
+            <span>Triggered Guardrail Security Rules ({activeEvent.triggered_rules.length})</span>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {activeEvent.triggered_rules.map((rule, idx) => (
+              <span key={idx} className="px-3 py-1 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25 text-xs font-medium">
+                {rule}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* HITL Review Queue Controls */}
       <div className="glass-panel p-6 rounded-3xl border border-primary/25 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-brand font-bold text-base text-slate-900 dark:text-white">
-            Human-in-the-Loop (HITL) Reviewer Workspace
+          <h3 className="font-brand font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🧑‍💻</span>
+            <span>Human-in-the-Loop (HITL) Reviewer Workspace</span>
           </h3>
           <span className="text-xs text-slate-500 dark:text-slate-400">Feedback auto-tunes policy thresholds</span>
         </div>
@@ -235,3 +316,4 @@ export function EventOverviewView({ eventId, sessionId, onBack }) {
     </div>
   );
 }
+

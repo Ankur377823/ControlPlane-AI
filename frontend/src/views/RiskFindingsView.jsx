@@ -56,12 +56,34 @@ export function RiskFindingsView({ onSelectFinding }) {
   const formatTime = (ts) => {
     if (!ts) return 'Just now';
     try {
-      const date = new Date(ts);
-      return isNaN(date.getTime()) ? ts : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      let dateObj = new Date(ts);
+      if (isNaN(dateObj.getTime())) {
+        const num = Number(ts);
+        if (!isNaN(num)) {
+          dateObj = new Date(num > 10000000000 ? num : num * 1000);
+        } else {
+          return ts || 'Just now';
+        }
+      }
+      const now = Date.now();
+      const past = dateObj.getTime();
+      const diffSec = Math.max(0, Math.floor((now - past) / 1000));
+
+      if (diffSec < 45) return 'Just now';
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin === 1) return '1 min ago';
+      if (diffMin < 60) return `${diffMin} mins ago`;
+      const diffHours = Math.floor(diffMin / 60);
+      if (diffHours === 1) return '1 hour ago';
+      if (diffHours < 24) return `${diffHours} hours ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      if (diffDays === 1) return '1 day ago';
+      return `${diffDays} days ago`;
     } catch (e) {
       return 'Just now';
     }
   };
+
 
   return (
     <div className="space-y-6 animate-fade-in">

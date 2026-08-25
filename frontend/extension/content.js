@@ -525,69 +525,109 @@
     }
   }
 
-  async function evaluatePromptWithBackend(text) {
-    try {
-      let tokenKey = "cp_live_default";
-      let tenantId = "ankur-tenant-1";
-      let configuredUrl = "http://localhost:8000";
+  async function sendGuardrailCheck(payload) {
+    let tokenKey = "cp_live_default";
+    let tenantId = "ankur-tenant-1";
+    let configuredUrl = "http://localhost:8000";
 
-      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      try {
         const stored = await chrome.storage.local.get(["cp_token", "cp_tenant_id", "cp_server_url"]);
         if (stored && stored.cp_token) tokenKey = stored.cp_token;
         if (stored && stored.cp_tenant_id) tenantId = stored.cp_tenant_id;
         if (stored && stored.cp_server_url && stored.cp_server_url.trim()) {
           configuredUrl = stored.cp_server_url.trim().replace(/\/$/, "");
         }
-      }
+      } catch (e) {}
+    }
 
-      let currentSessionId = window.__cp_session_id;
-      if (!currentSessionId) {
-        let botTag = "chatgpt";
-        if (host.includes("claude")) botTag = "claude";
-        else if (host.includes("gemini")) botTag = "gemini";
-        else if (host.includes("deepseek")) botTag = "deepseek";
-        else if (host.includes("kimi")) botTag = "kimi";
-        else if (host.includes("perplexity")) botTag = "perplexity";
-        else if (host.includes("copilot")) botTag = "copilot";
-        else if (host.includes("groq")) botTag = "groq";
-        else if (host.includes("mistral")) botTag = "mistral";
+    let currentSessionId = window.__cp_session_id;
+    if (!currentSessionId) {
+      let botTag = "chatgpt";
+      if (host.includes("claude")) botTag = "claude";
+      else if (host.includes("gemini")) botTag = "gemini";
+      else if (host.includes("deepseek")) botTag = "deepseek";
+      else if (host.includes("kimi")) botTag = "kimi";
+      else if (host.includes("perplexity")) botTag = "perplexity";
+      else if (host.includes("copilot")) botTag = "copilot";
+      else if (host.includes("groq")) botTag = "groq";
+      else if (host.includes("mistral")) botTag = "mistral";
 
-        currentSessionId = `sess_${botTag}_${Math.random().toString(36).substring(2, 9)}`;
-        window.__cp_session_id = currentSessionId;
-      }
+      currentSessionId = `sess_${botTag}_${Math.random().toString(36).substring(2, 9)}`;
+      window.__cp_session_id = currentSessionId;
+    }
 
-      const candidates = Array.from(
-        new Set([
-          configuredUrl,
-          "http://127.0.0.1:8000",
-          "http://localhost:8000"
-        ])
-      );
+    const fullPayload = {
+      ...payload,
+      session_id: payload.session_id || currentSessionId,
+    };
 
-      for (const base of candidates) {
-        try {
-          const res = await fetch(`${base}/api/v1/resources/res_demo/check`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + tokenKey,
-              "X-Tenant-ID": tenantId,
-              "X-Source": "Browser Extension",
+    const targetUrl = `${configuredUrl}/api/v1/resources/res_demo/check`;
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + tokenKey,
+      "X-Tenant-ID": tenantId,
+      "X-Source": "Browser Extension",
+    };
+
+    // Primary: Delegate to Background Service Worker (Bypasses HTTPS -> HTTP Mixed Content & CSP)
+    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+      try {
+        const bgResponse = await new Promise((resolve) => {
+          chrome.runtime.sendMessage(
+            {
+              type: "CP_EVALUATE_GUARDRAIL",
+              url: targetUrl,
+              headers: headers,
+              body: fullPayload,
             },
-            body: JSON.stringify({ user_prompt: text, session_id: currentSessionId, source: "Browser Extension" }),
-          });
-          if (res.ok) {
-            return await res.json();
-          }
-        } catch (e) {
-          // Continue to next endpoint
+            (res) => {
+              if (chrome.runtime.lastError) {
+                resolve(null);
+              } else {
+                resolve(res);
+              }
+            }
+          );
+        });
+
+        if (bgResponse && bgResponse.success && bgResponse.data) {
+          return bgResponse.data;
         }
+      } catch (err) {
+        // Fall back to direct fetch below
       }
+    }
+
+    // Secondary Fallback: Direct Fetch
+    const candidates = Array.from(new Set([configuredUrl, "http://127.0.0.1:8000", "http://localhost:8000"]));
+    for (const base of candidates) {
+      try {
+        const res = await fetch(`${base}/api/v1/resources/res_demo/check`, {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify(fullPayload),
+        });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  async function evaluatePromptWithBackend(text) {
+    try {
+      return await sendGuardrailCheck({
+        user_prompt: text,
+        source: "Browser Extension",
+      });
     } catch (err) {
       console.warn("ControlPlane Guardrail API offline:", err);
     }
     return null;
   }
+
 
   function updateBannerUI(action, message, data) {
     const textEl = document.getElementById("cp-banner-text");
@@ -766,43 +806,18 @@
 
   async function evaluateAssistantResponse(prompt, response, targetNode) {
     try {
-      let tokenKey = "cp_live_default";
-      let tenantId = "ankur-tenant-1";
-      let configuredUrl = "http://localhost:8000";
-
-      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-        const stored = await chrome.storage.local.get(["cp_token", "cp_tenant_id", "cp_server_url"]);
-        if (stored && stored.cp_token) tokenKey = stored.cp_token;
-        if (stored && stored.cp_tenant_id) tenantId = stored.cp_tenant_id;
-        if (stored && stored.cp_server_url && stored.cp_server_url.trim()) {
-          configuredUrl = stored.cp_server_url.trim().replace(/\/$/, "");
-        }
-      }
-
-      const currentSessionId = window.__cp_session_id || `sess_chatgpt_${Math.random().toString(36).substring(2, 9)}`;
-
-      const res = await fetch(`${configuredUrl}/api/v1/resources/res_demo/check`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + tokenKey,
-          "X-Tenant-ID": tenantId,
-          "X-Source": "Browser Extension",
-        },
-        body: JSON.stringify({
-          user_prompt: prompt,
-          raw_response: response,
-          session_id: currentSessionId,
-          source: "ChatGPT Extension Listener"
-        }),
+      const data = await sendGuardrailCheck({
+        user_prompt: prompt,
+        raw_response: response,
+        source: "ChatGPT Extension Listener"
       });
 
-      if (!res.ok) return;
-      const data = await res.json();
+      if (!data) return;
 
       const pScore = (data.scores && typeof data.scores.performance_p === "number")
         ? data.scores.performance_p
         : 100.0;
+
 
       const hasHallucination = (data.risk_findings || []).some(
         rf => rf.type && (rf.type.includes("HALLUCINATION") || rf.type.includes("GROUNDING"))

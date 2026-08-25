@@ -6,7 +6,8 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC.svg)](https://tailwindcss.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon%20Cloud-336791.svg)](https://neon.tech/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
-[![Tests](https://img.shields.io/badge/Pytest-75%2F75%20Passed-emerald.svg)](#-testing--verification)
+[![Tests](https://img.shields.io/badge/Pytest-77%2F77%20Passed-emerald.svg)](#-testing--verification)
+
 
 **ControlPlane AI** is an enterprise-grade **Responsible AI (RAI) Governance Control Plane**, real-time guardrail shield, and telemetry monitoring studio. It is engineered to safeguard, monitor, audit, and auto-tune AI assistants, chatbots, and autonomous agents across diverse organizational use cases (Customer Support, Internal Copilot, Decision Support, and Agent Runtimes).
 
