@@ -9,17 +9,17 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#6366f1',
-          hover: '#4f46e5',
-          light: '#818cf8',
-          dark: '#4338ca',
+          DEFAULT: '#f97316',
+          hover: '#ea580c',
+          light: '#fb923c',
+          dark: '#c2410c',
         },
         dark: {
-          900: '#0b0f19',
-          850: '#0f172a',
-          800: '#1e293b',
-          750: '#283548',
-          700: '#334155',
+          900: '#080808',
+          850: '#111111',
+          800: '#1b1b1b',
+          750: '#242424',
+          700: '#333333',
         },
         accent: {
           cyan: '#06b6d4',
@@ -30,8 +30,8 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        brand: ['Outfit', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+        brand: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
     },
