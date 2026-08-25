@@ -32,9 +32,11 @@ def authenticate_user(username: str, password: str) -> Optional[dict]:
         if row:
             d = dict(row)
             # Verify password against database hash or configured admin secret
-            if d.get("password_hash") == p_clean or p_clean == os.environ.get("ADMIN_PASSWORD", "password123"):
+            admin_secret = os.environ.get("ADMIN_PASSWORD")
+            if d.get("password_hash") == p_clean or (admin_secret and p_clean == admin_secret):
                 if d.get("status") != "approved":
                     raise ValueError(f"Account '{d.get('email')}' is pending Admin approval.")
+
                 
                 is_admin = (d.get("role") == "ADMIN")
                 allowed_tenants = ALL_TENANTS if is_admin else [d.get("tenant_id", "acme-tenant-1")]
