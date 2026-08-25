@@ -33,7 +33,7 @@ export function UserManagementModal() {
   const handleApprove = async (userId, name) => {
     try {
       await approveUser(userId);
-      showToast(`User account '${name}' approved successfully!`, 'success');
+      showToast(`User account '${name}' approved successfully`, 'success');
       loadUsers();
     } catch (err) {
       showToast('Approval failed: ' + err.message, 'error');
@@ -52,9 +52,9 @@ export function UserManagementModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-dark-900/80 backdrop-blur-md animate-fade-in transition-colors">
-      <div className="w-full max-w-4xl max-h-[85vh] bg-white dark:bg-dark-850 border border-slate-200 dark:border-primary/40 rounded-3xl shadow-2xl shadow-slate-400/30 dark:shadow-black/80 flex flex-col overflow-hidden transition-colors">
+      <div className="w-full max-w-4xl max-h-[85vh] bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl shadow-slate-400/30 dark:shadow-black/80 flex flex-col overflow-hidden transition-colors">
         {/* Modal Header */}
-        <div className="p-5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-dark-800/80">
+        <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-dark-900">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-primary/10 dark:bg-primary/20 border border-primary/25 flex items-center justify-center text-primary dark:text-primary-light">
               <Users className="w-5 h-5" />
@@ -71,14 +71,14 @@ export function UserManagementModal() {
           <div className="flex items-center gap-2">
             <button
               onClick={loadUsers}
-              className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+              className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors"
               title="Refresh users"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
             <button
               onClick={() => setIsUserMgmtOpen(false)}
-              className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+              className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -87,9 +87,9 @@ export function UserManagementModal() {
 
         {/* Modal Body / Table */}
         <div className="flex-1 overflow-y-auto p-5">
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-dark-900/50">
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-dark-900/50">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-100 dark:bg-dark-800/80 border-b border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 uppercase font-bold text-[10px] tracking-wider">
+              <thead className="bg-slate-100 dark:bg-dark-900 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase font-bold text-[10px] tracking-wider">
                 <tr>
                   <th className="py-3.5 px-4">User Name & Email</th>
                   <th className="py-3.5 px-4">Username</th>
@@ -99,7 +99,7 @@ export function UserManagementModal() {
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200/80 dark:divide-white/5 text-slate-700 dark:text-slate-300">
+              <tbody className="divide-y divide-slate-200/80 dark:divide-slate-800/80 text-slate-700 dark:text-slate-300">
                 {users.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="py-8 text-center text-slate-500">
@@ -112,14 +112,14 @@ export function UserManagementModal() {
                     const isApproved = u.approval_status === 'approved' || !u.approval_status;
 
                     return (
-                      <tr key={u.id || u.username} className="hover:bg-slate-100/50 dark:hover:bg-white/[0.02] transition-colors">
+                      <tr key={u.id || u.username} className="hover:bg-slate-100/50 dark:hover:bg-dark-800/50 transition-colors">
                         <td className="py-3.5 px-4">
                           <div className="font-bold text-slate-900 dark:text-white">{u.name || u.username}</div>
                           <div className="text-[11px] text-slate-500 font-mono">{u.email || '—'}</div>
                         </td>
                         <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-400">{u.username}</td>
                         <td className="py-3.5 px-4">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-200/70 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-200/70 dark:bg-dark-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                             {u.auth_provider === 'google' ? 'Google OAuth' : 'Local DB'}
                           </span>
                         </td>
@@ -128,7 +128,7 @@ export function UserManagementModal() {
                             className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                               u.role === 'ADMIN'
                                 ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light border border-primary/25'
-                                : 'bg-slate-200 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300'
+                                : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                             }`}
                           >
                             {u.role || 'USER'}
@@ -142,7 +142,7 @@ export function UserManagementModal() {
                                 : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25'
                             }`}
                           >
-                            {isApproved ? '🟢 Approved' : '⏳ Pending'}
+                            {isApproved ? 'Approved' : 'Pending'}
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-right space-x-1.5">
@@ -165,7 +165,7 @@ export function UserManagementModal() {
                           {!isSelf && (
                             <button
                               onClick={() => switchAccount(u)}
-                              className="px-2.5 py-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/10 text-[11px] font-semibold transition-colors"
+                              className="px-2.5 py-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-[11px] font-semibold transition-colors"
                             >
                               Switch To
                             </button>

@@ -31,7 +31,7 @@ export function Header({ activeRoute }) {
       : [user?.tenant_id || 'ankur-tenant-1', 'globex-tenant-2'];
 
   return (
-    <header className="h-16 border-b border-slate-200 dark:border-white/10 bg-white/80 dark:bg-dark-900/60 backdrop-blur-md px-6 flex items-center justify-between flex-shrink-0 z-20 transition-colors">
+    <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-dark-900/80 backdrop-blur-md px-6 flex items-center justify-between flex-shrink-0 z-20 transition-colors">
       {/* Breadcrumb Title */}
       <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
         <span>{parentName}</span>
@@ -42,39 +42,32 @@ export function Header({ activeRoute }) {
       {/* Controls & Tenant Pill */}
       <div className="flex items-center gap-3">
         {/* Status Indicator */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>Shield Active (Sub-15ms)</span>
         </div>
 
-        {/* Theme Toggle Button */}
+        {/* Theme Toggle Button - Symbol Only */}
         <button
           onClick={toggleTheme}
-          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          className="p-2 rounded-lg bg-slate-100 dark:bg-dark-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-primary hover:bg-slate-200 dark:hover:bg-white/10 transition-all flex items-center gap-1.5 text-xs font-medium"
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="w-8 h-8 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-sm transition-all duration-150 focus:outline-none"
         >
           {isDark ? (
-            <>
-              <Sun className="w-4 h-4 text-amber-400" />
-              <span className="hidden md:inline">Light</span>
-            </>
+            <Sun className="w-4 h-4 text-slate-300" />
           ) : (
-            <>
-              <Moon className="w-4 h-4 text-indigo-500" />
-              <span className="hidden md:inline">Dark</span>
-            </>
+            <Moon className="w-4 h-4 text-slate-600" />
           )}
         </button>
 
         {/* Tenant Pill / Switcher */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-dark-800 border border-slate-200 dark:border-white/10 shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono font-medium uppercase">Tenant:</span>
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 shadow-sm transition-colors text-xs font-semibold">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           {isAdmin && allowedTenants.length > 1 ? (
             <select
               value={activeTenant}
               onChange={(e) => changeActiveTenant(e.target.value)}
-              className="bg-transparent text-slate-900 dark:text-white font-mono text-xs font-semibold focus:outline-none cursor-pointer pr-1"
+              className="bg-transparent text-slate-900 dark:text-white text-xs font-semibold focus:outline-none cursor-pointer pr-1"
             >
               {allowedTenants.map((t) => (
                 <option key={t} value={t} className="bg-white dark:bg-dark-850 text-slate-900 dark:text-white">
@@ -83,7 +76,7 @@ export function Header({ activeRoute }) {
               ))}
             </select>
           ) : (
-            <span className="text-slate-900 dark:text-white font-mono text-xs font-semibold">{activeTenant}</span>
+            <span className="text-slate-900 dark:text-white text-xs font-semibold">{activeTenant}</span>
           )}
         </div>
       </div>

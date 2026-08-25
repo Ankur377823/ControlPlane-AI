@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { verifyHallucination } from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { Microscope } from 'lucide-react';
+import { Microscope, CheckCircle2, AlertTriangle, Key } from 'lucide-react';
 
 export function HallucinationsView() {
-  const [prompt, setPrompt] = useState('Introduce Graham Neubig');
-  const [response, setResponse] = useState(
-    'Graham Neubig is a professor at MIT and conducts research in artificial intelligence.'
-  );
+  const [prompt, setPrompt] = useState('');
+  const [response, setResponse] = useState('');
   const [category, setCategory] = useState('kbqa');
   const [model, setModel] = useState('gpt-3.5-turbo');
   const [openaiKey, setOpenaiKey] = useState('');
@@ -61,7 +59,7 @@ export function HallucinationsView() {
 
       const res = await verifyHallucination(payload);
       setResult(res);
-      showToast('Factuality verification completed!', 'success');
+      showToast('Factuality verification completed', 'success');
     } catch (err) {
       showToast('Verification failed: ' + err.message, 'error');
     } finally {
@@ -85,37 +83,37 @@ export function HallucinationsView() {
       </div>
 
       {/* Main Card */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-white/10 space-y-6">
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm space-y-6">
         {/* Preset Buttons */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-4">
-          <span className="text-xs font-bold text-slate-600 dark:text-slate-400 mr-2">Quick Sample Presets:</span>
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-4">
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-400 mr-2">Sample Presets:</span>
           <button
             type="button"
             onClick={() => handlePreset('neubig')}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 text-xs font-semibold transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm"
           >
-            💡 Preset 1: QA Hallucination
+            Preset 1: QA Hallucination
           </button>
           <button
             type="button"
             onClick={() => handlePreset('math')}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 text-xs font-semibold transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm"
           >
-            🧮 Preset 2: Math Reasoning
+            Preset 2: Math Reasoning
           </button>
           <button
             type="button"
             onClick={() => handlePreset('code')}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 text-xs font-semibold transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm"
           >
-            💻 Preset 3: Code Verification
+            Preset 3: Code Verification
           </button>
           <button
             type="button"
             onClick={() => handlePreset('microsoft')}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 text-xs font-semibold transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm"
           >
-            🏢 Preset 4: CEO Hallucination
+            Preset 4: CEO Hallucination
           </button>
         </div>
 
@@ -128,9 +126,9 @@ export function HallucinationsView() {
                 rows={4}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Enter prompt given to LLM..."
+                placeholder="e.g. Introduce Graham Neubig (or click a sample preset above)..."
                 required
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-white/10 rounded-2xl p-3.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-2xl p-3.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-primary shadow-sm"
               />
             </div>
 
@@ -142,9 +140,9 @@ export function HallucinationsView() {
                 rows={4}
                 value={response}
                 onChange={(e) => setResponse(e.target.value)}
-                placeholder="Enter model generated response to verify..."
+                placeholder="e.g. Graham Neubig is a professor at MIT and conducts research in artificial intelligence..."
                 required
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-white/10 rounded-2xl p-3.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-2xl p-3.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-primary shadow-sm"
               />
             </div>
           </div>
@@ -155,7 +153,7 @@ export function HallucinationsView() {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-primary font-medium"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-primary font-medium shadow-sm"
               >
                 <option value="kbqa">Knowledge QA (kbqa)</option>
                 <option value="math">Mathematical Reasoning (math)</option>
@@ -169,7 +167,7 @@ export function HallucinationsView() {
               <select
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-primary font-medium"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-primary font-medium shadow-sm"
               >
                 <option value="gpt-3.5-turbo">GPT-3.5-Turbo (Fast)</option>
                 <option value="gpt-4">GPT-4 (High Accuracy)</option>
@@ -183,7 +181,7 @@ export function HallucinationsView() {
                 value={openaiKey}
                 onChange={(e) => setOpenaiKey(e.target.value)}
                 placeholder="sk-..."
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 font-mono focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 font-mono focus:outline-none focus:border-primary shadow-sm"
               />
             </div>
 
@@ -194,20 +192,21 @@ export function HallucinationsView() {
                 value={serperKey}
                 onChange={(e) => setSerperKey(e.target.value)}
                 placeholder="Serper search key..."
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 font-mono focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 font-mono focus:outline-none focus:border-primary shadow-sm"
               />
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              🔑 Provide OpenAI & Serper API keys for live web search, or leave blank to test with local evaluator.
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <Key className="w-3.5 h-3.5 text-primary" />
+              <span>Provide OpenAI & Serper API keys for live web search, or leave blank to test with local evaluator.</span>
             </span>
 
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-lg shadow-primary/25 transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md shadow-primary/25 transition-colors flex items-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -221,8 +220,8 @@ export function HallucinationsView() {
 
         {/* Results Box */}
         {result && (
-          <div className="p-6 rounded-3xl bg-slate-50 dark:bg-dark-900/90 border border-slate-200 dark:border-white/10 space-y-4 animate-fade-in">
-            <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-200 dark:border-white/10 pb-3">
+          <div className="p-6 rounded-3xl bg-slate-50 dark:bg-dark-900/90 border border-slate-200 dark:border-slate-800 space-y-4 animate-fade-in">
+            <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
               <div>
                 <h4 className="font-brand font-bold text-sm text-slate-900 dark:text-white">Factuality Verification Report</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">Status: {result.status || 'Success'}</p>
@@ -238,7 +237,7 @@ export function HallucinationsView() {
             <div className="space-y-3 text-xs text-slate-700 dark:text-slate-300">
               {result.claim_verifications && result.claim_verifications.length > 0 ? (
                 result.claim_verifications.map((cv, idx) => (
-                  <div key={idx} className="p-3.5 rounded-2xl bg-white dark:bg-dark-850 border border-slate-200 dark:border-white/5 space-y-1.5">
+                  <div key={idx} className="p-3.5 rounded-2xl bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-sm">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-slate-900 dark:text-white">Claim #{idx + 1}:</span>
                       <span
@@ -248,12 +247,12 @@ export function HallucinationsView() {
                             : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25'
                         }`}
                       >
-                        {cv.is_factual ? '✅ FACTUAL' : '⚠️ HALLUCINATION'}
+                        {cv.is_factual ? 'FACTUAL' : 'HALLUCINATION'}
                       </span>
                     </div>
                     <div className="text-slate-800 dark:text-slate-300 font-mono text-[11px]">{cv.claim}</div>
                     {cv.evidence && (
-                      <div className="text-slate-500 dark:text-slate-400 text-[10px] bg-slate-50 dark:bg-black/30 p-2 rounded-lg border border-slate-200/60 dark:border-transparent">
+                      <div className="text-slate-500 dark:text-slate-400 text-[10px] bg-slate-50 dark:bg-dark-900 p-2 rounded-lg border border-slate-200 dark:border-slate-800">
                         Evidence: {cv.evidence}
                       </div>
                     )}

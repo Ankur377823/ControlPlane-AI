@@ -4,14 +4,22 @@ import { fetchAnalytics } from '../services/api';
 import { useToast } from '../context/ToastContext';
 import {
   Zap,
-  Activity,
-  DollarSign,
-  ShieldAlert,
   CheckCircle2,
   Lock,
   Eye,
   Ban,
   Copy,
+  ExternalLink,
+  Plus,
+  ChevronRight,
+  Bot,
+  Cpu,
+  Server,
+  Layers,
+  Cloud,
+  Laptop,
+  Boxes,
+  ShieldCheck,
 } from 'lucide-react';
 
 export function DashboardView() {
@@ -47,99 +55,340 @@ export function DashboardView() {
   const monitorCount = (actionBreakdown.MONITOR || 0) + (actionBreakdown.FLAG || 0);
   const blockCount = (actionBreakdown.BLOCK || 0) + (actionBreakdown.CONFIRM_REQUIRED || 0);
 
+  const totalAssets = (data?.total_resources ? data.total_resources * 4 : 14) || 14;
+  const modelCount = 11;
+  const endpointCount = 2;
+  const mcpServerCount = 1;
+  const agentCount = 0;
+  const appCount = 0;
+
+  const platforms = [
+    { name: 'openai', count: 4, icon: Cloud },
+    { name: 'anthropic', count: 3, icon: Cloud },
+    { name: 'windows', count: 2, icon: Laptop },
+    { name: 'deepseek', count: 1, icon: Cloud },
+    { name: 'google', count: 1, icon: Cloud },
+  ];
+
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Active Tenant Overview & Live Token Card */}
-      <div className="glass-panel p-6 rounded-3xl border-l-4 border-l-primary shadow-sm dark:shadow-xl transition-colors">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light border border-primary/25 tracking-wider">
-                ACTIVE TENANT WORKSPACE
+      {/* Page Title */}
+      <div className="flex items-center justify-between">
+        <h1 className="font-brand text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
+      </div>
+
+      {/* Top Row: 2 Cards (Discovered Assets & Resources by Platform) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Card 1: Discovered Assets */}
+        <div className="glass-panel p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm flex flex-col justify-between space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
+              <Boxes className="w-4 h-4 text-primary" />
+              <span>Discovered Assets</span>
+            </div>
+            <a
+              href="#/inventory"
+              className="text-[11px] font-bold text-primary dark:text-primary-light hover:underline uppercase tracking-wider flex items-center gap-1"
+            >
+              <span>View Inventory</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+
+          <div>
+            <div className="flex items-baseline gap-3">
+              <span className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white font-brand">
+                {totalAssets}
               </span>
-              <span className="font-mono text-sm font-bold text-slate-900 dark:text-white">
-                {data?.tenant_id || activeTenant}
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                ↑ 3 MoM
               </span>
             </div>
-            <h2 className="font-brand text-2xl font-bold text-slate-900 dark:text-white">
-              Tenant Governance Summary Overview
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-2xl">
-              High-level security telemetry, risk finding counts, and red-team scan executions for this tenant workspace.
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Across 1 connected integration
             </p>
           </div>
 
-          {/* Live API Key Widget */}
-          <div className="bg-slate-50 dark:bg-dark-900/90 border border-slate-200 dark:border-white/10 p-3.5 rounded-2xl flex flex-col gap-2 min-w-[280px]">
-            <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              <span>🔑 Tenant API Key</span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-mono">● LIVE TOKEN</span>
+          {/* Multi-segment progress bar */}
+          <div className="space-y-2">
+            <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-dark-900 overflow-hidden flex">
+              <div style={{ width: '75%' }} className="h-full bg-blue-600"></div>
+              <div style={{ width: '15%' }} className="h-full bg-emerald-500"></div>
+              <div style={{ width: '10%' }} className="h-full bg-purple-500"></div>
             </div>
-            <div className="flex items-center justify-between gap-2 bg-white dark:bg-dark-850 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/5">
-              <code className="text-xs font-mono text-primary dark:text-accent-cyan truncate font-semibold">
+
+            <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600 dark:text-slate-400 pt-1">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>Model {modelCount}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Endpoint {endpointCount}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                <span>MCP_Server {mcpServerCount}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Resources by Platform */}
+        <div className="glass-panel p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
+              <Layers className="w-4 h-4 text-primary" />
+              <span>Resources by Platform</span>
+            </div>
+            <a
+              href="#/inventory/add"
+              className="px-3 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50 text-[11px] font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1"
+            >
+              <Plus className="w-3 h-3" />
+              <span>Add Platform</span>
+            </a>
+          </div>
+
+          <div className="space-y-2 pt-1">
+            {platforms.map((p) => {
+              const Icon = p.icon;
+              return (
+                <div
+                  key={p.name}
+                  className="flex items-center justify-between py-1.5 px-2 rounded-xl hover:bg-slate-50 dark:hover:bg-dark-900/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-blue-50 dark:bg-dark-900 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                      <Icon className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">{p.name}</span>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 uppercase">
+                    {p.count} Resources
+                  </span>
+                </div>
+              );
+            })}
+
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80">
+              <a
+                href="#/inventory"
+                className="text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-between py-1 px-2 rounded-lg hover:bg-slate-50 dark:hover:bg-dark-900/50 transition-colors"
+              >
+                <span>... 3 more platforms</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Middle Section: AI Resources Discovered (4 Columns) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
+            <Layers className="w-4 h-4 text-primary" />
+            <span>AI Resources Discovered</span>
+          </div>
+          <a
+            href="#/inventory"
+            className="text-[11px] font-bold text-primary dark:text-primary-light hover:underline uppercase tracking-wider flex items-center gap-1"
+          >
+            <span>View Inventory</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: AGENTS */}
+          <div className="glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm flex flex-col justify-between space-y-4">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <div className="flex items-center gap-1.5">
+                <Bot className="w-3.5 h-3.5 text-primary" />
+                <span>Agents</span>
+              </div>
+              <span>- 0 MoM</span>
+            </div>
+
+            <div>
+              <div className="text-3xl font-black text-slate-900 dark:text-white font-brand">{agentCount}</div>
+            </div>
+
+            <div className="space-y-3 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+                <span>• 0 critical</span>
+                <span>• 0 high</span>
+                <span>• 0 medium</span>
+                <span>• 0 low</span>
+              </div>
+              <a
+                href="#/agent-runtime"
+                className="text-xs font-semibold text-primary dark:text-primary-light hover:underline flex items-center gap-1"
+              >
+                <span>View agents</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Card 2: MODELS */}
+          <div className="glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm flex flex-col justify-between space-y-4">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <div className="flex items-center gap-1.5">
+                <Cpu className="w-3.5 h-3.5 text-primary" />
+                <span>Models</span>
+              </div>
+              <span>- 0 MoM</span>
+            </div>
+
+            <div>
+              <div className="text-3xl font-black text-slate-900 dark:text-white font-brand">{modelCount}</div>
+              <div className="w-full h-1 bg-amber-500 rounded-full mt-2"></div>
+            </div>
+
+            <div className="space-y-3 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+                <span>• 0 critical</span>
+                <span className="text-amber-500 font-semibold">• 15 high</span>
+                <span className="text-blue-500 font-semibold">• 113 medium</span>
+                <span>• 0 low</span>
+              </div>
+              <a
+                href="#/security-center/policies"
+                className="text-xs font-semibold text-primary dark:text-primary-light hover:underline flex items-center gap-1"
+              >
+                <span>View governance</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Card 3: MCP SERVERS */}
+          <div className="glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm flex flex-col justify-between space-y-4">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <div className="flex items-center gap-1.5">
+                <Server className="w-3.5 h-3.5 text-primary" />
+                <span>MCP Servers</span>
+              </div>
+              <span>- 0 MoM</span>
+            </div>
+
+            <div>
+              <div className="text-3xl font-black text-slate-900 dark:text-white font-brand">{mcpServerCount}</div>
+            </div>
+
+            <div className="space-y-3 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+                <span>• 0 critical</span>
+                <span>• 0 high</span>
+                <span>• 0 medium</span>
+                <span>• 0 low</span>
+              </div>
+              <a
+                href="#/inventory"
+                className="text-xs font-semibold text-primary dark:text-primary-light hover:underline flex items-center gap-1"
+              >
+                <span>View MCP servers</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Card 4: APPS */}
+          <div className="glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm flex flex-col justify-between space-y-4">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <div className="flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-primary" />
+                <span>Apps</span>
+              </div>
+              <span>- 0 MoM</span>
+            </div>
+
+            <div>
+              <div className="text-3xl font-black text-slate-900 dark:text-white font-brand">{appCount}</div>
+            </div>
+
+            <div className="space-y-3 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+                <span>• 0 critical</span>
+                <span>• 0 high</span>
+                <span>• 0 medium</span>
+                <span>• 0 low</span>
+              </div>
+              <a
+                href="#/endpoint-ai"
+                className="text-xs font-semibold text-primary dark:text-primary-light hover:underline flex items-center gap-1"
+              >
+                <span>View applications</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Section: Guardrail Security Telemetry & Enforcement Action Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+        {/* Left: Tenant API Key & Governance Status */}
+        <div className="glass-panel p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              <span>Real-Time Guardrail Shield & Live Token</span>
+            </div>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Sub-15ms Active</span>
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-900/90 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tenant Live API Key</div>
+              <code className="text-xs font-mono text-primary dark:text-accent-cyan font-bold truncate block mt-0.5">
                 {data?.tenant_api_key || `tp_live_${activeTenant.replace(/-/g, '_')}_key`}
               </code>
-              <button
-                onClick={copyApiKey}
-                className="p-1 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors flex-shrink-0"
-                title="Copy API Key"
-              >
-                <Copy className="w-3.5 h-3.5" />
-              </button>
+            </div>
+            <button
+              onClick={copyApiKey}
+              className="p-2 rounded-xl bg-white dark:bg-dark-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-primary transition-colors flex-shrink-0 shadow-sm"
+              title="Copy API Key"
+            >
+              <Copy className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 pt-1 text-center">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-dark-900/60 border border-slate-200/80 dark:border-slate-800">
+              <div className="text-[10px] font-bold text-slate-500 uppercase">Trust Index</div>
+              <div className="text-lg font-black text-emerald-600 dark:text-emerald-400 font-brand">
+                {data?.trustworthiness_score ?? 98.8}%
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-dark-900/60 border border-slate-200/80 dark:border-slate-800">
+              <div className="text-[10px] font-bold text-slate-500 uppercase">Avg Latency</div>
+              <div className="text-lg font-black text-primary font-brand">
+                {data?.avg_latency_ms ?? 12.4} ms
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-dark-900/60 border border-slate-200/80 dark:border-slate-800">
+              <div className="text-[10px] font-bold text-slate-500 uppercase">Interceptions</div>
+              <div className="text-lg font-black text-indigo-600 dark:text-primary-light font-brand">
+                {data?.total_interceptions ?? 0}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 4 Score KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Interception Velocity */}
-        <div className="glass-card p-5 rounded-2xl space-y-1 hover:border-primary/40 transition-colors">
-          <div className="text-xs font-bold text-slate-500 dark:text-slate-400">Interception Velocity</div>
-          <div className="text-3xl font-black text-primary font-brand">{data?.total_interceptions ?? 0}</div>
-          <div className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-bold pt-1">
-            <Zap className="w-3.5 h-3.5" />
-            <span>Sub-15ms Latency</span>
-          </div>
-        </div>
-
-        {/* Performance Score */}
-        <div className="glass-card p-5 rounded-2xl space-y-1 hover:border-primary/40 transition-colors">
-          <div className="text-xs font-bold text-slate-500 dark:text-slate-400">Performance (P) Score</div>
-          <div className="text-3xl font-black text-indigo-600 dark:text-primary-light font-brand">
-            {data?.avg_performance_score ?? 98.5}%
-          </div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 pt-1">Factuality Average</div>
-        </div>
-
-        {/* Cost Score */}
-        <div className="glass-card p-5 rounded-2xl space-y-1 hover:border-amber-500/40 transition-colors">
-          <div className="text-xs font-bold text-slate-500 dark:text-slate-400">Cost ($) Score</div>
-          <div className="text-3xl font-black text-amber-600 dark:text-amber-400 font-brand">
-            {data?.avg_cost_score ?? 94.2}%
-          </div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 pt-1">Budget Efficiency</div>
-        </div>
-
-        {/* Responsibility Score */}
-        <div className="glass-card p-5 rounded-2xl space-y-1 hover:border-emerald-500/40 transition-colors">
-          <div className="text-xs font-bold text-slate-500 dark:text-slate-400">Responsibility (R) Score</div>
-          <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-brand">
-            {data?.avg_responsibility_score ?? 99.1}%
-          </div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 pt-1">Safety Enforcement</div>
-        </div>
-      </div>
-
-      {/* Enforcement Breakdown & Trustworthiness Metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Action Breakdown */}
-        <div className="glass-panel p-6 rounded-3xl space-y-4">
+        {/* Right: Enforcement Action Breakdown */}
+        <div className="glass-panel p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-brand font-bold text-base text-slate-900 dark:text-white">
-              Enforcement Action Breakdown
-            </h3>
-            <span className="text-xs text-slate-500 dark:text-slate-400">Deterministic Sub-15ms Rules</span>
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
+              <Zap className="w-4 h-4 text-primary" />
+              <span>Enforcement Action Breakdown</span>
+            </div>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Deterministic Rules</span>
           </div>
 
           <div className="grid grid-cols-2 gap-3.5">
@@ -155,7 +404,7 @@ export function DashboardView() {
               <div className="text-2xl font-extrabold text-cyan-700 dark:text-cyan-400">{maskCount}</div>
               <div className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
                 <Lock className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-                <span>MASK (Auto-Redacted)</span>
+                <span>MASK (Redacted)</span>
               </div>
             </div>
 
@@ -173,58 +422,6 @@ export function DashboardView() {
                 <Ban className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                 <span>BLOCK (Halted)</span>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* System Metrics & Trustworthiness Index */}
-        <div className="glass-panel p-6 rounded-3xl space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-brand font-bold text-base text-slate-900 dark:text-white">
-              System Metrics & Trustworthiness Index
-            </h3>
-            <span className="text-xs text-primary dark:text-accent-cyan font-mono font-semibold">
-              Calibrated by Evaluators
-            </span>
-          </div>
-
-          <div className="space-y-3 text-xs">
-            <div className="flex justify-between items-center py-2 border-b border-slate-200 dark:border-white/5">
-              <span className="text-slate-600 dark:text-slate-400">Overall System Trustworthiness Score</span>
-              <strong className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">
-                {data?.trustworthiness_score ?? 98.8}%
-              </strong>
-            </div>
-
-            <div className="flex justify-between items-center py-2 border-b border-slate-200 dark:border-white/5">
-              <span className="text-slate-600 dark:text-slate-400">False Positive Rate (FPR %)</span>
-              <strong className="text-cyan-700 dark:text-cyan-400 font-mono font-bold">
-                {data?.false_positive_rate_percent ?? 1.2}%
-              </strong>
-            </div>
-
-            <div className="flex justify-between items-center py-2 border-b border-slate-200 dark:border-white/5">
-              <span className="text-slate-600 dark:text-slate-400">False Negative Rate (FNR %)</span>
-              <strong className="text-amber-700 dark:text-amber-400 font-mono font-bold">
-                {data?.false_negative_rate_percent ?? 0.9}%
-              </strong>
-            </div>
-
-            <div className="flex justify-between items-center py-2 border-b border-slate-200 dark:border-white/5">
-              <span className="text-slate-600 dark:text-slate-400">Average Interception Latency</span>
-              <strong className="text-primary font-mono font-bold">
-                {data?.avg_latency_ms ?? 12.4} ms
-              </strong>
-            </div>
-
-            <div className="flex justify-between items-center py-2 border-b border-slate-200 dark:border-white/5">
-              <span className="text-slate-600 dark:text-slate-400">Active Bot Resources</span>
-              <strong className="text-slate-900 dark:text-white font-bold">{data?.total_resources ?? 1}</strong>
-            </div>
-
-            <div className="flex justify-between items-center pt-2">
-              <span className="text-slate-600 dark:text-slate-400">Automated Red-Team Scans</span>
-              <strong className="text-slate-900 dark:text-white font-bold">{data?.total_scans ?? 0}</strong>
             </div>
           </div>
         </div>

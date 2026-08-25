@@ -1,5 +1,5 @@
 import React from 'react';
-import { Laptop, CheckCircle2 } from 'lucide-react';
+import { Laptop, CheckCircle2, Lock, FileText, Zap } from 'lucide-react';
 
 const SUPPORTED_PLATFORMS = [
   { name: 'ChatGPT', url: 'chat.openai.com', color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25' },
@@ -26,7 +26,7 @@ export function EndpointAIView() {
       {/* Top 2 Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Status Card */}
-        <div className="glass-panel p-6 rounded-3xl border-l-4 border-l-emerald-500 space-y-4">
+        <div className="glass-panel p-6 rounded-3xl border-l-4 border-l-emerald-500 border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="w-6 h-6" />
@@ -40,17 +40,19 @@ export function EndpointAIView() {
           </div>
 
           <div className="flex flex-wrap gap-2 pt-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
-              ✅ Connected to localhost:8000
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Connected to localhost:8000</span>
             </span>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary dark:text-primary-light border border-primary/25">
-              🔒 HTTPS Intercept Active
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary dark:text-primary-light border border-primary/25 flex items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5" />
+              <span>HTTPS Intercept Active</span>
             </span>
           </div>
         </div>
 
         {/* Supported Platforms Card */}
-        <div className="glass-panel p-6 rounded-3xl space-y-4">
+        <div className="glass-panel p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm space-y-4">
           <h3 className="font-brand font-bold text-base text-slate-900 dark:text-white">Supported AI Platforms</h3>
           <div className="flex flex-wrap gap-2">
             {SUPPORTED_PLATFORMS.map((p) => (
@@ -63,16 +65,16 @@ export function EndpointAIView() {
       </div>
 
       {/* Setup Guide */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-white/10 space-y-4">
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm space-y-4">
         <h3 className="font-brand font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-          <span>📋</span>
+          <FileText className="w-4 h-4 text-primary" />
           <span>Quick Setup Guide for Chrome Extension</span>
         </h3>
 
         <ol className="space-y-3 text-xs text-slate-700 dark:text-slate-300 list-decimal list-inside leading-relaxed font-medium">
           <li>
             Open Google Chrome and navigate to{' '}
-            <code className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-dark-900 text-primary dark:text-accent-cyan font-mono border border-slate-200 dark:border-white/10">
+            <code className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-dark-900 text-primary dark:text-accent-cyan font-mono border border-slate-200 dark:border-slate-700">
               chrome://extensions/
             </code>
           </li>
@@ -81,21 +83,19 @@ export function EndpointAIView() {
           </li>
           <li>
             Click <strong className="text-slate-900 dark:text-white font-bold">Load unpacked</strong> and select the directory:{' '}
-            <code className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-dark-900 text-primary dark:text-accent-cyan font-mono border border-slate-200 dark:border-white/10">
+            <code className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-dark-900 text-primary dark:text-accent-cyan font-mono border border-slate-200 dark:border-slate-700">
               frontend/extension/
             </code>
           </li>
           <li>
             Open the extension popup from the browser toolbar and click{' '}
-            <strong className="text-primary dark:text-primary-light">⚡ Auto-Enroll Extension</strong>.
+            <strong className="text-primary dark:text-primary-light">Auto-Enroll Extension</strong>.
           </li>
           <li>
-            The status indicator will switch to <span className="text-emerald-600 dark:text-emerald-400 font-bold">CONNECTED 🟢</span> and
-            commence client-side prompt guarding.
+            The status indicator will switch to <span className="text-emerald-600 dark:text-emerald-400 font-bold">CONNECTED</span> and commence client-side prompt guarding.
           </li>
           <li>
-            Navigate to any supported platform (ChatGPT, Claude, etc.) — the top monitoring banner confirms active
-            interception.
+            Navigate to any supported platform (ChatGPT, Claude, etc.) — the top monitoring banner confirms active interception.
           </li>
         </ol>
       </div>

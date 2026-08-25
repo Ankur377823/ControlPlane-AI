@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { CheckCircle2, AlertTriangle, Info, Zap, X } from 'lucide-react';
 
 const ToastContext = createContext(null);
 
@@ -24,21 +25,21 @@ export function ToastProvider({ children }) {
       {/* Toast Overlay */}
       <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md w-full pointer-events-none px-4 sm:px-0">
         {toasts.map((toast) => {
-          let bg = 'bg-slate-800 border-slate-700 text-slate-100';
-          let icon = 'ℹ️';
+          let bg = 'bg-white dark:bg-dark-850 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-lg';
+          let icon = <Info className="w-4 h-4 text-primary" />;
 
           if (toast.type === 'success') {
-            bg = 'bg-emerald-950/90 border-emerald-500/40 text-emerald-100 shadow-emerald-900/20';
-            icon = '✅';
+            bg = 'bg-white dark:bg-dark-850 border-emerald-500/30 text-slate-900 dark:text-slate-100 shadow-emerald-500/10 shadow-lg';
+            icon = <CheckCircle2 className="w-4 h-4 text-emerald-500" />;
           } else if (toast.type === 'error') {
-            bg = 'bg-rose-950/90 border-rose-500/40 text-rose-100 shadow-rose-900/20';
-            icon = '⚠️';
+            bg = 'bg-white dark:bg-dark-850 border-rose-500/30 text-slate-900 dark:text-slate-100 shadow-rose-500/10 shadow-lg';
+            icon = <AlertTriangle className="w-4 h-4 text-rose-500" />;
           } else if (toast.type === 'warning') {
-            bg = 'bg-amber-950/90 border-amber-500/40 text-amber-100 shadow-amber-900/20';
-            icon = '⚡';
+            bg = 'bg-white dark:bg-dark-850 border-amber-500/30 text-slate-900 dark:text-slate-100 shadow-amber-500/10 shadow-lg';
+            icon = <AlertTriangle className="w-4 h-4 text-amber-500" />;
           } else if (toast.type === 'cyan') {
-            bg = 'bg-cyan-950/90 border-cyan-500/40 text-cyan-100 shadow-cyan-900/20';
-            icon = '📋';
+            bg = 'bg-white dark:bg-dark-850 border-blue-500/30 text-slate-900 dark:text-slate-100 shadow-blue-500/10 shadow-lg';
+            icon = <Zap className="w-4 h-4 text-primary" />;
           }
 
           return (
@@ -47,14 +48,14 @@ export function ToastProvider({ children }) {
               className={`pointer-events-auto flex items-center justify-between p-3.5 rounded-xl border shadow-xl backdrop-blur-md transition-all duration-300 text-sm animate-bounce-in ${bg}`}
             >
               <div className="flex items-center gap-2.5">
-                <span className="text-base">{icon}</span>
+                <span className="flex-shrink-0">{icon}</span>
                 <span className="font-medium text-xs sm:text-sm">{toast.message}</span>
               </div>
               <button
                 onClick={() => removeToast(toast.id)}
-                className="ml-3 text-slate-400 hover:text-white transition-colors text-xs font-bold px-1.5 py-0.5 rounded"
+                className="ml-3 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors text-xs font-bold p-1 rounded"
               >
-                ✕
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           );

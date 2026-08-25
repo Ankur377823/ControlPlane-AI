@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchResources, validateResource } from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { Boxes, Plus, CheckCircle2, RefreshCw, Zap } from 'lucide-react';
+import { Boxes, Plus, CheckCircle2, RefreshCw, Zap, Server } from 'lucide-react';
 
 export function InventoryView({ onNavigateOnboard }) {
   const [resources, setResources] = useState([]);
@@ -46,23 +46,23 @@ export function InventoryView({ onNavigateOnboard }) {
     const s = (status || 'not_validated').toLowerCase().trim();
     if (s === 'valid' || s === 'validated' || s === 'success') {
       return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 inline-flex items-center gap-1">
-          <span>🟢</span>
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 inline-flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
           <span>Valid</span>
         </span>
       );
     }
     if (s === 'failed' || s === 'invalid' || s === 'error') {
       return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25 inline-flex items-center gap-1">
-          <span>🔴</span>
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25 inline-flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
           <span>Failed</span>
         </span>
       );
     }
     return (
-      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25 inline-flex items-center gap-1">
-        <span>🟡</span>
+      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25 inline-flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
         <span>Not Validated</span>
       </span>
     );
@@ -92,10 +92,10 @@ export function InventoryView({ onNavigateOnboard }) {
       </div>
 
       {/* Table Card */}
-      <div className="glass-panel rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10">
+      <div className="glass-panel rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-100 dark:bg-dark-800/90 border-b border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 uppercase font-bold text-[10px] tracking-wider">
+            <thead className="bg-slate-50 dark:bg-dark-900 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase font-bold text-[10px] tracking-wider">
               <tr>
                 <th className="py-3.5 px-4">AI Tool / Resource Name</th>
                 <th className="py-3.5 px-4">AI Provider</th>
@@ -106,7 +106,7 @@ export function InventoryView({ onNavigateOnboard }) {
                 <th className="py-3.5 px-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200/80 dark:divide-white/5 text-slate-700 dark:text-slate-300">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-700 dark:text-slate-300">
               {loading && resources.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="py-12 text-center text-slate-500 dark:text-slate-400">
@@ -122,14 +122,14 @@ export function InventoryView({ onNavigateOnboard }) {
                 </tr>
               ) : (
                 resources.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                  <tr key={r.id} className="hover:bg-slate-50/80 dark:hover:bg-dark-900/50 transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-slate-900 dark:text-white">{r.resource_name}</div>
                       <div className="text-[10px] text-slate-500 font-mono">ID: {r.id}</div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="font-bold text-primary dark:text-accent-cyan flex items-center gap-1">
-                        <Zap className="w-3 h-3" />
+                      <span className="font-bold text-primary dark:text-accent-cyan flex items-center gap-1.5">
+                        <Server className="w-3.5 h-3.5" />
                         <span>{r.ai_provider === 'botpress' ? 'Botpress Connector' : 'Botpress Webhook'}</span>
                       </span>
                     </td>
@@ -151,7 +151,7 @@ export function InventoryView({ onNavigateOnboard }) {
                       <button
                         onClick={() => handleValidate(r.id)}
                         disabled={validatingId === r.id}
-                        className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 text-xs font-semibold transition-colors disabled:opacity-50 inline-flex items-center gap-1"
+                        className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors disabled:opacity-50 inline-flex items-center gap-1 shadow-sm"
                       >
                         {validatingId === r.id ? (
                           <RefreshCw className="w-3 h-3 animate-spin" />

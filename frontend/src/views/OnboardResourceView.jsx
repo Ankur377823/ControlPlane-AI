@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { onboardResource } from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { Bot, ArrowLeft } from 'lucide-react';
+import { Bot, ArrowLeft, Zap, CheckCircle2 } from 'lucide-react';
 
 export function OnboardResourceView({ onBack, onComplete }) {
   const [provider, setProvider] = useState('botpress');
@@ -31,7 +31,7 @@ export function OnboardResourceView({ onBack, onComplete }) {
         ai_provider: provider,
       };
       const res = await onboardResource(payload);
-      showToast(`Successfully onboarded AI Tool '${res.resource_name}'!`, 'success');
+      showToast(`Successfully onboarded AI Tool '${res.resource_name}'`, 'success');
       if (onComplete) onComplete();
       onBack();
     } catch (err) {
@@ -46,16 +46,16 @@ export function OnboardResourceView({ onBack, onComplete }) {
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-white/10 text-xs font-semibold transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-850 dark:hover:bg-dark-800 text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs font-semibold transition-colors shadow-sm"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Monitored Resources</span>
         </button>
       </div>
 
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-primary/40 shadow-xl space-y-6">
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm space-y-6">
         {/* Title */}
-        <div className="border-b border-slate-200 dark:border-white/10 pb-4">
+        <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
           <h3 className="font-brand font-bold text-xl text-slate-900 dark:text-white flex items-center gap-2">
             <Bot className="w-6 h-6 text-primary" />
             <span>Onboard & Connect AI Tools & Chatbots</span>
@@ -75,15 +75,16 @@ export function OnboardResourceView({ onBack, onComplete }) {
             className="p-4 rounded-2xl border-2 border-primary bg-primary/5 dark:bg-primary/10 hover:bg-primary/10 transition-all cursor-pointer flex items-center gap-4 shadow-sm"
           >
             <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-primary to-accent-cyan flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-md">
-              ⚡
+              <Zap className="w-6 h-6" />
             </div>
             <div>
               <div className="font-bold text-slate-900 dark:text-white text-sm">Botpress Connector</div>
               <div className="text-xs text-slate-500 dark:text-slate-400">Botpress Chatbot API & Webhook Integration</div>
             </div>
             <div className="ml-auto">
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
-                ✅ Active Connector
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                <span>Active Connector</span>
               </span>
             </div>
           </div>
@@ -102,7 +103,7 @@ export function OnboardResourceView({ onBack, onComplete }) {
                 onChange={(e) => setAccountName(e.target.value)}
                 placeholder="e.g. Botpress Production Workspace"
                 required
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-primary shadow-sm"
               />
             </div>
 
@@ -116,7 +117,7 @@ export function OnboardResourceView({ onBack, onComplete }) {
                 onChange={(e) => setResourceName(e.target.value)}
                 placeholder="e.g. Customer Support Assistant"
                 required
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-primary shadow-sm"
               />
             </div>
           </div>
@@ -132,7 +133,7 @@ export function OnboardResourceView({ onBack, onComplete }) {
                 onChange={(e) => setWebhookId(e.target.value)}
                 placeholder="e.g. 5e89a2b1-4f1c-490b-928d-318e860bc904"
                 required
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 font-mono focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 font-mono focus:outline-none focus:border-primary shadow-sm"
               />
             </div>
 
@@ -143,7 +144,7 @@ export function OnboardResourceView({ onBack, onComplete }) {
               <select
                 value={useCase}
                 onChange={(e) => setUseCase(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-primary shadow-sm"
               >
                 <option value="customer_support">Customer Support Bot (High PII Guardrail)</option>
                 <option value="internal_copilot">Internal Employee Copilot (Secret Redaction)</option>
@@ -156,14 +157,14 @@ export function OnboardResourceView({ onBack, onComplete }) {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 py-3 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-lg shadow-primary/25 transition-colors disabled:opacity-50"
+              className="flex-1 py-3 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md shadow-primary/25 transition-colors disabled:opacity-50"
             >
-              {submitting ? 'Connecting...' : '🚀 Save & Onboard Botpress Resource'}
+              {submitting ? 'Connecting...' : 'Save & Onboard Resource'}
             </button>
             <button
               type="button"
               onClick={onBack}
-              className="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-white/10 text-xs font-semibold transition-colors"
+              className="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm"
             >
               Cancel
             </button>
