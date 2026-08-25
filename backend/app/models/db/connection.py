@@ -151,6 +151,26 @@ SCHEMA_TABLES = [
 SCHEMA = "\n".join(SCHEMA_TABLES)
 
 
+class PostgresRow(dict):
+    """Wrapper around psycopg2 RealDictRow to allow both key access (row['name']) and index access (row[0]), matching sqlite3.Row."""
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            try:
+                return list(self.values())[key]
+            except IndexError:
+                raise IndexError(f"Tuple index out of range: {key}")
+        return super().__getitem__(key)
+
+    def get(self, key, default=None):
+        if isinstance(key, int):
+            try:
+                return list(self.values())[key]
+            except IndexError:
+                return default
+        return super().get(key, default)
+
+
 class PostgresCursorWrapper:
     """Wrapper around psycopg2 RealDictCursor to normalize execute and query behavior."""
 
@@ -173,11 +193,11 @@ class PostgresCursorWrapper:
 
     def fetchone(self):
         row = self._cursor.fetchone()
-        return dict(row) if row is not None else None
+        return PostgresRow(row) if row is not None else None
 
     def fetchall(self):
         rows = self._cursor.fetchall()
-        return [dict(r) for r in rows] if rows else []
+        return [PostgresRow(r) for r in rows] if rows else []
 
     @property
     def rowcount(self):

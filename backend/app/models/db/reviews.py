@@ -135,16 +135,20 @@ def get_trustworthiness_metrics(tenant_id: Optional[str] = "ankur-tenant-1") -> 
     Human Override Rate, and Detector Specific Accuracy.
     """
     with get_conn() as conn:
-        total_interceptions = conn.execute("SELECT COUNT(*) FROM interceptions").fetchone()[0]
+        r_int = conn.execute("SELECT COUNT(*) as c FROM interceptions").fetchone()
+        total_interceptions = (r_int[0] if r_int else 0) or 0
         
         # Check feedback counts
         fp_count = 0
         tp_count = 0
         override_count = 0
         try:
-            fp_count = conn.execute("SELECT COUNT(*) FROM interceptions WHERE status IN ('false_positive', 'rejected')").fetchone()[0]
-            tp_count = conn.execute("SELECT COUNT(*) FROM interceptions WHERE status IN ('resolved', 'approved')").fetchone()[0]
-            override_count = conn.execute("SELECT COUNT(*) FROM interceptions WHERE status = 'overridden'").fetchone()[0]
+            r_fp = conn.execute("SELECT COUNT(*) as c FROM interceptions WHERE status IN ('false_positive', 'rejected')").fetchone()
+            fp_count = (r_fp[0] if r_fp else 0) or 0
+            r_tp = conn.execute("SELECT COUNT(*) as c FROM interceptions WHERE status IN ('resolved', 'approved')").fetchone()
+            tp_count = (r_tp[0] if r_tp else 0) or 0
+            r_ov = conn.execute("SELECT COUNT(*) as c FROM interceptions WHERE status = 'overridden'").fetchone()
+            override_count = (r_ov[0] if r_ov else 0) or 0
         except Exception:
             pass
 

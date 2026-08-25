@@ -283,9 +283,12 @@ def get_analytics_summary(tenant_id: Optional[str] = "ankur-tenant-1") -> dict:
     tenant_api_key = get_tenant_api_key(tenant_id)
 
     with get_conn() as conn:
-        total_interceptions = conn.execute("SELECT COUNT(*) FROM interceptions").fetchone()[0]
-        total_scans = conn.execute("SELECT COUNT(*) FROM scans").fetchone()[0]
-        total_resources = conn.execute("SELECT COUNT(*) FROM resources").fetchone()[0]
+        r_int = conn.execute("SELECT COUNT(*) as c FROM interceptions").fetchone()
+        total_interceptions = (r_int[0] if r_int else 0) or 0
+        r_scan = conn.execute("SELECT COUNT(*) as c FROM scans").fetchone()
+        total_scans = (r_scan[0] if r_scan else 0) or 0
+        r_res = conn.execute("SELECT COUNT(*) as c FROM resources").fetchone()
+        total_resources = (r_res[0] if r_res else 0) or 0
 
         scan_rows = conn.execute("SELECT id FROM scans ORDER BY created_at DESC LIMIT 5").fetchall()
         scan_ids = [r["id"] for r in scan_rows]
@@ -308,13 +311,15 @@ def get_analytics_summary(tenant_id: Optional[str] = "ankur-tenant-1") -> dict:
 
         fp_count = 0
         try:
-            fp_count = conn.execute("SELECT COUNT(*) FROM interceptions WHERE status = 'false_positive'").fetchone()[0]
+            r_fp = conn.execute("SELECT COUNT(*) as c FROM interceptions WHERE status = 'false_positive'").fetchone()
+            fp_count = (r_fp[0] if r_fp else 0) or 0
         except Exception:
             pass
 
         total_flagged = action_breakdown.get("BLOCK", 0) + action_breakdown.get("MASK", 0) + action_breakdown.get("CONFIRM_REQUIRED", 0) + fp_count
         fp_rate = round((fp_count / total_flagged * 100), 1) if total_flagged > 0 else 1.2
-        fn_rate = round(100.0 - (averages["avg_r"] or 99.1), 1)
+        avg_r = (averages["avg_r"] if (averages and averages["avg_r"] is not None) else None) or 99.1
+        fn_rate = round(100.0 - avg_r, 1)
         trustworthiness = round(100.0 - (fp_rate * 0.4) - (fn_rate * 0.6), 1)
         trustworthiness = max(85.0, min(99.9, trustworthiness))
 
