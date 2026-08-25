@@ -70,7 +70,7 @@ export function LoginScreen() {
                   setUsername(e.target.value);
                   if (errorMsg) setErrorMsg('');
                 }}
-                placeholder="ankur@acme.com"
+                placeholder="Enter your email address"
                 required
                 className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-md px-3.5 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors"
               />
@@ -137,7 +137,7 @@ export function LoginScreen() {
           </button>
 
           {/* Google Sign In Option */}
-          <div className="pt-2">
+          {/* <div className="pt-2">
             <button
               type="button"
               onClick={() => googleLogin('ankur@acme.com', 'Ankur Kumar Singh')}
@@ -146,10 +146,10 @@ export function LoginScreen() {
               <Key className="w-3.5 h-3.5 text-primary" />
               <span>Sign in with Google OAuth (Demo)</span>
             </button>
-          </div>
+          </div> */}
 
           {/* Google Sign In Option */}
-          <button
+          {/* <button
             type="button"
             onClick={() => googleLogin('ankur@acme.com', 'Ankur Kumar Singh')}
             className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-dark-900 dark:hover:bg-dark-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold transition-colors flex items-center justify-center gap-2.5 shadow-sm"
@@ -173,7 +173,7 @@ export function LoginScreen() {
               />
             </svg>
             <span>Google</span>
-          </button>
+          </button> */}
         </form>
       </div>
     </div>
