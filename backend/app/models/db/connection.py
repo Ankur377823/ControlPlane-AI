@@ -570,11 +570,17 @@ def _seed_default_users(conn) -> None:
         pass
 
     now = _now()
+    admin_uname = os.environ.get("ADMIN_USERNAME", "ankur")
+    admin_email = os.environ.get("ADMIN_EMAIL", "ankur@acme.com")
+    admin_pwd = os.environ.get("ADMIN_PASSWORD", "password123")
+    admin_name = os.environ.get("ADMIN_NAME", "Ankur Kumar Singh")
+
     users = [
-        ("usr_ankur", "ankur", "ankur@acme.com", "password123", "Ankur Kumar Singh", "ADMIN", "local", "approved", "tnt_84ndhdjdj94844hj", now),
-        ("usr_john", "john", "john@acme.com", "password123", "John Acme", "USER", "local", "approved", "tnt_84ndhdjdj94844hj", now),
-        ("usr_alice", "alice", "alice@globex.com", "password123", "Alice Globex", "USER", "local", "approved", "tnt_92kf74bc109312ae", now),
+        ("usr_admin", admin_uname, admin_email, admin_pwd, admin_name, "ADMIN", "local", "approved", "tnt_84ndhdjdj94844hj", now),
+        ("usr_john", "john", "john@acme.com", os.environ.get("USER1_PASSWORD", "password123"), "John Acme", "USER", "local", "approved", "tnt_84ndhdjdj94844hj", now),
+        ("usr_alice", "alice", "alice@globex.com", os.environ.get("USER2_PASSWORD", "password123"), "Alice Globex", "USER", "local", "approved", "tnt_92kf74bc109312ae", now),
     ]
+
     for u in users:
         row = conn.execute("SELECT id FROM users WHERE id = ? OR username = ?", (u[0], u[1])).fetchone()
         if not row:
