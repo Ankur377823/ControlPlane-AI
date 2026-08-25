@@ -63,7 +63,7 @@
   // Prevent duplicate banner insertion
   if (document.getElementById("controlplane-top-banner")) return;
 
-  console.log("🛡️ ControlPlane AI Guardrail active on AI Chatbot: " + host);
+  console.log("[ControlPlane AI Guardrail] Active on AI Chatbot: " + host);
 
   const blockedPromptsSet = new Set();
   let isChecking = false;
@@ -76,34 +76,34 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 38px;
+    height: 34px;
     z-index: 2147483645;
-    background: #0f172a;
-    border-bottom: 1px solid rgba(99, 102, 241, 0.4);
-    color: #f8fafc;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #090d16;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #f1f5f9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-size: 12px;
     font-weight: 500;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 16px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    transition: all 0.25s ease;
   `;
 
   banner.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px;">
-      <span style="font-size: 14px;">🛡️</span>
-      <span id="cp-banner-text"><strong>ControlPlane AI Protection Active</strong> — Protecting ${host}</span>
+      <span id="cp-banner-dot" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);"></span>
+      <span id="cp-banner-text" style="color: #cbd5e1; font-weight: 500;">ControlPlane Active — Guarding ${host}</span>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
-      <span id="cp-banner-badge" style="background: #6366f1; color: #ffffff; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase;">ACTIVE</span>
-      <button id="cp-banner-dismiss" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 2px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Dismiss</button>
+      <span id="cp-banner-badge" style="background: rgba(99, 102, 241, 0.12); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.25); padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;">ACTIVE</span>
+      <button id="cp-banner-dismiss" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500; transition: all 0.15s ease;">Dismiss</button>
     </div>
   `;
 
-  document.documentElement.style.marginTop = "38px";
+  document.documentElement.style.marginTop = "34px";
   document.body.appendChild(banner);
 
   const dismissBtn = document.getElementById("cp-banner-dismiss");
@@ -124,18 +124,18 @@
     z-index: 2147483647;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    max-width: 440px;
+    gap: 8px;
+    max-width: 420px;
     width: calc(100vw - 48px);
     pointer-events: none;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   `;
   document.body.appendChild(toastContainer);
 
   const styleEl = document.createElement("style");
   styleEl.textContent = `
     @keyframes cpSlideUp {
-      from { opacity: 0; transform: translateY(16px); }
+      from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
   `;
@@ -145,46 +145,53 @@
     const card = document.createElement("div");
     card.style.cssText = `
       pointer-events: auto;
-      background: #0f172a;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 14px;
-      padding: 14px 16px;
-      color: #ffffff;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-      animation: cpSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      background: #0d131f;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: #f1f5f9;
+      box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.7);
+      animation: cpSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      transition: all 0.3s ease;
+      gap: 5px;
+      transition: all 0.2s ease;
     `;
 
-    let badgeColor = "#6366f1";
+    let badgeColor = "rgba(99, 102, 241, 0.12)";
+    let badgeBorder = "rgba(99, 102, 241, 0.25)";
+    let badgeTextColor = "#818cf8";
     let badgeText = "PROTECTED";
-    let icon = "🛡️";
+    let dotColor = "#818cf8";
 
     if (type === "BLOCK") {
-      card.style.borderColor = "#ef4444";
-      card.style.boxShadow = "0 10px 30px rgba(239, 68, 68, 0.25)";
-      badgeColor = "#ef4444";
+      card.style.border = "1px solid rgba(244, 63, 94, 0.35)";
+      badgeColor = "rgba(244, 63, 94, 0.15)";
+      badgeBorder = "rgba(244, 63, 94, 0.3)";
+      badgeTextColor = "#fb7185";
       badgeText = "BLOCKED";
-      icon = "⛔";
+      dotColor = "#f43f5e";
     } else if (type === "MASK") {
-      card.style.borderColor = "#06b6d4";
-      card.style.boxShadow = "0 10px 30px rgba(6, 182, 212, 0.25)";
-      badgeColor = "#06b6d4";
-      badgeText = "MASKED & SANITIZED";
-      icon = "🔒";
+      card.style.border = "1px solid rgba(6, 182, 212, 0.35)";
+      badgeColor = "rgba(6, 182, 212, 0.15)";
+      badgeBorder = "rgba(6, 182, 212, 0.3)";
+      badgeTextColor = "#38bdf8";
+      badgeText = "MASKED";
+      dotColor = "#06b6d4";
     } else if (type === "DETECT" || type === "MONITOR") {
-      card.style.borderColor = "#f59e0b";
-      card.style.boxShadow = "0 10px 30px rgba(245, 158, 11, 0.25)";
-      badgeColor = "#f59e0b";
-      badgeText = "DETECTED & AUDITED";
-      icon = "👁️";
+      card.style.border = "1px solid rgba(245, 158, 11, 0.35)";
+      badgeColor = "rgba(245, 158, 11, 0.15)";
+      badgeBorder = "rgba(245, 158, 11, 0.3)";
+      badgeTextColor = "#fbbf24";
+      badgeText = "AUDITED";
+      dotColor = "#f59e0b";
     } else if (type === "CONFIRM") {
-      card.style.borderColor = "#f97316";
-      badgeColor = "#f97316";
+      card.style.border = "1px solid rgba(249, 115, 22, 0.35)";
+      badgeColor = "rgba(249, 115, 22, 0.15)";
+      badgeBorder = "rgba(249, 115, 22, 0.3)";
+      badgeTextColor = "#fb923c";
       badgeText = "CONFIRMATION NEEDED";
-      icon = "⚠️";
+      dotColor = "#f97316";
     }
 
     const safeDetails = details
@@ -193,20 +200,20 @@
 
     card.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px;">
-          <span>${icon}</span>
-          <span style="color: #ffffff;">${title}</span>
+        <div style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 12px;">
+          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: ${dotColor}; box-shadow: 0 0 6px ${dotColor};"></span>
+          <span style="color: #f8fafc;">${title}</span>
         </div>
-        <span style="background: ${badgeColor}; color: #ffffff; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase;">
+        <span style="background: ${badgeColor}; color: ${badgeTextColor}; border: 1px solid ${badgeBorder}; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;">
           ${badgeText}
         </span>
       </div>
-      <div style="font-size: 12px; color: #cbd5e1; line-height: 1.4;">
+      <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
         ${message}
       </div>
       ${
         safeDetails
-          ? `<div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 8px; font-family: monospace; font-size: 11px; color: #38bdf8; margin-top: 4px; word-break: break-all; max-height: 80px; overflow-y: auto;">
+          ? `<div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.06); padding: 6px 8px; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace; font-size: 10.5px; color: #7dd3fc; margin-top: 4px; word-break: break-all; max-height: 80px; overflow-y: auto;">
               ${safeDetails}
              </div>`
           : ""
@@ -217,9 +224,9 @@
 
     setTimeout(() => {
       card.style.opacity = "0";
-      card.style.transform = "translateY(10px)";
-      setTimeout(() => card.remove(), 300);
-    }, 6000);
+      card.style.transform = "translateY(8px)";
+      setTimeout(() => card.remove(), 250);
+    }, 5000);
   }
 
   // 5. Synchronous Keydown Interception on Enter Key
@@ -236,7 +243,7 @@
 
           if (blockedPromptsSet.has(text)) {
             haltEvent(e);
-            updateBannerUI("BLOCK", "⛔ Permanently Blocked: Prompt contains sensitive secret/PII or injection threat!");
+            updateBannerUI("BLOCK", "Permanently Blocked: Prompt contains sensitive secret, PII, or injection threat.");
             showInPageAlert("BLOCK", "Action Blocked", "Prompt is blocked by ControlPlane policy.");
             return false;
           }
@@ -288,7 +295,7 @@
 
           if (blockedPromptsSet.has(text)) {
             haltEvent(e);
-            updateBannerUI("BLOCK", "⛔ Permanently Blocked: Prompt contains sensitive secret/PII or injection threat!");
+            updateBannerUI("BLOCK", "Permanently Blocked: Prompt contains sensitive secret, PII, or injection threat.");
             showInPageAlert("BLOCK", "Action Blocked", "Prompt is blocked by ControlPlane policy.");
             return false;
           }
@@ -319,7 +326,7 @@
     }
 
     if (result.action === "CONFIRM_REQUIRED") {
-      updateBannerUI("CONFIRM", "⚠️ High-Risk Action Intercepted: Explicit User Confirmation Required!", result);
+      updateBannerUI("CONFIRM", "Confirmation Required: Explicit user approval needed before tool execution.", result);
       showInPageAlert("CONFIRM", "Confirmation Required", "High-risk tool call execution requires explicit approval.");
       showConfirmationModal(result, rawText, inputEl);
       return;
@@ -328,10 +335,10 @@
     if (result.action === "BLOCK") {
       blockedPromptsSet.add(rawText);
       if (inputEl) {
-        inputEl.style.border = "2px solid #ef4444";
-        inputEl.style.boxShadow = "0 0 12px rgba(239, 68, 68, 0.4)";
+        inputEl.style.border = "1px solid #f43f5e";
+        inputEl.style.boxShadow = "0 0 10px rgba(244, 63, 94, 0.25)";
       }
-      updateBannerUI("BLOCK", "⛔ Action Blocked: High severity risk or policy violation detected!", result);
+      updateBannerUI("BLOCK", "Action Blocked: High severity risk or policy violation detected.", result);
       showInPageAlert(
         "BLOCK",
         "Prompt Blocked",
@@ -352,11 +359,11 @@
       const sanitized = result.sanitized_prompt || rawText;
 
       setInputValue(inputEl, sanitized);
-      updateBannerUI("MASK", "🛡️ Sensitive Data Redacted: Prompt sanitized before sending.", result);
+      updateBannerUI("MASK", "Sensitive Data Redacted: Prompt sanitized before sending.", result);
 
       showInPageAlert(
         "MASK",
-        "PII Redacted & Sanitized",
+        "Data Redacted",
         "Sensitive information was automatically masked before submission.",
         `Sanitized: ${sanitized}`
       );
@@ -370,23 +377,23 @@
       result.action === "FLAG" ||
       (result.risk_findings && result.risk_findings.length > 0)
     ) {
-      updateBannerUI("MONITOR", "👁️ Risk Detected: Logged to ControlPlane Risk Findings Telemetry.", result);
+      updateBannerUI("MONITOR", "Risk Detected: Logged to ControlPlane Risk Findings.", result);
 
       const reasons =
         result.triggered_rules && result.triggered_rules.length > 0
           ? result.triggered_rules.join(", ")
-          : "Risk detected & recorded to security telemetry";
+          : "Risk pattern detected and logged to telemetry";
 
       showInPageAlert(
         "DETECT",
-        "Risk Detected & Audited",
-        "Prompt allowed, but sensitive pattern was detected and recorded in your Governance Studio.",
+        "Risk Telemetry Logged",
+        "Prompt allowed, but sensitive pattern was detected and recorded in Governance Studio.",
         reasons
       );
 
       triggerNativeSubmit(inputEl);
     } else {
-      updateBannerUI("ALLOW", "✅ Clean Query — Passed all guardrails", result);
+      updateBannerUI("ALLOW", "Clean Query: Verified across all policy guardrails", result);
       triggerNativeSubmit(inputEl);
     }
   }
@@ -632,40 +639,70 @@
   function updateBannerUI(action, message, data) {
     const textEl = document.getElementById("cp-banner-text");
     const badgeEl = document.getElementById("cp-banner-badge");
+    const dotEl = document.getElementById("cp-banner-dot");
 
-    if (textEl) textEl.innerText = message;
-    if (badgeEl) badgeEl.innerText = action;
+    if (textEl) textEl.textContent = message;
+    if (badgeEl) badgeEl.textContent = action;
+
+    // Standard enterprise dark baseline
+    banner.style.background = "#090d16";
+    banner.style.color = "#f1f5f9";
 
     if (action === "BLOCK") {
-      banner.style.background = "#450a0a";
-      banner.style.borderBottom = "1px solid #ef4444";
-      banner.style.color = "#fecaca";
-      badgeEl.style.background = "#ef4444";
-      badgeEl.style.color = "#ffffff";
+      banner.style.borderBottom = "1px solid rgba(244, 63, 94, 0.35)";
+      if (dotEl) {
+        dotEl.style.background = "#f43f5e";
+        dotEl.style.boxShadow = "0 0 6px rgba(244, 63, 94, 0.6)";
+      }
+      if (badgeEl) {
+        badgeEl.style.background = "rgba(244, 63, 94, 0.15)";
+        badgeEl.style.color = "#fb7185";
+        badgeEl.style.border = "1px solid rgba(244, 63, 94, 0.3)";
+      }
     } else if (action === "MASK" || action === "REDACT") {
-      banner.style.background = "#082f49";
-      banner.style.borderBottom = "1px solid #06b6d4";
-      banner.style.color = "#bae6fd";
-      badgeEl.style.background = "#06b6d4";
-      badgeEl.style.color = "#ffffff";
+      banner.style.borderBottom = "1px solid rgba(6, 182, 212, 0.35)";
+      if (dotEl) {
+        dotEl.style.background = "#06b6d4";
+        dotEl.style.boxShadow = "0 0 6px rgba(6, 182, 212, 0.6)";
+      }
+      if (badgeEl) {
+        badgeEl.style.background = "rgba(6, 182, 212, 0.15)";
+        badgeEl.style.color = "#38bdf8";
+        badgeEl.style.border = "1px solid rgba(6, 182, 212, 0.3)";
+      }
     } else if (action === "MONITOR") {
-      banner.style.background = "#451a03";
-      banner.style.borderBottom = "1px solid #f59e0b";
-      banner.style.color = "#fef3c7";
-      badgeEl.style.background = "#f59e0b";
-      badgeEl.style.color = "#ffffff";
+      banner.style.borderBottom = "1px solid rgba(245, 158, 11, 0.35)";
+      if (dotEl) {
+        dotEl.style.background = "#f59e0b";
+        dotEl.style.boxShadow = "0 0 6px rgba(245, 158, 11, 0.6)";
+      }
+      if (badgeEl) {
+        badgeEl.style.background = "rgba(245, 158, 11, 0.15)";
+        badgeEl.style.color = "#fbbf24";
+        badgeEl.style.border = "1px solid rgba(245, 158, 11, 0.3)";
+      }
     } else if (action === "CONFIRM") {
-      banner.style.background = "#431407";
-      banner.style.borderBottom = "1px solid #f97316";
-      banner.style.color = "#ffedd5";
-      badgeEl.style.background = "#ea580c";
-      badgeEl.style.color = "#ffffff";
+      banner.style.borderBottom = "1px solid rgba(249, 115, 22, 0.35)";
+      if (dotEl) {
+        dotEl.style.background = "#f97316";
+        dotEl.style.boxShadow = "0 0 6px rgba(249, 115, 22, 0.6)";
+      }
+      if (badgeEl) {
+        badgeEl.style.background = "rgba(249, 115, 22, 0.15)";
+        badgeEl.style.color = "#fb923c";
+        badgeEl.style.border = "1px solid rgba(249, 115, 22, 0.3)";
+      }
     } else {
-      banner.style.background = "#022c22";
-      banner.style.borderBottom = "1px solid #10b981";
-      banner.style.color = "#d1fae5";
-      badgeEl.style.background = "#10b981";
-      badgeEl.style.color = "#ffffff";
+      banner.style.borderBottom = "1px solid rgba(16, 185, 129, 0.3)";
+      if (dotEl) {
+        dotEl.style.background = "#10b981";
+        dotEl.style.boxShadow = "0 0 6px rgba(16, 185, 129, 0.6)";
+      }
+      if (badgeEl) {
+        badgeEl.style.background = "rgba(16, 185, 129, 0.15)";
+        badgeEl.style.color = "#34d399";
+        badgeEl.style.border = "1px solid rgba(16, 185, 129, 0.3)";
+      }
     }
   }
 
@@ -680,39 +717,39 @@
       position: fixed;
       inset: 0;
       z-index: 2147483647;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(6px);
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 1rem;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     `;
 
     modal.innerHTML = `
-      <div style="background: #1e293b; border: 1px solid #ea580c; border-radius: 14px; max-width: 480px; width: 100%; padding: 1.5rem; color: #ffffff; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
-          <span style="font-size: 1.8rem;">⚠️</span>
+      <div style="background: #0d131f; border: 1px solid rgba(249, 115, 22, 0.35); border-radius: 8px; max-width: 460px; width: 100%; padding: 1.25rem; color: #f8fafc; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
           <div>
-            <h3 style="margin: 0; font-size: 1.15rem; color: #f97316; font-weight: 700;">Action Confirmation Required</h3>
-            <span style="font-size: 0.78rem; color: #94a3b8;">Risk Tier: <strong>${result.action_risk_tier || "HIGH"}</strong></span>
+            <h3 style="margin: 0; font-size: 1.05rem; color: #f97316; font-weight: 700;">Action Confirmation Required</h3>
+            <span style="font-size: 0.75rem; color: #94a3b8;">Risk Tier: <strong>${result.action_risk_tier || "HIGH"}</strong></span>
           </div>
+          <span style="background: rgba(249, 115, 22, 0.15); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3); padding: 2px 7px; border-radius: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase;">REQUIRED</span>
         </div>
 
-        <div style="background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 1.25rem; font-size: 0.85rem;">
-          <div style="color: #cbd5e1; margin-bottom: 4px;">An AI Agent requested to execute:</div>
-          <code style="color: #38bdf8; font-family: monospace; font-size: 0.9rem;">${toolName}</code>
-          <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 8px; font-style: italic;">
+        <div style="background: rgba(0, 0, 0, 0.4); padding: 10px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 1.25rem; font-size: 0.82rem;">
+          <div style="color: #94a3b8; margin-bottom: 4px;">An AI Agent requested to execute:</div>
+          <code style="color: #38bdf8; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.85rem;">${toolName}</code>
+          <div style="color: #cbd5e1; font-size: 0.78rem; margin-top: 6px;">
             "${rawText.substring(0, 120)}${rawText.length > 120 ? "..." : ""}"
           </div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 10px;">
-          <button id="cp-modal-cancel" style="background: #334155; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
-            🛑 Block Action
+        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+          <button id="cp-modal-cancel" style="background: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.12); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.82rem;">
+            Block Action
           </button>
-          <button id="cp-modal-approve" style="background: #ea580c; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.85rem;">
-            ✅ Approve & Execute
+          <button id="cp-modal-approve" style="background: #ea580c; color: #ffffff; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.82rem;">
+            Approve & Execute
           </button>
         </div>
       </div>
@@ -725,7 +762,7 @@
       cancelBtn.addEventListener("click", () => {
         modal.remove();
         blockedPromptsSet.add(rawText);
-        updateBannerUI("BLOCK", "⛔ Action Cancelled by User!");
+        updateBannerUI("BLOCK", "Action Cancelled: High-risk tool execution blocked by user.");
         showInPageAlert("BLOCK", "Action Cancelled", "High-risk tool call execution blocked by user.");
       });
     }
@@ -734,7 +771,7 @@
     if (approveBtn) {
       approveBtn.addEventListener("click", () => {
         modal.remove();
-        updateBannerUI("ALLOW", "✅ Approved by User — Executing Action");
+        updateBannerUI("ALLOW", "Action Approved: Executing tool call.");
         showInPageAlert("ALLOW", "Action Approved", "User confirmed and allowed tool call execution.");
         triggerNativeSubmit(inputEl);
       });
@@ -818,40 +855,39 @@
         ? data.scores.performance_p
         : 100.0;
 
-
       const hasHallucination = (data.risk_findings || []).some(
         rf => rf.type && (rf.type.includes("HALLUCINATION") || rf.type.includes("GROUNDING"))
       ) || pScore < 65.0;
 
-      // Render Inline Badge on ChatGPT Response
+      // Render Inline Badge on AI Response
       const badge = document.createElement("div");
       badge.className = "cp-factuality-inline-badge";
       badge.style.cssText = `
-        margin-top: 10px;
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        margin-top: 8px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         font-size: 11px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 8px;
-        transition: all 0.3s ease;
-        ${
-          hasHallucination
-            ? "background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5;"
-            : "background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #6ee7b7;"
-        }
+        gap: 10px;
+        background: #090e17;
+        border: 1px solid ${hasHallucination ? "rgba(244, 63, 94, 0.28)" : "rgba(255, 255, 255, 0.08)"};
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        color: #94a3b8;
+        transition: all 0.2s ease;
       `;
 
       badge.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span>${hasHallucination ? "⚠️" : "🔬"}</span>
-          <span><strong>ControlPlane AI Factuality:</strong> ${pScore.toFixed(0)}% Score</span>
-          <span style="opacity: 0.8;">• ${hasHallucination ? "Low-Grounding Risk Logged" : "Grounded & Verified"}</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: ${hasHallucination ? "#f43f5e" : "#10b981"}; box-shadow: 0 0 6px ${hasHallucination ? "rgba(244, 63, 94, 0.6)" : "rgba(16, 185, 129, 0.6)"};"></span>
+          <span style="color: #e2e8f0; font-weight: 500;">Factuality & Grounding: <strong style="color: ${hasHallucination ? "#fb7185" : "#34d399"}; font-weight: 700;">${pScore.toFixed(0)}%</strong></span>
+          <span style="color: #475569;">•</span>
+          <span style="color: #94a3b8;">${hasHallucination ? "Low-Grounding Risk Logged" : "Grounded & Verified"}</span>
         </div>
-        <span style="background: ${hasHallucination ? "#ef4444" : "#10b981"}; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 9px; text-transform: uppercase;">
-          ${hasHallucination ? "LOGGED IN RISK FINDINGS" : "VERIFIED SAFE"}
+        <span style="background: ${hasHallucination ? "rgba(244, 63, 94, 0.15)" : "rgba(16, 185, 129, 0.15)"}; color: ${hasHallucination ? "#fb7185" : "#34d399"}; border: 1px solid ${hasHallucination ? "rgba(244, 63, 94, 0.3)" : "rgba(16, 185, 129, 0.3)"}; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase;">
+          ${hasHallucination ? "RISK LOGGED" : "VERIFIED SAFE"}
         </span>
       `;
 
@@ -863,7 +899,7 @@
         showInPageAlert(
           "DETECT",
           `Hallucination Risk Detected (${pScore.toFixed(0)}% Factuality)`,
-          "ChatGPT response contains low-grounding or unverified claims. Automatically recorded in your Risk Findings dashboard.",
+          "Model response contains unverified claims or low factual grounding. Recorded in your Risk Findings dashboard.",
           `Response snippet: "${response.substring(0, 100)}..."`
         );
       }
