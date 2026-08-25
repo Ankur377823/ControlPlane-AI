@@ -85,7 +85,7 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
       </div>
 
       {/* Large Open Findings Card */}
-      <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm">
+      <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-none p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-4 flex-1">
             <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -97,28 +97,28 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
 
             {/* Progress Breakdown Bar */}
             <div className="space-y-2 pt-2">
-              <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-dark-900 overflow-hidden flex">
-                <div style={{ width: `${(criticalCount / totalCount) * 100}%` }} className="bg-rose-500"></div>
+              <div className="w-full h-2 bg-slate-100 dark:bg-dark-900 overflow-hidden flex">
+                <div style={{ width: `${(criticalCount / totalCount) * 100}%` }} className="bg-orange-700"></div>
                 <div style={{ width: `${(highCount / totalCount) * 100}%` }} className="bg-orange-500"></div>
-                <div style={{ width: `${(mediumCount / totalCount) * 100}%` }} className="bg-amber-400"></div>
-                <div style={{ width: `${(lowCount / totalCount) * 100}%` }} className="bg-emerald-500"></div>
+                <div style={{ width: `${(mediumCount / totalCount) * 100}%` }} className="bg-orange-400"></div>
+                <div style={{ width: `${(lowCount / totalCount) * 100}%` }} className="bg-orange-300"></div>
               </div>
 
               <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-600 dark:text-slate-400 pt-1">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                  <span className="w-2 h-2 bg-orange-700"></span>
                   <span>Critical {criticalCount}</span>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                  <span className="w-2 h-2 bg-orange-500"></span>
                   <span>High {highCount}</span>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                  <span className="w-2 h-2 bg-orange-400"></span>
                   <span>Medium {mediumCount}</span>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span className="w-2 h-2 bg-orange-300"></span>
                   <span>Low {lowCount}</span>
                 </span>
               </div>
@@ -137,7 +137,7 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
             </div>
             <div>
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">New Findings MoM</div>
-              <div className="text-lg font-bold text-rose-600 dark:text-rose-400 font-brand">↑ 4%</div>
+              <div className="text-lg font-bold text-primary font-brand">↑ 4%</div>
             </div>
           </div>
         </div>
@@ -145,7 +145,7 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
 
       {/* 4-Card Source Breakdown Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-1">
+        <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-none p-5 shadow-sm space-y-1">
           <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Inventory
           </div>
@@ -153,7 +153,7 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
           <div className="text-xs text-slate-500 dark:text-slate-400">Cloud & platform misconfigurations</div>
         </div>
 
-        <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-1">
+        <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-none p-5 shadow-sm space-y-1">
           <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             AI Runtime
           </div>
@@ -161,7 +161,7 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
           <div className="text-xs text-slate-500 dark:text-slate-400">Gateway LLM & MCP traffic</div>
         </div>
 
-        <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-1">
+        <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-none p-5 shadow-sm space-y-1">
           <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Agent Session
           </div>
@@ -169,7 +169,7 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
           <div className="text-xs text-slate-500 dark:text-slate-400">Autonomous agent violations</div>
         </div>
 
-        <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-1">
+        <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-none p-5 shadow-sm space-y-1">
           <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Endpoint
           </div>
@@ -179,7 +179,7 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
       </div>
 
       {/* Policies & Protection Card */}
-      <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+      <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-none p-6 shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <h3 className="font-brand font-bold text-sm text-slate-900 dark:text-white">Policies & Protection</h3>
           <button
@@ -213,7 +213,7 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
       </div>
 
       {/* Recent Critical Findings Table */}
-      <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden space-y-0">
+      <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-none shadow-sm overflow-hidden space-y-0">
         <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h3 className="font-brand font-bold text-base text-slate-900 dark:text-white">
             Recent Critical Findings
@@ -224,7 +224,7 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
               <select
                 value={severityFilter}
                 onChange={(e) => setSeverityFilter(e.target.value)}
-                className="bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:border-primary shadow-sm"
+                className="bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:border-primary shadow-sm"
               >
                 <option value="critical_high">Critical + High</option>
                 <option value="critical">Critical Only</option>
@@ -244,37 +244,37 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs border-collapse">
             <thead className="bg-slate-50/70 dark:bg-dark-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold text-[11px]">
               <tr>
-                <th className="py-3 px-4">Severity</th>
-                <th className="py-3 px-4">Finding</th>
-                <th className="py-3 px-4">Source</th>
-                <th className="py-3 px-4">Context</th>
-                <th className="py-3 px-4">Age</th>
+                <th className="py-3 px-4 border border-slate-200 dark:border-slate-800">Severity</th>
+                <th className="py-3 px-4 border border-slate-200 dark:border-slate-800">Finding</th>
+                <th className="py-3 px-4 border border-slate-200 dark:border-slate-800">Source</th>
+                <th className="py-3 px-4 border border-slate-200 dark:border-slate-800">Context</th>
+                <th className="py-3 px-4 border border-slate-200 dark:border-slate-800">Age</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-700 dark:text-slate-300">
+            <tbody className="text-slate-700 dark:text-slate-300">
               {filteredRecent.slice(0, 8).map((f) => (
                 <tr
                   key={f.id}
                   onClick={() => onSelectFinding(f.id)}
-                  className="hover:bg-slate-50 dark:hover:bg-dark-800/60 transition-colors cursor-pointer"
+                  className="hover:bg-orange-50/40 dark:hover:bg-orange-500/5 transition-colors cursor-pointer"
                 >
-                  <td className="py-3 px-4">{getSeverityBadge(f.severity)}</td>
-                  <td className="py-3 px-4">
+                  <td className="py-3 px-4 border border-slate-200 dark:border-slate-800">{getSeverityBadge(f.severity)}</td>
+                  <td className="py-3 px-4 border border-slate-200 dark:border-slate-800">
                     <div className="font-bold text-slate-900 dark:text-white">{f.finding_title}</div>
                     <div className="text-[10px] text-slate-500 font-mono">{f.finding_code || 'PII-OUTPUT-001'}</div>
                   </td>
-                  <td className="py-3 px-4">
-                    <span className="px-2 py-0.5 rounded text-[11px] bg-slate-100 dark:bg-dark-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <td className="py-3 px-4 border border-slate-200 dark:border-slate-800">
+                    <span className="px-2 py-0.5 rounded-sm text-[11px] bg-slate-100 dark:bg-dark-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {f.source || 'Endpoint'}
                     </span>
                   </td>
-                  <td className="py-3 px-4 font-mono text-slate-800 dark:text-slate-200 font-medium">
+                  <td className="py-3 px-4 border border-slate-200 dark:border-slate-800 font-mono text-slate-800 dark:text-slate-200 font-medium">
                     {f.context || 'SECRET_EXPOSURE'}
                   </td>
-                  <td className="py-3 px-4 text-slate-500">{getRelativeAge(f.timestamp)}</td>
+                  <td className="py-3 px-4 border border-slate-200 dark:border-slate-800 text-slate-500">{getRelativeAge(f.timestamp)}</td>
                 </tr>
               ))}
             </tbody>
