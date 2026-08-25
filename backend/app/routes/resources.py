@@ -71,6 +71,9 @@ class CheckRequest(BaseModel):
     context_docs: Optional[list[str]] = None
     session_id: Optional[str] = None
     tool_history: Optional[list[dict]] = None
+    source: Optional[str] = "Endpoint"
+    tenant_id: Optional[str] = "ankur-tenant-1"
+
 
 
 class UpdatePolicyRequest(BaseModel):
@@ -302,8 +305,11 @@ def check_guardrail(resource_id: str, payload: CheckRequest):
         responsibility_score=eval_result["responsibility_score"],
         triggered_rules=eval_result["triggered_rules"],
         risk_findings=eval_result["risk_findings"],
+        source=payload.source or "Endpoint",
         session_id=payload.session_id,
+        tenant_id=payload.tenant_id or "ankur-tenant-1",
     )
+
 
     return {
         "interception_id": intercept["id"],

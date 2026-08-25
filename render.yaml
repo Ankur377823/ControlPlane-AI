@@ -1,8 +1,8 @@
 services:
   - type: web
-    name: controlplane-botpress-connector
+    name: controlplane-ai
     env: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: npm --prefix frontend install && npm --prefix frontend run build && pip install -r requirements.txt
     startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
     disk:
       name: botpress-data
@@ -12,8 +12,14 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: FRONTEND_DIST
-        value: ./frontend
+        value: ./frontend/dist
       - key: BOTPRESS_CONNECTOR_DB
         value: /app/data/botpress_connector.db
       - key: DATABASE_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SERPER_API_KEY
         sync: false

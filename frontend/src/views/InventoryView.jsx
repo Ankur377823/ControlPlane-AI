@@ -29,13 +29,43 @@ export function InventoryView({ onNavigateOnboard }) {
     setValidatingId(id);
     try {
       const res = await validateResource(id);
-      showToast(`Target Botpress Validation: ${res.validation_status?.toUpperCase() || 'VALID'}`, 'success');
+      const isOk = res.validation_status === 'valid' || res.validation_status === 'validated';
+      showToast(
+        `Target Botpress Validation: ${res.validation_status?.toUpperCase() || 'VALID'}`,
+        isOk ? 'success' : 'error'
+      );
       loadResources();
     } catch (err) {
       showToast('Validation failed: ' + err.message, 'error');
     } finally {
       setValidatingId(null);
     }
+  };
+
+  const getStatusBadge = (status) => {
+    const s = (status || 'not_validated').toLowerCase().trim();
+    if (s === 'valid' || s === 'validated' || s === 'success') {
+      return (
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 inline-flex items-center gap-1">
+          <span>🟢</span>
+          <span>Valid</span>
+        </span>
+      );
+    }
+    if (s === 'failed' || s === 'invalid' || s === 'error') {
+      return (
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25 inline-flex items-center gap-1">
+          <span>🔴</span>
+          <span>Failed</span>
+        </span>
+      );
+    }
+    return (
+      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25 inline-flex items-center gap-1">
+        <span>🟡</span>
+        <span>Not Validated</span>
+      </span>
+    );
   };
 
   return (
@@ -115,9 +145,7 @@ export function InventoryView({ onNavigateOnboard }) {
                       </code>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
-                        🟢 {r.validation_status || 'valid'}
-                      </span>
+                      {getStatusBadge(r.validation_status)}
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <button

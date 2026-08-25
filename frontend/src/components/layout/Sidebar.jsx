@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { BrandLogo } from '../common/BrandLogo';
 import {
   LayoutDashboard,
   Boxes,
@@ -68,9 +69,7 @@ export function Sidebar({ activeRoute, onNavigate }) {
     <aside className="w-64 bg-white dark:bg-dark-900 border-r border-slate-200 dark:border-white/10 flex flex-col flex-shrink-0 select-none transition-colors">
       {/* Brand Header */}
       <div className="h-16 flex items-center gap-3 px-5 border-b border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-dark-850/50">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-accent-cyan flex items-center justify-center font-brand font-black text-white text-base shadow-md shadow-primary/20">
-          CP
-        </div>
+        <BrandLogo className="w-9 h-9" />
         <div>
           <div className="font-brand font-bold text-slate-900 dark:text-white tracking-wide text-base leading-tight">
             ControlPlane

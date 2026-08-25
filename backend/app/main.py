@@ -1,5 +1,7 @@
+# ControlPlane AI — Responsible AI Governance Control Plane
 """
 FastAPI entry point.
+
 
 - Mounts the resources router under /api/v1/resources
 - Exposes /health and /ready for liveness/readiness probes
@@ -14,6 +16,10 @@ from __future__ import annotations
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

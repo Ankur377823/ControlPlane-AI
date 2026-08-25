@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { BrandLogo } from '../common/BrandLogo';
 import { Eye, EyeOff, Lock, User, Sun, Moon } from 'lucide-react';
 
 export function LoginScreen() {
@@ -35,9 +36,7 @@ export function LoginScreen() {
         {/* Top Bar with Theme Toggle */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary to-accent-cyan flex items-center justify-center font-brand font-black text-white text-xl shadow-lg shadow-primary/20">
-              CP
-            </div>
+            <BrandLogo className="w-12 h-12 rounded-2xl" />
             <div>
               <h2 className="font-brand font-bold text-xl text-slate-900 dark:text-white tracking-tight">
                 ControlPlane AI

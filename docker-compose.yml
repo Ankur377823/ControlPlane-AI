@@ -1,12 +1,7 @@
-# One-command startup: builds and runs the FastAPI backend, which also
-# serves the static frontend at /. No separate frontend service needed.
-#
+# ControlPlane AI — Multi-Container / Production Composition
 # Usage:
 #   docker compose up --build
 #   open http://localhost:8000/
-#
-# Onboard a real Botpress bot through the UI (see README.md) -- no
-# Botpress credentials are required at build/run time.
 
 services:
   app:
@@ -17,14 +12,21 @@ services:
       - "8000:8000"
     environment:
       - BOTPRESS_CONNECTOR_DB=/app/data/botpress_connector.db
-      - FRONTEND_DIST=/app/frontend
+      - FRONTEND_DIST=/app/frontend/dist
+      - DATABASE_URL=${DATABASE_URL:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - SERPER_API_KEY=${SERPER_API_KEY:-}
+      - GUARDIAN_REQUIRE_AUTH=${GUARDIAN_REQUIRE_AUTH:-true}
+      - TASK_TOKEN_SECRET=${TASK_TOKEN_SECRET:-}
     volumes:
       - botpress-data:/app/data
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 5s
       retries: 3
+    restart: unless-stopped
 
 volumes:
   botpress-data:

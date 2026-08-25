@@ -5,20 +5,16 @@ import { Bot, ArrowLeft } from 'lucide-react';
 
 export function OnboardResourceView({ onBack, onComplete }) {
   const [provider, setProvider] = useState('botpress');
-  const [accountName, setAccountName] = useState('Botpress Production Workspace');
-  const [resourceName, setResourceName] = useState('Botpress Customer Support Assistant');
-  const [webhookId, setWebhookId] = useState('5e89a2b1-4f1c-490b-928d-318e860bc904');
+  const [accountName, setAccountName] = useState('');
+  const [resourceName, setResourceName] = useState('');
+  const [webhookId, setWebhookId] = useState('');
   const [useCase, setUseCase] = useState('customer_support');
   const [submitting, setSubmitting] = useState(false);
   const { showToast } = useToast();
 
   const handleSelectPreset = () => {
     setProvider('botpress');
-    setAccountName('Botpress Production Workspace');
-    setResourceName('Botpress Customer Support Assistant');
-    setWebhookId('5e89a2b1-4f1c-490b-928d-318e860bc904');
-    setUseCase('customer_support');
-    showToast('Applied Botpress Connector Preset', 'cyan');
+    showToast('Selected Botpress Connector', 'cyan');
   };
 
   const handleSubmit = async (e) => {
