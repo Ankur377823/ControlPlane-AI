@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { BrandLogo } from '../common/BrandLogo';
-import { Eye, EyeOff, Lock, User, Sun, Moon, Key } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, Sun, Moon } from 'lucide-react';
 
 export function LoginScreen() {
   const { login, googleLogin } = useAuth();
@@ -12,126 +12,181 @@ export function LoginScreen() {
   const [remember, setRemember] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !password) return;
+    setErrorMsg('');
+    if (!username.trim()) {
+      setErrorMsg('Please enter a valid email address');
+      return;
+    }
+    if (!password) {
+      setErrorMsg('Please enter your password');
+      return;
+    }
     setLoading(true);
-    await login(username, password, remember);
+    const success = await login(username.trim(), password, remember);
+    if (!success) {
+      setErrorMsg('Invalid email or password');
+    }
     setLoading(false);
   };
 
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-dark-900/80 backdrop-blur-xl animate-fade-in transition-colors">
-      <div className="w-full max-w-md bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-slate-300/50 dark:shadow-black/80 relative overflow-hidden transition-colors">
-        {/* Subtle decorative glow */}
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-accent-cyan/10 dark:bg-accent-cyan/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-100/90 dark:bg-dark-950/95 backdrop-blur-md animate-fade-in transition-colors">
+      {/* Background soft ambient accents */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        {/* Top Bar with Theme Toggle */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <BrandLogo className="w-12 h-12 rounded-2xl" />
-            <div>
-              <h2 className="font-brand font-bold text-xl text-slate-900 dark:text-white tracking-tight">
-                ControlPlane AI
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Enterprise AI Security & Governance</p>
-            </div>
+      <div className="w-full max-w-[420px] bg-white dark:bg-dark-850 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/60 dark:shadow-black/70 relative transition-all">
+        {/* Top Right Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          type="button"
+          className="absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 shadow-sm transition-colors"
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDark ? <Sun className="w-4 h-4 text-slate-300" /> : <Moon className="w-4 h-4 text-slate-600" />}
+        </button>
+
+        {/* Center Logo & Header */}
+        <div className="flex flex-col items-center text-center mb-7">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 dark:bg-primary/20 border border-primary/20 flex items-center justify-center mb-4 shadow-sm">
+            <BrandLogo className="w-8 h-8" />
           </div>
-
-          <button
-            onClick={toggleTheme}
-            className="w-8 h-8 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-sm transition-colors"
-            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {isDark ? <Sun className="w-4 h-4 text-slate-300" /> : <Moon className="w-4 h-4 text-slate-600" />}
-          </button>
+          <h1 className="font-brand font-bold text-2xl text-slate-900 dark:text-white tracking-tight">
+            Welcome Back
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Sign in to your ControlPlane account
+          </p>
         </div>
 
         {/* Login Form */}
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Username / Email
+            <label className="block text-[11px] font-bold tracking-wider text-slate-600 dark:text-slate-400 uppercase mb-1.5">
+              EMAIL ADDRESS
             </label>
             <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <User className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+              </div>
               <input
                 type="text"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username or email"
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  if (errorMsg) setErrorMsg('');
+                }}
+                placeholder="ankur@acme.com"
                 required
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors shadow-sm"
+                className={`w-full bg-[#f1f5f9]/70 dark:bg-dark-900 border ${
+                  errorMsg && !username.trim()
+                    ? 'border-rose-400 focus:border-rose-500'
+                    : 'border-slate-200 dark:border-slate-700/80 focus:border-primary'
+                } rounded-xl pl-10 pr-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors`}
               />
-              <User className="w-4 h-4 text-slate-400 absolute right-3.5 top-3" />
             </div>
+            {errorMsg && (
+              <p className="text-xs text-rose-500 dark:text-rose-400 font-medium mt-1.5">
+                {errorMsg}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
+            <label className="block text-[11px] font-bold tracking-wider text-slate-600 dark:text-slate-400 uppercase mb-1.5">
+              PASSWORD
+            </label>
             <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+              </div>
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errorMsg) setErrorMsg('');
+                }}
+                placeholder="••••••••••••"
                 required
-                className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors pr-10 shadow-sm"
+                className="w-full bg-[#f1f5f9]/70 dark:bg-dark-900 border border-slate-200 dark:border-slate-700/80 focus:border-primary rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                title="Toggle password visibility"
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                title={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center justify-between pt-0.5">
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary accent-primary"
+                className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-700 text-primary focus:ring-primary accent-primary"
               />
-              <span className="text-xs text-slate-600 dark:text-slate-400">Remember me on this device</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Remember me</span>
             </label>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3 rounded-xl bg-primary hover:bg-primary-hover text-white text-sm font-semibold shadow-md shadow-primary/25 transition-all duration-150 flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full mt-2 py-3 rounded-xl bg-[#cbb28d] hover:bg-[#bd9f78] dark:bg-[#cbb28d] dark:hover:bg-[#b8986f] text-slate-900 font-semibold text-sm shadow-sm transition-all duration-150 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.99]"
           >
             {loading ? (
-              <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              <span className="inline-block w-4 h-4 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin"></span>
             ) : (
-              <>
-                <Lock className="w-4 h-4" />
-                <span>Sign In to ControlPlane AI</span>
-              </>
+              <span>Sign In</span>
             )}
           </button>
 
-          {/* Google Sign In Option */}
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={() => googleLogin('ankur@acme.com', 'Ankur Kumar Singh')}
-              className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-300 text-xs font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm"
-            >
-              <Key className="w-3.5 h-3.5 text-primary" />
-              <span>Sign in with Google OAuth (Demo)</span>
-            </button>
+          {/* Divider */}
+          <div className="flex items-center my-5">
+            <div className="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
+            <span className="px-3 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+              OR CONTINUE WITH
+            </span>
+            <div className="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
           </div>
+
+          {/* Google Sign In Option */}
+          <button
+            type="button"
+            onClick={() => googleLogin('ankur@acme.com', 'Ankur Kumar Singh')}
+            className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-dark-900 dark:hover:bg-dark-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold transition-colors flex items-center justify-center gap-2.5 shadow-sm"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+              />
+            </svg>
+            <span>Google</span>
+          </button>
         </form>
       </div>
     </div>
   );
 }
+
