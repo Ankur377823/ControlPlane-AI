@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { BrandLogo } from '../common/BrandLogo';
 import {
   LayoutDashboard,
   Boxes,
@@ -74,15 +73,14 @@ export function Sidebar({ activeRoute, onNavigate }) {
   };
 
   return (
-    <aside className="w-64 bg-white dark:bg-dark-900 border-r border-slate-200 dark:border-white/10 flex flex-col flex-shrink-0 select-none transition-colors">
+    <aside className="w-80 bg-white dark:bg-dark-900 border-r border-slate-200 dark:border-white/10 flex flex-col flex-shrink-0 select-none transition-colors">
       {/* Brand Header */}
-      <div className="h-16 flex items-center gap-3 px-5 border-b border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-dark-850/50">
-        <BrandLogo className="w-9 h-9" />
+      <div className="h-[72px] flex items-center px-6 border-b border-slate-200 dark:border-white/10 bg-white dark:bg-dark-900">
         <div>
-          <div className="font-brand font-bold text-slate-900 dark:text-white tracking-wide text-base leading-tight">
+          <div className="font-brand font-bold text-slate-900 dark:text-white text-lg leading-tight">
             ControlPlane
           </div>
-          <div className="text-[10px] text-primary dark:text-accent-cyan font-mono font-semibold tracking-wider uppercase">
+          <div className="text-[10px] text-primary dark:text-primary-light font-mono font-semibold tracking-wider uppercase">
             AI Security Studio
           </div>
         </div>
@@ -107,7 +105,7 @@ export function Sidebar({ activeRoute, onNavigate }) {
                   <button
                     key={item.id}
                     onClick={() => handleItemClick(item)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-150 text-left ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-none text-xs font-medium transition-all duration-150 text-left ${
                       isActive
                         ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-white border border-primary/30 dark:border-primary/40 font-semibold shadow-sm'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5'
@@ -132,7 +130,7 @@ export function Sidebar({ activeRoute, onNavigate }) {
       <div className="p-3 border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-dark-850/70 space-y-2">
         <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.02] border border-slate-200/60 dark:border-transparent">
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-xs ring-1 ring-black/10 dark:ring-white/20 flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center font-bold text-white text-xs ring-1 ring-black/10 dark:ring-white/20 flex-shrink-0">
               {getInitials(user?.name || user?.username)}
             </div>
             <div className="overflow-hidden">
