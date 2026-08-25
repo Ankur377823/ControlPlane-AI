@@ -9,6 +9,8 @@ from typing import Optional
 
 from .connection import get_conn, _now
 
+import os
+
 ALL_TENANTS = ["acme-tenant-1", "globex-tenant-2", "stark-tenant-3"]
 
 
@@ -20,33 +22,24 @@ def list_users() -> list[dict]:
 
 def authenticate_user(username: str, password: str) -> Optional[dict]:
     u_clean = username.strip().lower()
-    
-    alias_map = {
-        "admin": "ankur@acme.com",
-        "ankur-admin": "ankur@acme.com",
-        "ankur": "ankur@acme.com",
-        "user1": "john@acme.com",
-        "user 1": "john@acme.com",
-        "john": "john@acme.com",
-        "user2": "alice@globex.com",
-        "user 2": "alice@globex.com",
-        "alice": "alice@globex.com",
-    }
-    target_lookup = alias_map.get(u_clean, u_clean)
+    p_clean = password.strip()
 
     with get_conn() as conn:
         row = conn.execute(
-            "SELECT * FROM users WHERE LOWER(username) = ? OR LOWER(email) = ? OR LOWER(username) = ? OR LOWER(email) = ?",
-            (u_clean, u_clean, target_lookup, target_lookup),
+            "SELECT * FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?",
+            (u_clean, u_clean),
         ).fetchone()
         if row:
             d = dict(row)
-            if d["password_hash"] == password.strip() or password.strip() == "password123":
-                if d["status"] != "approved":
-                    raise ValueError(f"Account '{d['email']}' is pending Admin approval. Contact Main Admin (Ankur Kumar Singh).")
+            # Verify password against database hash or configured admin secret
+            admin_secret = os.environ.get("ADMIN_PASSWORD")
+            if d.get("password_hash") == p_clean or (admin_secret and p_clean == admin_secret):
+                if d.get("status") != "approved":
+                    raise ValueError(f"Account '{d.get('email')}' is pending Admin approval.")
+
                 
-                is_admin = d["role"] == "ADMIN" or "ankur" in d["username"].lower() or "ankur" in d["email"].lower()
-                allowed_tenants = ALL_TENANTS if is_admin else [d["tenant_id"]]
+                is_admin = (d.get("role") == "ADMIN")
+                allowed_tenants = ALL_TENANTS if is_admin else [d.get("tenant_id", "acme-tenant-1")]
                 
                 return {
                     "id": d["id"],
@@ -60,19 +53,8 @@ def authenticate_user(username: str, password: str) -> Optional[dict]:
                     "token": "cp_auth_token_" + uuid.uuid4().hex[:16],
                 }
 
-    if (u_clean in ["admin", "ankur", "ankur@acme.com", "ankur-admin"]) and password.strip() == "password123":
-        return {
-            "id": "usr_ankur",
-            "username": "ankur",
-            "email": "ankur@acme.com",
-            "name": "Ankur Kumar Singh",
-            "role": "ADMIN",
-            "status": "approved",
-            "tenant_id": "acme-tenant-1",
-            "allowed_tenants": ALL_TENANTS,
-            "token": "cp_auth_token_" + uuid.uuid4().hex[:16],
-        }
     return None
+
 
 
 def google_login_or_register(email: str, name: str) -> dict:

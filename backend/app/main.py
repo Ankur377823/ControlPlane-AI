@@ -90,20 +90,18 @@ _FRONTEND_DIR = None
 
 if frontend_env:
     cand = Path(frontend_env).resolve()
-    if cand.exists():
+    if cand.exists() and (cand / "index.html").exists():
         _FRONTEND_DIR = cand
 
 if not _FRONTEND_DIR or not _FRONTEND_DIR.exists():
     base_root = Path(__file__).resolve().parents[2]
     candidates = [
         base_root / "frontend" / "dist",
-        base_root / "frontend",
         Path.cwd() / "frontend" / "dist",
-        Path.cwd() / "frontend",
         Path("/app/frontend/dist"),
-        Path("/app/frontend"),
         Path("./frontend/dist").resolve(),
-        Path("./frontend").resolve()
+        base_root / "dist",
+        Path.cwd() / "dist",
     ]
     for cand in candidates:
         if cand.exists() and (cand / "index.html").exists():
@@ -112,3 +110,4 @@ if not _FRONTEND_DIR or not _FRONTEND_DIR.exists():
 
 if _FRONTEND_DIR and _FRONTEND_DIR.exists():
     app.mount("/", StaticFiles(directory=str(_FRONTEND_DIR), html=True), name="frontend")
+

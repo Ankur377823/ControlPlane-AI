@@ -25,9 +25,9 @@ docker-compose up --build
 # 2. Access Studio in your web browser:
 # http://localhost:8000/
 
-# Default demo credentials:
-# Admin: ankur@acme.com / password123
-# User:  john@acme.com / password123`}
+# Authentication:
+# Configure ADMIN_USERNAME and ADMIN_PASSWORD in your private .env file`}
+
           </pre>
         </div>
       </section>

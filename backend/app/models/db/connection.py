@@ -564,17 +564,32 @@ def _seed_default_interceptions(conn) -> None:
 
 
 def _seed_default_users(conn) -> None:
-    try:
-        conn.execute("DELETE FROM users WHERE email LIKE '%wingback.io%' OR username IN ('bob', 'carol', 'usr_bob', 'usr_carol')")
-    except Exception:
-        pass
-
     now = _now()
-    users = [
-        ("usr_ankur", "ankur", "ankur@acme.com", "password123", "Ankur Kumar Singh", "ADMIN", "local", "approved", "tnt_84ndhdjdj94844hj", now),
-        ("usr_john", "john", "john@acme.com", "password123", "John Acme", "USER", "local", "approved", "tnt_84ndhdjdj94844hj", now),
-        ("usr_alice", "alice", "alice@globex.com", "password123", "Alice Globex", "USER", "local", "approved", "tnt_92kf74bc109312ae", now),
-    ]
+    admin_uname = os.environ.get("ADMIN_USERNAME")
+    admin_email = os.environ.get("ADMIN_EMAIL")
+    admin_pwd = os.environ.get("ADMIN_PASSWORD")
+    admin_name = os.environ.get("ADMIN_NAME")
+
+    user1_uname = os.environ.get("USER1_USERNAME")
+    user1_email = os.environ.get("USER1_EMAIL")
+    user1_pwd = os.environ.get("USER1_PASSWORD")
+    user1_name = os.environ.get("USER1_NAME")
+
+    user2_uname = os.environ.get("USER2_USERNAME")
+    user2_email = os.environ.get("USER2_EMAIL")
+    user2_pwd = os.environ.get("USER2_PASSWORD")
+    user2_name = os.environ.get("USER2_NAME")
+
+    users = []
+    if admin_uname and admin_pwd:
+        users.append(("usr_admin", admin_uname, admin_email or f"{admin_uname}@domain.com", admin_pwd, admin_name or admin_uname, "ADMIN", "local", "approved", "tnt_84ndhdjdj94844hj", now))
+    if user1_uname and user1_pwd:
+        users.append(("usr_john", user1_uname, user1_email or f"{user1_uname}@domain.com", user1_pwd, user1_name or user1_uname, "USER", "local", "approved", "tnt_84ndhdjdj94844hj", now))
+    if user2_uname and user2_pwd:
+        users.append(("usr_alice", user2_uname, user2_email or f"{user2_uname}@domain.com", user2_pwd, user2_name or user2_uname, "USER", "local", "approved", "tnt_92kf74bc109312ae", now))
+
+
+
     for u in users:
         row = conn.execute("SELECT id FROM users WHERE id = ? OR username = ?", (u[0], u[1])).fetchone()
         if not row:

@@ -5,8 +5,9 @@ import { useToast } from '../../context/ToastContext';
 import { Users, X, RefreshCw } from 'lucide-react';
 
 export function UserManagementModal() {
-  const { isUserMgmtOpen, setIsUserMgmtOpen, user: currentUser, switchAccount } = useAuth();
+  const { isUserMgmtOpen, setIsUserMgmtOpen, user: currentUser, isAdmin, switchAccount } = useAuth();
   const [users, setUsers] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
@@ -146,7 +147,7 @@ export function UserManagementModal() {
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-right space-x-1.5">
-                          {!isApproved && (
+                          {isAdmin && !isApproved && (
                             <>
                               <button
                                 onClick={() => handleApprove(u.id, u.name || u.username)}
@@ -162,7 +163,7 @@ export function UserManagementModal() {
                               </button>
                             </>
                           )}
-                          {!isSelf && (
+                          {isAdmin && !isSelf && (
                             <button
                               onClick={() => switchAccount(u)}
                               className="px-2.5 py-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-[11px] font-semibold transition-colors"
@@ -176,6 +177,7 @@ export function UserManagementModal() {
                             </span>
                           )}
                         </td>
+
                       </tr>
                     );
                   })
