@@ -26,9 +26,10 @@ export function Header({ activeRoute }) {
   const [parentName, childName] = formatBreadcrumb(activeRoute);
 
   const allowedTenants =
-    Array.isArray(user?.allowed_tenants) && user?.allowed_tenants.length > 0
+    isAdmin && Array.isArray(user?.allowed_tenants) && user?.allowed_tenants.length > 0
       ? user.allowed_tenants
-      : [user?.tenant_id || 'ankur-tenant-1', 'globex-tenant-2'];
+      : [user?.tenant_id || 'acme-tenant-1'];
+
 
   return (
     <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-dark-900/80 backdrop-blur-md px-6 flex items-center justify-between flex-shrink-0 z-20 transition-colors">

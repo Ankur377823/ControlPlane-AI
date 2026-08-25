@@ -103,13 +103,16 @@ export function AuthProvider({ children }) {
     showToast(`Switched active tenant workspace to: ${newTenantId}`, 'cyan');
   };
 
-  const isAdmin = !!(
+  const isSuperAdmin = !!(
     user &&
-    (user.role === 'ADMIN' ||
+    (user.username === 'ankur' ||
+      user.email === 'ankur@acme.com' ||
       user.username === 'admin' ||
-      user.username === 'ankur' ||
-      (user.email && (user.email.includes('admin') || user.email.includes('ankur'))))
+      (user.email && user.email.toLowerCase().includes('ankur')))
   );
+
+  const isAdmin = isSuperAdmin;
+
 
   return (
     <AuthContext.Provider

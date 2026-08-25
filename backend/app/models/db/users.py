@@ -45,8 +45,9 @@ def authenticate_user(username: str, password: str) -> Optional[dict]:
                 if d["status"] != "approved":
                     raise ValueError(f"Account '{d['email']}' is pending Admin approval. Contact Main Admin (Ankur Kumar Singh).")
                 
-                is_admin = d["role"] == "ADMIN" or "ankur" in d["username"].lower() or "ankur" in d["email"].lower()
+                is_admin = bool("ankur" in d["username"].lower() or "ankur" in d["email"].lower() or d["username"].lower() == "admin")
                 allowed_tenants = ALL_TENANTS if is_admin else [d["tenant_id"]]
+
                 
                 return {
                     "id": d["id"],
