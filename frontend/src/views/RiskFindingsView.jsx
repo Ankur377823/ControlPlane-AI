@@ -100,16 +100,16 @@ export function RiskFindingsView({ onSelectFinding }) {
         </p>
       </div>
 
-      {/* Filter Source Pills */}
+      {/* Source Filters */}
       <div className="flex flex-wrap items-center gap-2">
         {FILTER_SOURCES.map((src) => (
           <button
             key={src}
             onClick={() => setSourceFilter(src)}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+            className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${
               sourceFilter === src
-                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-semibold shadow-sm'
-                : 'bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-dark-800'
+                ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-300 dark:border-orange-500/40 font-semibold shadow-sm'
+                : 'bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-orange-300 hover:bg-orange-50/50 dark:hover:bg-orange-500/5'
             }`}
           >
             {src}
@@ -123,7 +123,7 @@ export function RiskFindingsView({ onSelectFinding }) {
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value)}
-            className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-primary shadow-sm font-medium"
+            className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-primary shadow-sm font-medium"
           >
             {SEVERITIES.map((sev) => (
               <option key={sev} value={sev} className="bg-white dark:bg-dark-850 text-slate-900 dark:text-white">
@@ -138,7 +138,7 @@ export function RiskFindingsView({ onSelectFinding }) {
 
         <button
           onClick={loadFindings}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-dark-850 hover:bg-slate-50 dark:hover:bg-dark-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded-xl transition-colors text-xs font-semibold shadow-sm"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-dark-850 hover:bg-orange-50 dark:hover:bg-orange-500/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded-md transition-colors text-xs font-semibold shadow-sm"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh</span>
@@ -146,14 +146,14 @@ export function RiskFindingsView({ onSelectFinding }) {
       </div>
 
       {/* Clean Enterprise Findings Table matching screenshot */}
-      <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50/70 dark:bg-dark-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold text-xs">
+            <thead className="bg-slate-50/70 dark:bg-dark-900/60 text-slate-600 dark:text-slate-400 font-semibold text-xs">
               <tr>
                 <th
                   onClick={() => handleSort('severity')}
-                  className="py-3.5 px-5 cursor-pointer select-none hover:text-primary transition-colors"
+                  className="py-3.5 px-5 border-b border-r border-slate-200 dark:border-slate-800 cursor-pointer select-none hover:text-primary transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
                     <span>Severity</span>
@@ -162,7 +162,7 @@ export function RiskFindingsView({ onSelectFinding }) {
                 </th>
                 <th
                   onClick={() => handleSort('finding_title')}
-                  className="py-3.5 px-5 cursor-pointer select-none hover:text-primary transition-colors"
+                  className="py-3.5 px-5 border-b border-r border-slate-200 dark:border-slate-800 cursor-pointer select-none hover:text-primary transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
                     <span>Finding</span>
@@ -171,7 +171,7 @@ export function RiskFindingsView({ onSelectFinding }) {
                 </th>
                 <th
                   onClick={() => handleSort('source')}
-                  className="py-3.5 px-5 cursor-pointer select-none hover:text-primary transition-colors"
+                  className="py-3.5 px-5 border-b border-r border-slate-200 dark:border-slate-800 cursor-pointer select-none hover:text-primary transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
                     <span>Source</span>
@@ -180,7 +180,7 @@ export function RiskFindingsView({ onSelectFinding }) {
                 </th>
                 <th
                   onClick={() => handleSort('context')}
-                  className="py-3.5 px-5 cursor-pointer select-none hover:text-primary transition-colors"
+                  className="py-3.5 px-5 border-b border-r border-slate-200 dark:border-slate-800 cursor-pointer select-none hover:text-primary transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
                     <span>Context</span>
@@ -189,7 +189,7 @@ export function RiskFindingsView({ onSelectFinding }) {
                 </th>
                 <th
                   onClick={() => handleSort('status')}
-                  className="py-3.5 px-5 cursor-pointer select-none hover:text-primary transition-colors"
+                  className="py-3.5 px-5 border-b border-r border-slate-200 dark:border-slate-800 cursor-pointer select-none hover:text-primary transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
                     <span>Status</span>
@@ -198,7 +198,7 @@ export function RiskFindingsView({ onSelectFinding }) {
                 </th>
                 <th
                   onClick={() => handleSort('timestamp')}
-                  className="py-3.5 px-5 cursor-pointer select-none hover:text-primary transition-colors"
+                  className="py-3.5 px-5 border-b border-slate-200 dark:border-slate-800 cursor-pointer select-none hover:text-primary transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
                     <span>Date</span>
@@ -207,7 +207,7 @@ export function RiskFindingsView({ onSelectFinding }) {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-700 dark:text-slate-300">
+            <tbody className="text-slate-700 dark:text-slate-300">
               {loading && sortedFindings.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="py-12 text-center text-slate-500">
@@ -226,10 +226,10 @@ export function RiskFindingsView({ onSelectFinding }) {
                   <tr
                     key={item.id}
                     onClick={() => onSelectFinding(item.id)}
-                    className="hover:bg-slate-50/80 dark:hover:bg-dark-800/50 cursor-pointer transition-colors"
+                    className="hover:bg-orange-50/40 dark:hover:bg-orange-500/5 cursor-pointer transition-colors"
                   >
                     {/* Severity Pill */}
-                    <td className="py-3.5 px-5">
+                    <td className="py-3.5 px-5 border-b border-r border-slate-200 dark:border-slate-800">
                       <span
                         className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider ${sevBadge(
                           item.severity
@@ -240,7 +240,7 @@ export function RiskFindingsView({ onSelectFinding }) {
                     </td>
 
                     {/* Finding Title & Code */}
-                    <td className="py-3.5 px-5">
+                    <td className="py-3.5 px-5 border-b border-r border-slate-200 dark:border-slate-800">
                       <div className="font-semibold text-slate-900 dark:text-white">
                         {item.finding_title || 'PII Detected in Model Response'}
                       </div>
@@ -250,24 +250,24 @@ export function RiskFindingsView({ onSelectFinding }) {
                     </td>
 
                     {/* Source Pill */}
-                    <td className="py-3.5 px-5">
+                    <td className="py-3.5 px-5 border-b border-r border-slate-200 dark:border-slate-800">
                       <span className="inline-block px-2.5 py-0.5 rounded bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-300 text-[11px] font-medium border border-slate-200 dark:border-slate-700">
                         {item.source || 'Endpoint'}
                       </span>
                     </td>
 
                     {/* Context Category */}
-                    <td className="py-3.5 px-5 font-mono text-xs text-slate-700 dark:text-slate-300 uppercase font-medium">
+                    <td className="py-3.5 px-5 border-b border-r border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-700 dark:text-slate-300 uppercase font-medium">
                       {item.context || 'SECRET_EXPOSURE'}
                     </td>
 
                     {/* Status */}
-                    <td className="py-3.5 px-5 text-xs text-slate-600 dark:text-slate-400 lowercase">
+                    <td className="py-3.5 px-5 border-b border-r border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 lowercase">
                       {item.status || 'open'}
                     </td>
 
                     {/* Date */}
-                    <td className="py-3.5 px-5 text-xs text-slate-500 whitespace-nowrap">
+                    <td className="py-3.5 px-5 border-b border-slate-200 dark:border-slate-800 text-xs text-slate-500 whitespace-nowrap">
                       {formatTime(item.timestamp)}
                     </td>
                   </tr>
