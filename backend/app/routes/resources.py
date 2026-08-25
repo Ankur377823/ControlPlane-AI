@@ -109,8 +109,9 @@ class UpdateFindingStatusRequest(BaseModel):
 def login(payload: LoginRequest):
     user = db.authenticate_user(payload.username, payload.password)
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid username or password. Default is admin / password123")
+        raise HTTPException(status_code=401, detail="Invalid username or password.")
     return user
+
 
 
 @router.get("/auth/me")

@@ -298,8 +298,8 @@ npm run dev
 
 # 3. Build React Frontend for Production
 npm run build
-```
-Open **`http://localhost:8000`** (or `http://localhost:5173` in Vite dev mode) in your browser. Default Admin credentials: `ankur` / `password123`.
+Open **`http://localhost:8000`** (or `http://localhost:5173` in Vite dev mode) in your browser. Configure your admin credentials in `.env` (`ADMIN_USERNAME` / `ADMIN_PASSWORD`).
+
 
 ### 2. Run with Docker
 ```bash

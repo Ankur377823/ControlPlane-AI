@@ -201,7 +201,8 @@ export async function openUserManagementModal() {
           <td>
             ${!isApproved ? `<button class="btn" style="padding:4px 10px; font-size:0.75rem;" onclick="approveUserAccount('${u.id}')">✓ Approve</button>` : ''}
             ${!isRejected ? `<button class="btn-secondary" style="padding:4px 10px; font-size:0.75rem;" onclick="rejectUserAccount('${u.id}')">✕ Reject</button>` : ''}
-            <button class="btn-secondary" style="padding:4px 10px; font-size:0.75rem;" onclick="switchAccount('${u.username}', 'password123', '${u.tenant_id}')">⚡ Switch To</button>
+            <button class="btn-secondary" style="padding:4px 10px; font-size:0.75rem;" onclick="switchAccount('${u.username}', '', '${u.tenant_id}')">⚡ Switch To</button>
+
           </td>
         </tr>
       `;
