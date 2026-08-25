@@ -317,7 +317,7 @@ export function DashboardView() {
                 <span>• 0 low</span>
               </div>
               <a
-                href="#/endpoint-ai"
+                href="#/inventory"
                 className="text-xs font-semibold text-primary dark:text-primary-light hover:underline flex items-center gap-1"
               >
                 <span>View applications</span>

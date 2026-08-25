@@ -8,7 +8,6 @@ import {
   SearchCheck,
   Sliders,
   KeyRound,
-  Laptop,
   Crosshair,
   Microscope,
   BookOpen,
@@ -38,7 +37,6 @@ const NAV_GROUPS = [
     title: 'Connectors & Keys',
     items: [
       { id: 'tokens', label: 'Enrollment Tokens', icon: KeyRound },
-      { id: 'endpoint-ai', label: 'Extension & Endpoint AI', icon: Laptop },
     ],
   },
   {

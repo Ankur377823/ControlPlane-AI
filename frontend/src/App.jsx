@@ -15,7 +15,6 @@ import { OnboardResourceView } from './views/OnboardResourceView';
 import { AgentRuntimeView } from './views/AgentRuntimeView';
 import { PoliciesView } from './views/PoliciesView';
 import { EnrollmentTokensView } from './views/EnrollmentTokensView';
-import { EndpointAIView } from './views/EndpointAIView';
 import { RedTeamScannerView } from './views/RedTeamScannerView';
 import { HallucinationsView } from './views/HallucinationsView';
 import { DocumentationView } from './views/DocumentationView';
@@ -107,8 +106,6 @@ export function App() {
         return <PoliciesView />;
       case 'tokens':
         return <EnrollmentTokensView />;
-      case 'endpoint-ai':
-        return <EndpointAIView />;
       case 'ai-red-team':
         return <RedTeamScannerView />;
       case 'hallucinations':
