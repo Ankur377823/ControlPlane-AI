@@ -44,17 +44,31 @@
     host.includes("chat.openai.com") ||
     host.includes("claude.ai") ||
     host.includes("gemini.google.com") ||
+    host.includes("aistudio.google.com") ||
     host.includes("deepseek.com") ||
     host.includes("kimi.moonshot.cn") ||
     host.includes("kimi.ai") ||
     host.includes("perplexity.ai") ||
     host.includes("copilot.microsoft.com") ||
+    (host.includes("bing.com") && path.includes("chat")) ||
     host.includes("poe.com") ||
     host.includes("mistral.ai") ||
     host.includes("chat.groq.com") ||
     (host.includes("huggingface.co") && path.startsWith("/chat")) ||
+    host.includes("qwenlm.ai") ||
+    host.includes("tongyi.aliyun.com") ||
+    host.includes("chatglm.cn") ||
+    host.includes("doubao.com") ||
+    host.includes("you.com") ||
+    host.includes("phind.com") ||
+    (host.includes("duckduckgo.com") && (path.includes("chat") || window.location.search.includes("ia=chat"))) ||
+    host.includes("v0.dev") ||
+    host.includes("bolt.new") ||
+    host.includes("lovable.dev") ||
     host.includes("botpress.cloud") ||
-    host.includes("botpress.com");
+    host.includes("botpress.com") ||
+    host.includes("dify.ai") ||
+    host.includes("fastgpt.in");
 
   if (!isChatbotPortal) {
     return;
@@ -297,17 +311,48 @@
 
   let isSyntheticSubmit = false;
 
+  function haltEvent(e) {
+    if (!e) return;
+    try {
+      if (typeof e.preventDefault === "function") e.preventDefault();
+      if (typeof e.stopPropagation === "function") e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+      e.returnValue = false;
+    } catch (err) {}
+  }
+
+  function getSendButtonFromTarget(target) {
+    if (!target || !target.closest) return null;
+    return target.closest(
+      [
+        "button[data-testid*='send' i]",
+        "button[data-testid*='submit' i]",
+        "button[aria-label*='Send' i]",
+        "button[aria-label*='Submit' i]",
+        "button[aria-label*='发送']",
+        "button#send-button",
+        "button.send-button",
+        "button[type='submit']",
+        "div[role='button'][aria-label*='Send' i]",
+        "div[role='button'][data-testid*='send' i]",
+        "fieldset button",
+        "form button"
+      ].join(",")
+    );
+  }
+
   async function handleUserSubmitAttempt(e, inputEl) {
     if (isSyntheticSubmit) return;
     if (!isConnected) return;
+
+    // Immediately stop the native event in its tracks synchronously!
+    haltEvent(e);
+
     if (!inputEl) inputEl = findActiveChatInput();
     if (!inputEl) return;
 
     const text = getInputValue(inputEl);
     if (!text || text.length === 0) return;
-
-    // Immediately stop the native event in its tracks synchronously!
-    haltEvent(e);
 
     if (blockedPromptsSet.has(text)) {
       updateBannerUI("BLOCK", "Permanently Blocked: Prompt contains sensitive secret, PII, or injection threat.");
@@ -330,47 +375,72 @@
   }
 
   function onKeyDownCapture(e) {
+    if (!isConnected || isSyntheticSubmit) return;
     if (e.key === "Enter" && !e.shiftKey) {
       const activeEl = document.activeElement;
       const inputEl = (activeEl && isInputTarget(activeEl))
         ? (activeEl.closest("#prompt-textarea, div[contenteditable='true'], [role='textbox'], .ProseMirror, textarea, input") || activeEl)
         : findActiveChatInput();
       if (inputEl) {
+        haltEvent(e);
         handleUserSubmitAttempt(e, inputEl);
       }
     }
   }
 
-  function onClickCapture(e) {
-    const target = e.target;
-    const sendBtn = target && target.closest && target.closest(
-      [
-        "button[type='submit']",
-        "button[aria-label*='Send' i]",
-        "button[aria-label*='Submit' i]",
-        "button[aria-label*='发送']",
-        "button[data-testid*='send' i]",
-        "button[data-testid*='submit' i]",
-        "button#send-button",
-        "button.send-button",
-        "div[role='button'][aria-label*='Send' i]",
-        "fieldset button"
-      ].join(",")
-    );
+  function onKeyOtherCapture(e) {
+    if (!isConnected || isSyntheticSubmit) return;
+    if (e.key === "Enter" && !e.shiftKey) {
+      const activeEl = document.activeElement;
+      if (activeEl && isInputTarget(activeEl)) {
+        haltEvent(e);
+      }
+    }
+  }
 
+  function onBeforeInputCapture(e) {
+    if (!isConnected || isSyntheticSubmit) return;
+    if (e.inputType === "insertParagraph" || e.inputType === "insertLineBreak") {
+      const activeEl = document.activeElement;
+      if (activeEl && isInputTarget(activeEl)) {
+        haltEvent(e);
+      }
+    }
+  }
+
+  function onPointerCapture(e) {
+    if (!isConnected || isSyntheticSubmit) return;
+    const sendBtn = getSendButtonFromTarget(e.target);
     if (sendBtn) {
-      const inputEl = findAssociatedInput(sendBtn);
-      if (inputEl) {
-        handleUserSubmitAttempt(e, inputEl);
+      haltEvent(e);
+      if (e.type === "pointerdown" || e.type === "click") {
+        const inputEl = findAssociatedInput(sendBtn);
+        if (inputEl) {
+          handleUserSubmitAttempt(e, inputEl);
+        }
       }
     }
   }
 
-  // Register on both window and document in capture phase
+  function onSubmitCapture(e) {
+    if (!isConnected || isSyntheticSubmit) return;
+    haltEvent(e);
+    const inputEl = findActiveChatInput();
+    if (inputEl) {
+      handleUserSubmitAttempt(e, inputEl);
+    }
+  }
+
+  // Register in capture phase across all submission entry points on window
   window.addEventListener("keydown", onKeyDownCapture, true);
-  document.addEventListener("keydown", onKeyDownCapture, true);
-  window.addEventListener("click", onClickCapture, true);
-  document.addEventListener("click", onClickCapture, true);
+  window.addEventListener("keypress", onKeyOtherCapture, true);
+  window.addEventListener("keyup", onKeyOtherCapture, true);
+  window.addEventListener("beforeinput", onBeforeInputCapture, true);
+
+  window.addEventListener("pointerdown", onPointerCapture, true);
+  window.addEventListener("mousedown", onPointerCapture, true);
+  window.addEventListener("click", onPointerCapture, true);
+  window.addEventListener("submit", onSubmitCapture, true);
 
   // 7. Policy Outcome Handler
   function handleEvaluationResult(result, rawText, inputEl) {
@@ -530,12 +600,6 @@
     }
   }
 
-  function haltEvent(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-  }
-
   function findAssociatedInput(btn) {
     const form = btn.closest("form") || btn.closest("fieldset") || btn.closest("main") || btn.closest("div[class*='input']");
     if (form) {
@@ -549,44 +613,51 @@
 
   function triggerNativeSubmit(inputEl) {
     if (!inputEl) return;
+    isSyntheticSubmit = true;
 
-    // First try finding the send button in the same form/container
-    const form = inputEl.closest("form") || inputEl.closest("fieldset") || inputEl.closest("main");
-    if (form) {
-      const submitBtn = form.querySelector(
-        "button[type='submit'], button[aria-label*='Send' i], button[data-testid*='send-button' i], button[data-testid*='submit' i]"
+    try {
+      // First try finding the send button in the same form/container
+      const form = inputEl.closest("form") || inputEl.closest("fieldset") || inputEl.closest("main") || inputEl.closest("div[class*='input']");
+      if (form) {
+        const submitBtn = form.querySelector(
+          "button[type='submit'], button[aria-label*='Send' i], button[data-testid*='send-button' i], button[data-testid*='submit' i]"
+        );
+        if (submitBtn && !submitBtn.disabled) {
+          submitBtn.click();
+          return;
+        }
+      }
+
+      const pageSendBtn = document.querySelector(
+        [
+          "button[data-testid='send-button']",
+          "button[aria-label*='Send message' i]",
+          "button[aria-label*='Send prompt' i]",
+          "button[aria-label*='Send' i]",
+          "button.send-button",
+          "div[role='button'][aria-label*='Send' i]"
+        ].join(",")
       );
-      if (submitBtn && !submitBtn.disabled) {
-        submitBtn.click();
+      if (pageSendBtn && !pageSendBtn.disabled) {
+        pageSendBtn.click();
         return;
       }
-    }
 
-    const pageSendBtn = document.querySelector(
-      [
-        "button[data-testid='send-button']",
-        "button[aria-label*='Send message' i]",
-        "button[aria-label*='Send prompt' i]",
-        "button[aria-label*='Send' i]",
-        "button.send-button",
-        "div[role='button'][aria-label*='Send' i]"
-      ].join(",")
-    );
-    if (pageSendBtn && !pageSendBtn.disabled) {
-      pageSendBtn.click();
-      return;
+      // Fallback: trigger Enter key on the input element
+      const enterEvent = new KeyboardEvent("keydown", {
+        key: "Enter",
+        code: "Enter",
+        keyCode: 13,
+        which: 13,
+        bubbles: true,
+        cancelable: true,
+      });
+      inputEl.dispatchEvent(enterEvent);
+    } finally {
+      setTimeout(() => {
+        isSyntheticSubmit = false;
+      }, 400);
     }
-
-    // Fallback: trigger Enter key on the input element
-    const enterEvent = new KeyboardEvent("keydown", {
-      key: "Enter",
-      code: "Enter",
-      keyCode: 13,
-      which: 13,
-      bubbles: true,
-      cancelable: true,
-    });
-    inputEl.dispatchEvent(enterEvent);
   }
 
   async function sendGuardrailCheck(payload) {
@@ -635,7 +706,7 @@
       Authorization: "Bearer " + tokenKey,
       "X-Tenant-ID": tenantId,
       "X-Device-ID": deviceId || "unknown-device",
-      "X-Source": "Browser Extension",
+      "X-Source": payload.source || "Browser Extension",
     };
 
     // Primary: Delegate to Background Service Worker (Bypasses HTTPS -> HTTP Mixed Content & CSP)
@@ -695,7 +766,6 @@
     }
     return null;
   }
-
 
   function updateBannerUI(action, message, data) {
     const banner = document.getElementById("controlplane-top-banner");
@@ -862,7 +932,7 @@
       clearTimeout(responseDebounceTimer);
       responseDebounceTimer = setTimeout(() => {
         findAndEvaluateCompletedResponses();
-      }, 1400); // 1.4s debounce after streaming finishes
+      }, 1000);
     });
 
     observer.observe(document.body, {
@@ -870,39 +940,124 @@
       subtree: true,
       characterData: true,
     });
+
+    // Also run periodic scan every 2.5s for dynamic SPA chat history loads
+    setInterval(() => {
+      findAndEvaluateCompletedResponses();
+    }, 2500);
+
+    // Initial check
+    setTimeout(() => {
+      findAndEvaluateCompletedResponses();
+    }, 800);
   }
 
-  function findAndEvaluateCompletedResponses() {
-    // Selectors for AI Chatbot assistant response containers
-    const assistantSelectors = [
+  function getAssistantNodes() {
+    const candidateNodes = [];
+
+    // 1. ChatGPT Turn & Assistant Selectors
+    const chatgptSelectors = [
       "[data-message-author-role='assistant']",
-      "article[data-testid*='conversation-turn'] div.markdown",
-      "div.agent-turn div.markdown",
-      "div[data-is-streaming='false'] div.markdown",
+      "article[data-testid*='conversation-turn']",
+      "div.agent-turn",
+      "div[class*='agent-turn']",
       "div.font-claude-message",
       "model-response",
       ".ds-markdown",
-      "div.prose"
+      "[data-testid*='bot-message']"
     ];
 
-    const nodes = document.querySelectorAll(assistantSelectors.join(","));
+    const turns = document.querySelectorAll(chatgptSelectors.join(","));
+    turns.forEach((turn) => {
+      // Check if turn contains user input marker (skip user's own prompt bubbles)
+      if (turn.getAttribute("data-message-author-role") === "user") return;
+      if (turn.querySelector("[data-message-author-role='user']")) return;
+      if (turn.classList.contains("font-user-message")) return;
+
+      // Find the main text/markdown content block inside the turn
+      const contentEl = turn.querySelector(".markdown, .prose, div[class*='markdown'], div[class*='prose'], .ds-markdown") || turn;
+
+      // Filter out footer disclaimers, input forms, buttons
+      if (contentEl.closest("form, footer, header, #prompt-textarea, [contenteditable='true'], button")) {
+        return;
+      }
+
+      if (!candidateNodes.includes(contentEl)) {
+        candidateNodes.push(contentEl);
+      }
+    });
+
+    // 2. Generic fallback if no specific turns matched
+    if (candidateNodes.length === 0) {
+      const mainArea = document.querySelector("main") || document.body;
+      const genericMarkdowns = mainArea.querySelectorAll("div.markdown, div.prose");
+      genericMarkdowns.forEach((el) => {
+        if (!el.closest("form, footer, header, #prompt-textarea, [contenteditable='true'], button")) {
+          candidateNodes.push(el);
+        }
+      });
+    }
+
+    return candidateNodes;
+  }
+
+  function findPromptForAssistantNode(targetNode) {
+    try {
+      const turn = targetNode.closest("article[data-testid*='conversation-turn'], div[class*='turn'], div.agent-turn");
+      if (turn) {
+        let prev = turn.previousElementSibling;
+        while (prev) {
+          const userEl = prev.querySelector("[data-message-author-role='user'], div.font-user-message, div[class*='user'], div.markdown, p");
+          if (userEl) {
+            const txt = (userEl.innerText || userEl.textContent || "").trim();
+            if (txt && txt.length > 2 && !txt.toLowerCase().includes("chatgpt can make mistakes")) {
+              return txt;
+            }
+          }
+          prev = prev.previousElementSibling;
+        }
+      }
+    } catch (e) {}
+    return lastSubmittedPromptText || "General Query";
+  }
+
+  function findAndEvaluateCompletedResponses() {
+    if (!isConnected) return;
+
+    // Check if chatbot is still actively streaming response
+    const isStreaming = document.querySelector(
+      "button[aria-label*='Stop' i], button[data-testid*='stop' i], button[data-testid*='stop-button' i], div[data-is-streaming='true'], .result-streaming"
+    );
+    if (isStreaming) return; // Wait until streaming completes
+
+    const nodes = getAssistantNodes();
     if (!nodes || nodes.length === 0) return;
 
-    // Evaluate latest assistant response node
-    const latestNode = nodes[nodes.length - 1];
-    if (!latestNode || evaluatedResponsesSet.has(latestNode)) return;
+    nodes.forEach((node) => {
+      // Check if already evaluated or already has factuality badge rendered
+      if (node.dataset.cpEvaluated === "true" || evaluatedResponsesSet.has(node)) return;
 
-    const responseText = (latestNode.innerText || latestNode.textContent || "").trim();
-    if (!responseText || responseText.length < 15) return;
+      const parentTurn = node.closest("article, [data-message-author-role='assistant'], div.agent-turn, model-response") || node;
+      if (parentTurn.querySelector(".cp-factuality-inline-badge")) {
+        node.dataset.cpEvaluated = "true";
+        evaluatedResponsesSet.add(node);
+        return;
+      }
 
-    // Check if still streaming
-    const isStreaming = document.querySelector(
-      "button[aria-label*='Stop' i], button[data-testid*='stop' i], div[data-is-streaming='true']"
-    );
-    if (isStreaming) return; // Wait until streaming finishes
+      const responseText = (node.innerText || node.textContent || "").trim();
+      if (!responseText || responseText.length < 15) return;
 
-    evaluatedResponsesSet.add(latestNode);
-    evaluateAssistantResponse(lastSubmittedPromptText || "General Query", responseText, latestNode);
+      // Filter out system disclaimers like "ChatGPT can make mistakes. Check important info."
+      if (responseText.startsWith("ChatGPT can make mistakes") || responseText.includes("Continue chatting with text only")) {
+        return;
+      }
+
+      node.dataset.cpEvaluated = "true";
+      evaluatedResponsesSet.add(node);
+
+      const promptText = findPromptForAssistantNode(node);
+      evaluateAssistantResponse(promptText, responseText, node);
+    });
   }
 
   async function evaluateAssistantResponse(prompt, response, targetNode) {
@@ -917,7 +1072,7 @@
 
       const pScore = (data.scores && typeof data.scores.performance_p === "number")
         ? data.scores.performance_p
-        : 100.0;
+        : (data.performance_score !== undefined ? data.performance_score : 100.0);
 
       const hasHallucination = (data.risk_findings || []).some(
         rf => rf.type && (rf.type.includes("HALLUCINATION") || rf.type.includes("GROUNDING"))
@@ -927,7 +1082,8 @@
       const badge = document.createElement("div");
       badge.className = "cp-factuality-inline-badge";
       badge.style.cssText = `
-        margin-top: 8px;
+        margin-top: 10px;
+        margin-bottom: 6px;
         padding: 6px 12px;
         border-radius: 6px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -937,16 +1093,20 @@
         justify-content: space-between;
         gap: 10px;
         background: #090e17;
-        border: 1px solid ${hasHallucination ? "rgba(244, 63, 94, 0.28)" : "rgba(255, 255, 255, 0.08)"};
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-        color: #94a3b8;
+        border: 1px solid ${hasHallucination ? "rgba(244, 63, 94, 0.35)" : "rgba(16, 185, 129, 0.25)"};
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        color: #cbd5e1;
         transition: all 0.2s ease;
+        position: relative;
+        z-index: 5;
+        width: fit-content;
+        max-width: 100%;
       `;
 
       badge.innerHTML = `
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: ${hasHallucination ? "#f43f5e" : "#10b981"}; box-shadow: 0 0 6px ${hasHallucination ? "rgba(244, 63, 94, 0.6)" : "rgba(16, 185, 129, 0.6)"};"></span>
-          <span style="color: #e2e8f0; font-weight: 500;">Factuality & Grounding: <strong style="color: ${hasHallucination ? "#fb7185" : "#34d399"}; font-weight: 700;">${pScore.toFixed(0)}%</strong></span>
+          <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: ${hasHallucination ? "#f43f5e" : "#10b981"}; box-shadow: 0 0 6px ${hasHallucination ? "rgba(244, 63, 94, 0.6)" : "rgba(16, 185, 129, 0.6)"};"></span>
+          <span style="color: #f1f5f9; font-weight: 500;">Factuality & Grounding: <strong style="color: ${hasHallucination ? "#fb7185" : "#34d399"}; font-weight: 700;">${pScore.toFixed(0)}%</strong></span>
           <span style="color: #475569;">•</span>
           <span style="color: #94a3b8;">${hasHallucination ? "Low-Grounding Risk Logged" : "Grounded & Verified"}</span>
         </div>
@@ -955,8 +1115,11 @@
         </span>
       `;
 
-      if (targetNode.parentElement) {
-        targetNode.parentElement.appendChild(badge);
+      // Insert badge neatly right after the markdown content block
+      if (targetNode.parentElement && targetNode.parentElement !== document.body) {
+        targetNode.insertAdjacentElement("afterend", badge);
+      } else {
+        targetNode.appendChild(badge);
       }
 
       if (hasHallucination) {
