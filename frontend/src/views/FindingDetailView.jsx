@@ -218,6 +218,42 @@ export function FindingDetailView({ findingId, onBack }) {
               )}
             </div>
           </div>
+
+          {/* Dedicated Verified Fact & Source Link for Hallucination Findings */}
+          {(finding.is_hallucination || finding.correct_answer || finding.source_link || (finding.context && (finding.context.includes('HALLUCINATION') || finding.context.includes('GROUNDING')))) && (
+            <div className="grid grid-cols-1 md:grid-cols-12 p-4 bg-emerald-50/40 dark:bg-emerald-950/20 border-t border-emerald-200 dark:border-emerald-800/50">
+              <div className="md:col-span-3 font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Verified Fact & Citation</span>
+              </div>
+              <div className="md:col-span-9 space-y-3">
+                <div className="space-y-1">
+                  <div className="font-bold text-[10px] text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
+                    Correct Grounded Fact / Answer
+                  </div>
+                  <div className="text-slate-900 dark:text-emerald-100 bg-white dark:bg-dark-900 p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800/60 font-medium text-xs shadow-sm">
+                    {finding.correct_answer || finding.evidence_snippet || "The correct factual statement verified against reference documentation."}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="font-bold text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Knowledge Source & Evidence Link
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={finding.source_link || "https://docs.controlplane.ai/knowledge-base/verified-sources"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 hover:bg-emerald-200 dark:hover:bg-emerald-800 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 font-mono text-[11px] font-semibold transition-colors"
+                    >
+                      <span>🔗 {finding.source_link || "https://docs.controlplane.ai/knowledge-base/verified-sources"}</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

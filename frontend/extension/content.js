@@ -60,88 +60,154 @@
     return;
   }
 
-  // Prevent duplicate banner insertion
-  if (document.getElementById("controlplane-top-banner")) return;
-
-  console.log("[ControlPlane AI Guardrail] Active on AI Chatbot: " + host);
-
   const blockedPromptsSet = new Set();
   let isChecking = false;
+  let isConnected = false;
 
-  // 3. Inject Top Security Banner Bar on the Chatbot Portal
-  const banner = document.createElement("div");
-  banner.id = "controlplane-top-banner";
-  banner.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 34px;
-    z-index: 2147483645;
-    background: #090d16;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    color: #f1f5f9;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-    transition: all 0.25s ease;
-  `;
+  function ensureBannerInjected() {
+    if (document.getElementById("controlplane-top-banner")) return;
 
-  banner.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <span id="cp-banner-dot" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);"></span>
-      <span id="cp-banner-text" style="color: #cbd5e1; font-weight: 500;">ControlPlane Active — Guarding ${host}</span>
-    </div>
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <span id="cp-banner-badge" style="background: rgba(99, 102, 241, 0.12); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.25); padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;">ACTIVE</span>
-      <button id="cp-banner-dismiss" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500; transition: all 0.15s ease;">Dismiss</button>
-    </div>
-  `;
+    const banner = document.createElement("div");
+    banner.id = "controlplane-top-banner";
+    banner.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 34px;
+      z-index: 2147483645;
+      background: #090d16;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+      transition: all 0.25s ease;
+    `;
 
-  document.documentElement.style.marginTop = "34px";
-  document.body.appendChild(banner);
+    banner.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span id="cp-banner-dot" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);"></span>
+        <span id="cp-banner-text" style="color: #cbd5e1; font-weight: 500;">ControlPlane Active — Guarding ${host}</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span id="cp-banner-badge" style="background: rgba(99, 102, 241, 0.12); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.25); padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;">ACTIVE</span>
+        <button id="cp-banner-dismiss" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500; transition: all 0.15s ease;">Dismiss</button>
+      </div>
+    `;
 
-  const dismissBtn = document.getElementById("cp-banner-dismiss");
-  if (dismissBtn) {
-    dismissBtn.addEventListener("click", () => {
-      banner.style.display = "none";
+    document.documentElement.style.marginTop = "34px";
+    document.body.appendChild(banner);
+
+    const dismissBtn = document.getElementById("cp-banner-dismiss");
+    if (dismissBtn) {
+      dismissBtn.addEventListener("click", () => {
+        banner.style.display = "none";
+        document.documentElement.style.marginTop = "0px";
+      });
+    }
+  }
+
+  function ensureToastContainerInjected() {
+    if (document.getElementById("cp-inpage-toast-container")) return;
+
+    const toastContainer = document.createElement("div");
+    toastContainer.id = "cp-inpage-toast-container";
+    toastContainer.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2147483647;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 420px;
+      width: calc(100vw - 48px);
+      pointer-events: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    `;
+    document.body.appendChild(toastContainer);
+
+    if (!document.getElementById("cp-toast-keyframes")) {
+      const styleEl = document.createElement("style");
+      styleEl.id = "cp-toast-keyframes";
+      styleEl.textContent = `
+        @keyframes cpSlideUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `;
+      document.head.appendChild(styleEl);
+    }
+  }
+
+  async function syncConnectionState() {
+    let token = "";
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      try {
+        const stored = await chrome.storage.local.get(["cp_token"]);
+        if (stored && stored.cp_token && stored.cp_token.trim()) {
+          token = stored.cp_token.trim();
+        }
+      } catch (e) {}
+    }
+
+    if (!token) {
+      // DISCONNECTED STATE: Clean up all injected UI and disable guardrail
+      isConnected = false;
+      const existingBanner = document.getElementById("controlplane-top-banner");
+      if (existingBanner) {
+        existingBanner.remove();
+      }
       document.documentElement.style.marginTop = "0px";
+
+      const existingToasts = document.getElementById("cp-inpage-toast-container");
+      if (existingToasts) {
+        existingToasts.remove();
+      }
+      console.log("[ControlPlane AI Guardrail] Extension is DISCONNECTED. Protection inactive.");
+      return;
+    }
+
+    // CONNECTED STATE: Activate banner and guardrail
+    isConnected = true;
+    console.log("[ControlPlane AI Guardrail] Extension is CONNECTED. Guarding " + host);
+    ensureBannerInjected();
+    ensureToastContainerInjected();
+  }
+
+  // Initial connection state synchronization
+  syncConnectionState();
+
+  // Listen for storage changes from extension popup (Connect / Disconnect / Reset)
+  if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName === "local" && changes.cp_token !== undefined) {
+        syncConnectionState();
+      }
     });
   }
 
-  // 4. In-Page HUD / Live Telemetry Toast Container
-  const toastContainer = document.createElement("div");
-  toastContainer.id = "cp-inpage-toast-container";
-  toastContainer.style.cssText = `
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 2147483647;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-width: 420px;
-    width: calc(100vw - 48px);
-    pointer-events: none;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  `;
-  document.body.appendChild(toastContainer);
-
-  const styleEl = document.createElement("style");
-  styleEl.textContent = `
-    @keyframes cpSlideUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  `;
-  document.head.appendChild(styleEl);
+  // Listen for direct broadcast messages from extension popup
+  if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener((msg) => {
+      if (msg && msg.type === "CP_STATE_CHANGED") {
+        syncConnectionState();
+      }
+    });
+  }
 
   function showInPageAlert(type, title, message, details) {
+    if (!isConnected) return;
+    ensureToastContainerInjected();
+    const toastContainer = document.getElementById("cp-inpage-toast-container");
+    if (!toastContainer) return;
+
     const card = document.createElement("div");
     card.style.cssText = `
       pointer-events: auto;
@@ -229,94 +295,82 @@
     }, 5000);
   }
 
-  // 5. Synchronous Keydown Interception on Enter Key
-  document.addEventListener(
-    "keydown",
-    async (e) => {
-      if (e.key === "Enter" && !e.shiftKey && !isChecking) {
-        const activeEl = document.activeElement;
-        const targetInput = isInputTarget(activeEl) ? activeEl : findActiveChatInput();
+  let isSyntheticSubmit = false;
 
-        if (targetInput) {
-          const text = getInputValue(targetInput);
-          if (!text || text.length === 0) return;
+  async function handleUserSubmitAttempt(e, inputEl) {
+    if (isSyntheticSubmit) return;
+    if (!isConnected) return;
+    if (!inputEl) inputEl = findActiveChatInput();
+    if (!inputEl) return;
 
-          if (blockedPromptsSet.has(text)) {
-            haltEvent(e);
-            updateBannerUI("BLOCK", "Permanently Blocked: Prompt contains sensitive secret, PII, or injection threat.");
-            showInPageAlert("BLOCK", "Action Blocked", "Prompt is blocked by ControlPlane policy.");
-            return false;
-          }
+    const text = getInputValue(inputEl);
+    if (!text || text.length === 0) return;
 
-          haltEvent(e);
-          isChecking = true;
+    // Immediately stop the native event in its tracks synchronously!
+    haltEvent(e);
 
-          try {
-            const result = await evaluatePromptWithBackend(text);
-            handleEvaluationResult(result, text, targetInput);
-          } catch (err) {
-            console.error("ControlPlane evaluation error:", err);
-            triggerNativeSubmit(targetInput);
-          } finally {
-            isChecking = false;
-          }
-        }
+    if (blockedPromptsSet.has(text)) {
+      updateBannerUI("BLOCK", "Permanently Blocked: Prompt contains sensitive secret, PII, or injection threat.");
+      showInPageAlert("BLOCK", "Action Blocked", "Prompt is blocked by ControlPlane policy.");
+      return false;
+    }
+
+    if (isChecking) return false;
+    isChecking = true;
+
+    try {
+      const result = await evaluatePromptWithBackend(text);
+      handleEvaluationResult(result, text, inputEl);
+    } catch (err) {
+      console.error("ControlPlane evaluation error:", err);
+      triggerNativeSubmit(inputEl);
+    } finally {
+      isChecking = false;
+    }
+  }
+
+  function onKeyDownCapture(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      const activeEl = document.activeElement;
+      const inputEl = (activeEl && isInputTarget(activeEl))
+        ? (activeEl.closest("#prompt-textarea, div[contenteditable='true'], [role='textbox'], .ProseMirror, textarea, input") || activeEl)
+        : findActiveChatInput();
+      if (inputEl) {
+        handleUserSubmitAttempt(e, inputEl);
       }
-    },
-    true
-  );
+    }
+  }
 
-  // 6. Synchronous Click Interception on Chatbot Send Buttons
-  document.addEventListener(
-    "click",
-    async (e) => {
-      if (isChecking) return;
-      const target = e.target;
-      const sendBtn = target.closest(
-        [
-          "button[type='submit']",
-          "button[aria-label*='Send' i]",
-          "button[aria-label*='Submit' i]",
-          "button[aria-label*='发送']",
-          "button[data-testid*='send' i]",
-          "button[data-testid*='submit' i]",
-          "button#send-button",
-          "button.send-button",
-          "div[role='button'][aria-label*='Send' i]",
-          "fieldset button"
-        ].join(",")
-      );
+  function onClickCapture(e) {
+    const target = e.target;
+    const sendBtn = target && target.closest && target.closest(
+      [
+        "button[type='submit']",
+        "button[aria-label*='Send' i]",
+        "button[aria-label*='Submit' i]",
+        "button[aria-label*='发送']",
+        "button[data-testid*='send' i]",
+        "button[data-testid*='submit' i]",
+        "button#send-button",
+        "button.send-button",
+        "div[role='button'][aria-label*='Send' i]",
+        "fieldset button"
+      ].join(",")
+    );
 
-      if (sendBtn) {
-        const inputEl = findAssociatedInput(sendBtn);
-        if (inputEl) {
-          const text = getInputValue(inputEl);
-          if (!text || text.length === 0) return;
-
-          if (blockedPromptsSet.has(text)) {
-            haltEvent(e);
-            updateBannerUI("BLOCK", "Permanently Blocked: Prompt contains sensitive secret, PII, or injection threat.");
-            showInPageAlert("BLOCK", "Action Blocked", "Prompt is blocked by ControlPlane policy.");
-            return false;
-          }
-
-          haltEvent(e);
-          isChecking = true;
-
-          try {
-            const result = await evaluatePromptWithBackend(text);
-            handleEvaluationResult(result, text, inputEl);
-          } catch (err) {
-            console.error("ControlPlane evaluation error:", err);
-            triggerNativeSubmit(inputEl);
-          } finally {
-            isChecking = false;
-          }
-        }
+    if (sendBtn) {
+      const inputEl = findAssociatedInput(sendBtn);
+      if (inputEl) {
+        handleUserSubmitAttempt(e, inputEl);
       }
-    },
-    true
-  );
+    }
+  }
+
+  // Register on both window and document in capture phase
+  window.addEventListener("keydown", onKeyDownCapture, true);
+  document.addEventListener("keydown", onKeyDownCapture, true);
+  window.addEventListener("click", onClickCapture, true);
+  document.addEventListener("click", onClickCapture, true);
 
   // 7. Policy Outcome Handler
   function handleEvaluationResult(result, rawText, inputEl) {
@@ -335,8 +389,8 @@
     if (result.action === "BLOCK") {
       blockedPromptsSet.add(rawText);
       if (inputEl) {
-        inputEl.style.border = "1px solid #f43f5e";
-        inputEl.style.boxShadow = "0 0 10px rgba(244, 63, 94, 0.25)";
+        inputEl.style.border = "2px solid #f43f5e";
+        inputEl.style.boxShadow = "0 0 14px rgba(244, 63, 94, 0.35)";
       }
       updateBannerUI("BLOCK", "Action Blocked: High severity risk or policy violation detected.", result);
       showInPageAlert(
@@ -370,7 +424,7 @@
 
       setTimeout(() => {
         triggerNativeSubmit(inputEl);
-      }, 120);
+      }, 150);
 
     } else if (
       result.action === "MONITOR" ||
@@ -402,15 +456,8 @@
 
   function isInputTarget(el) {
     if (!el) return false;
-    return (
-      el.tagName === "TEXTAREA" ||
-      el.tagName === "INPUT" ||
-      el.isContentEditable ||
-      el.getAttribute("contenteditable") === "true" ||
-      el.getAttribute("role") === "textbox" ||
-      el.id === "prompt-textarea" ||
-      el.classList.contains("ProseMirror") ||
-      el.classList.contains("ql-editor")
+    return !!el.closest?.(
+      "#prompt-textarea, div[contenteditable='true'], [role='textbox'], .ProseMirror, .ql-editor, textarea, input, rich-textarea"
     );
   }
 
@@ -466,12 +513,19 @@
         range.selectNodeContents(el);
         selection.removeAllRanges();
         selection.addRange(range);
+        document.execCommand("selectAll", false, null);
         document.execCommand("delete", false, null);
         document.execCommand("insertText", false, val);
       } catch (e) {
-        el.innerText = val;
+        el.innerHTML = `<p>${val}</p>`;
       }
-      el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: val }));
+
+      if (!el.innerText || !el.innerText.includes(val)) {
+        el.innerHTML = `<p>${val}</p>`;
+      }
+
+      el.dispatchEvent(new InputEvent("input", { bubbles: true, cancelable: true, inputType: "insertText", data: val }));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
       el.dispatchEvent(new Event("change", { bubbles: true }));
     }
   }
@@ -494,12 +548,15 @@
   }
 
   function triggerNativeSubmit(inputEl) {
-    const form = inputEl ? inputEl.closest("form") : null;
+    if (!inputEl) return;
+
+    // First try finding the send button in the same form/container
+    const form = inputEl.closest("form") || inputEl.closest("fieldset") || inputEl.closest("main");
     if (form) {
       const submitBtn = form.querySelector(
-        "button[type='submit'], button[aria-label*='Send' i], button[data-testid*='send-button' i]"
+        "button[type='submit'], button[aria-label*='Send' i], button[data-testid*='send-button' i], button[data-testid*='submit' i]"
       );
-      if (submitBtn) {
+      if (submitBtn && !submitBtn.disabled) {
         submitBtn.click();
         return;
       }
@@ -509,6 +566,7 @@
       [
         "button[data-testid='send-button']",
         "button[aria-label*='Send message' i]",
+        "button[aria-label*='Send prompt' i]",
         "button[aria-label*='Send' i]",
         "button.send-button",
         "div[role='button'][aria-label*='Send' i]"
@@ -519,29 +577,30 @@
       return;
     }
 
-    if (inputEl) {
-      const enterEvent = new KeyboardEvent("keydown", {
-        key: "Enter",
-        code: "Enter",
-        keyCode: 13,
-        which: 13,
-        bubbles: true,
-        cancelable: true,
-      });
-      inputEl.dispatchEvent(enterEvent);
-    }
+    // Fallback: trigger Enter key on the input element
+    const enterEvent = new KeyboardEvent("keydown", {
+      key: "Enter",
+      code: "Enter",
+      keyCode: 13,
+      which: 13,
+      bubbles: true,
+      cancelable: true,
+    });
+    inputEl.dispatchEvent(enterEvent);
   }
 
   async function sendGuardrailCheck(payload) {
     let tokenKey = "cp_live_default";
-    let tenantId = "ankur-tenant-1";
+    let tenantId = "default-workspace";
     let configuredUrl = "http://localhost:8000";
+    let deviceId = "";
 
     if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
       try {
-        const stored = await chrome.storage.local.get(["cp_token", "cp_tenant_id", "cp_server_url"]);
+        const stored = await chrome.storage.local.get(["cp_token", "cp_tenant_id", "cp_server_url", "cp_device_id"]);
         if (stored && stored.cp_token) tokenKey = stored.cp_token;
         if (stored && stored.cp_tenant_id) tenantId = stored.cp_tenant_id;
+        if (stored && stored.cp_device_id) deviceId = stored.cp_device_id;
         if (stored && stored.cp_server_url && stored.cp_server_url.trim()) {
           configuredUrl = stored.cp_server_url.trim().replace(/\/$/, "");
         }
@@ -567,6 +626,7 @@
     const fullPayload = {
       ...payload,
       session_id: payload.session_id || currentSessionId,
+      device_id: payload.device_id || deviceId || undefined,
     };
 
     const targetUrl = `${configuredUrl}/api/v1/resources/res_demo/check`;
@@ -574,6 +634,7 @@
       "Content-Type": "application/json",
       Authorization: "Bearer " + tokenKey,
       "X-Tenant-ID": tenantId,
+      "X-Device-ID": deviceId || "unknown-device",
       "X-Source": "Browser Extension",
     };
 
@@ -637,12 +698,15 @@
 
 
   function updateBannerUI(action, message, data) {
+    const banner = document.getElementById("controlplane-top-banner");
     const textEl = document.getElementById("cp-banner-text");
     const badgeEl = document.getElementById("cp-banner-badge");
     const dotEl = document.getElementById("cp-banner-dot");
 
     if (textEl) textEl.textContent = message;
     if (badgeEl) badgeEl.textContent = action;
+
+    if (!banner) return;
 
     // Standard enterprise dark baseline
     banner.style.background = "#090d16";

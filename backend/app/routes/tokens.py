@@ -20,6 +20,13 @@ class CreateTokenRequest(BaseModel):
     days_valid: int = Field(48, ge=1, le=365)
 
 
+class DeviceHeartbeatRequest(BaseModel):
+    device_id: str = Field(..., min_length=1)
+    token_key: Optional[str] = None
+    tenant_id: Optional[str] = None
+    source: Optional[str] = "Browser Extension"
+
+
 @router.get("")
 def list_tokens():
     return db.list_tokens()
@@ -32,6 +39,24 @@ def create_enrollment_token(payload: CreateTokenRequest):
         name=payload.name,
         days_valid=payload.days_valid,
     )
+
+
+@router.get("/{token_id}/devices")
+def get_token_devices(token_id: str):
+    return db.list_devices_for_token(token_id)
+
+
+@router.post("/heartbeat")
+def record_device_presence(payload: DeviceHeartbeatRequest):
+    try:
+        return db.record_device_heartbeat(
+            device_id=payload.device_id,
+            token_key=payload.token_key,
+            tenant_id=payload.tenant_id or "ankur-tenant-1",
+            source=payload.source,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=401, detail=str(err))
 
 
 @router.delete("/{token_id}")

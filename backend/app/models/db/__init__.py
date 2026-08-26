@@ -16,6 +16,7 @@ from .connection import (
 )
 from .users import (
     ALL_TENANTS,
+    is_valid_tenant,
     list_users,
     authenticate_user,
     google_login_or_register,
@@ -60,5 +61,7 @@ from .tokens import (
     revoke_token,
     get_active_token,
     validate_token_key,
+    record_device_heartbeat,
+    list_devices_for_token,
 )
 

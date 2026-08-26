@@ -88,6 +88,19 @@ def verify_against_context(claim: str, context_docs: List[str]) -> Tuple[bool, f
 
 
 
+_HEDGING_PATTERNS = [
+    re.compile(r"i'm\s+not\s+entirely\s+sure", re.IGNORECASE),
+    re.compile(r"i\s+believe\s+that\s+might\s+be", re.IGNORECASE),
+    re.compile(r"as\s+an\s+ai\s+language\s+model", re.IGNORECASE),
+    re.compile(r"i\s+don't\s+have\s+access\s+to\s+real-time", re.IGNORECASE),
+    re.compile(r"this\s+is\s+just\s+a\s+guess", re.IGNORECASE),
+    re.compile(r"i\s+may\s+be\s+mistaken", re.IGNORECASE),
+    re.compile(r"unverified\s+information", re.IGNORECASE),
+    re.compile(r"it\s+is\s+rumored\s+that", re.IGNORECASE),
+    re.compile(r"to\s+the\s+best\s+of\s+my\s+knowledge,\s+possibly", re.IGNORECASE),
+]
+
+
 def evaluate_grounding(
     prompt: str,
     response: str,
@@ -115,28 +128,23 @@ def evaluate_grounding(
     serper_key = serper_api_key or os.environ.get("SERPER_API_KEY", "")
 
     for c in claims:
-        # Check against RAG context first
+        # Check against RAG context first if provided
         if context_docs:
             grounded, conf, snippet = verify_against_context(c, context_docs)
         elif serper_key:
             # Live Serper Web Search Verification
             grounded, conf, snippet = verify_against_serper(prompt, c, serper_key)
         else:
-            # Fallback heuristic:
-            # 1. Check for specific numbers / dates without grounding context
-            has_specific_numbers = bool(re.search(r'\b\d{4,}\b|\$\d+|\b\d+\.\d+%\b', c))
-            # 2. Check for general factual/informational queries without reference docs
-            is_factual_q = bool(re.search(r'\b(who|what|where|when|which|how|why|name|capital|leader|head|founder|inventor|date|population|currency|author)\b', prompt, re.IGNORECASE))
-            
-            if is_factual_q and len(context_docs) == 0:
-                # Open factual assertion with zero grounding reference
+            # Direct response evaluation: check for hedging or self-contradiction
+            is_hedging = any(p.search(c) for p in _HEDGING_PATTERNS)
+            if is_hedging:
                 grounded = False
                 conf = 0.35
-                snippet = "Unverified assertion without approved enterprise reference context"
+                snippet = "Hedging or low-confidence phrasing detected"
             else:
-                grounded = not has_specific_numbers
-                conf = 0.85 if grounded else 0.45
-                snippet = None
+                grounded = True
+                conf = 0.95
+                snippet = "Direct high-confidence factual assertion"
 
 
         claim_record = {

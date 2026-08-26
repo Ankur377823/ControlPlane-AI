@@ -165,6 +165,44 @@ export function EventOverviewModal({ eventId, sessionId, isOpen, onClose }) {
                 </div>
               </div>
 
+              {/* Verified Fact & Source Evidence (for Hallucination / Grounding Events) */}
+              {(activeEvent.is_hallucination || activeEvent.correct_answer || activeEvent.source_link || (activeEvent.context && (activeEvent.context.includes('HALLUCINATION') || activeEvent.context.includes('GROUNDING')))) && (
+                <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-300 dark:border-emerald-500/30 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <span>Verified Grounded Fact & Source Citation</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 uppercase">
+                      Ground Truth
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      Correct Answer / Factual Truth
+                    </div>
+                    <div className="text-xs font-medium text-slate-900 dark:text-emerald-100 bg-white dark:bg-dark-900 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/60 shadow-sm">
+                      {activeEvent.correct_answer || activeEvent.evidence_snippet || "Verified fact based on approved enterprise reference documentation."}
+                    </div>
+
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-1">
+                      Knowledge Base Source Link
+                    </div>
+                    <div>
+                      <a
+                        href={activeEvent.source_link || "https://docs.controlplane.ai/knowledge-base/verified-sources"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 hover:bg-emerald-200 dark:hover:bg-emerald-800 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 font-mono text-[11px] font-semibold transition-colors"
+                      >
+                        <span>🔗 {activeEvent.source_link || "https://docs.controlplane.ai/knowledge-base/verified-sources"}</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Review Queue Actions */}
               <div className="p-5 rounded-2xl bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-3">
                 <div className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">

@@ -2,27 +2,26 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="utf-8">
-  <title>ControlPlane AI — Extension Setup</title>
+  <title>ControlPlane AI Security</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-main: #0b0f19;
-      --bg-card: #1e293b;
-      --bg-card-subtle: rgba(30, 41, 59, 0.7);
-      --bg-input: #090d16;
-      --border-color: rgba(255, 255, 255, 0.08);
-      --border-hover: rgba(99, 102, 241, 0.4);
-      --text-primary: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-subtle: #64748b;
-      --primary: #6366f1;
-      --primary-hover: #4f46e5;
+      --bg-page: #0b0f17;
+      --bg-card: #131b26;
+      --bg-input: #0a0f16;
+      --border-color: #202b3b;
+      --border-focus: #3b82f6;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --primary-btn: #2563eb;
+      --primary-btn-hover: #1d4ed8;
+      --secondary-btn: #1e293b;
+      --secondary-btn-hover: #273549;
       --accent-green: #10b981;
       --accent-red: #ef4444;
-      --accent-cyan: #06b6d4;
-      --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
     }
 
     * {
@@ -32,305 +31,312 @@
     }
 
     body {
-      background-color: var(--bg-main);
+      background-color: var(--bg-page);
       color: var(--text-primary);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 28px 16px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      min-width: 440px;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 24px;
       -webkit-font-smoothing: antialiased;
     }
 
     .container {
-      width: 100%;
-      max-width: 580px;
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     /* HEADER */
     .header {
       display: flex;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 22px;
+      gap: 12px;
+      margin-bottom: 2px;
     }
 
-    .logo-container {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #6366f1, #06b6d4);
+    .header-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #1e293b;
+      border: 1px solid #334155;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Outfit', sans-serif;
-      font-weight: 800;
-      font-size: 18px;
-      color: #ffffff;
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.2);
       flex-shrink: 0;
     }
 
-    .title-area h1 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: #ffffff;
+    .header-icon svg {
+      width: 18px;
+      height: 18px;
+      color: #60a5fa;
     }
 
-    .title-area p {
+    .header-text h1 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .header-text p {
       font-size: 12px;
       color: var(--text-muted);
-      margin-top: 1px;
+      margin-top: 2px;
     }
 
     /* CARDS */
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 18px;
-      padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow-card);
-      backdrop-filter: blur(12px);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      border-radius: 10px;
+      padding: 18px;
     }
 
-    .card:hover {
-      border-color: var(--border-hover);
-    }
-
-    .card-title {
-      font-family: 'Outfit', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 14px;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* STATUS BLOCK */
+    /* STATUS CARD */
     .status-header {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 12px;
-      font-weight: 700;
+      margin-bottom: 8px;
     }
 
     .status-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background-color: var(--accent-red);
-      box-shadow: 0 0 10px var(--accent-red);
-      display: inline-block;
+      background-color: var(--text-muted);
+      transition: background-color 0.25s, box-shadow 0.25s;
     }
 
     .status-dot.connected {
       background-color: var(--accent-green);
-      box-shadow: 0 0 10px var(--accent-green);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.45);
     }
 
-    .status-desc {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 2px;
-      margin-bottom: 14px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-color);
-      line-height: 1.5;
+    .status-dot.disconnected {
+      background-color: var(--text-muted);
     }
 
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .status-item {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .status-label {
-      font-size: 10px;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: var(--text-subtle);
-      letter-spacing: 0.05em;
-    }
-
-    .status-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11.5px;
+    .status-title {
+      font-size: 13px;
       font-weight: 600;
       color: #ffffff;
-      word-break: break-all;
     }
 
-    /* FORMS & INPUTS */
+    .status-summary {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      line-height: 1.45;
+    }
+
+    .meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: baseline;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .meta-label {
+      width: 110px;
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+
+    .meta-value {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      word-break: break-all;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0 2px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.15s;
+    }
+
+    .copy-btn:hover {
+      color: #ffffff;
+    }
+
+    /* FORM CARD */
+    .card-heading {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 14px;
+    }
+
     .form-group {
       margin-bottom: 14px;
     }
 
-    .form-label-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
       margin-bottom: 6px;
-    }
-
-    label {
-      font-size: 11.5px;
-      font-weight: 600;
-      color: #f1f5f9;
-    }
-
-    .label-badge {
-      font-size: 9.5px;
-      font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 4px;
-      text-transform: uppercase;
     }
 
     .input-field {
       width: 100%;
       background: var(--bg-input);
       border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 9px 12px;
+      border-radius: 6px;
+      padding: 8px 12px;
       color: #ffffff;
       font-size: 12.5px;
-      font-family: 'JetBrains Mono', monospace;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .input-field::placeholder {
+      color: #475569;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
     }
 
     .input-field:focus {
       outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 1px var(--border-focus);
+    }
+
+    .form-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.4;
     }
 
     /* BUTTONS */
-    .btn-row {
+    .btn-group {
       display: flex;
-      flex-wrap: wrap;
+      align-items: center;
       gap: 8px;
-      margin-top: 16px;
+      margin-top: 18px;
     }
 
     .btn {
-      padding: 9px 16px;
-      border-radius: 10px;
-      font-size: 11.5px;
-      font-weight: 700;
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
-      border: none;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      font-family: inherit;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
-      font-family: inherit;
+      text-decoration: none;
     }
 
     .btn-primary {
-      background: var(--primary);
+      background: var(--primary-btn);
       color: #ffffff;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      border-color: #3b82f6;
     }
 
     .btn-primary:hover {
-      background: var(--primary-hover);
-      transform: translateY(-1px);
+      background: var(--primary-btn-hover);
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      color: #f1f5f9;
-      border: 1px solid var(--border-color);
+      background: var(--secondary-btn);
+      color: #cbd5e1;
+      border-color: #334155;
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--secondary-btn-hover);
+      color: #ffffff;
     }
 
     .btn-danger {
-      background: rgba(239, 68, 68, 0.1);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: transparent;
+      color: #94a3b8;
+      border-color: #334155;
     }
 
     .btn-danger:hover {
-      background: rgba(239, 68, 68, 0.2);
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.4);
     }
 
-    .btn-cyan {
-      background: rgba(6, 182, 212, 0.1);
-      color: #38bdf8;
-      border: 1px solid rgba(6, 182, 212, 0.3);
+    .btn-dev {
+      margin-left: auto;
+      font-size: 11px;
+      color: #64748b;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
     }
 
-    .btn-cyan:hover {
-      background: rgba(6, 182, 212, 0.2);
+    .btn-dev:hover {
+      color: #94a3b8;
     }
 
-    /* TOAST */
+    /* TOAST / ALERTS */
     .toast-msg {
       display: none;
-      padding: 10px 14px;
-      border-radius: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
       font-size: 11.5px;
-      font-weight: 600;
-      margin-bottom: 14px;
-      animation: slideDown 0.3s ease;
-      text-align: center;
       border: 1px solid transparent;
+      animation: fadeIn 0.2s ease;
     }
 
-    @keyframes slideDown {
-      from { transform: translateY(-6px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-2px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* FOOTER LINK */
-    .dashboard-btn-container {
-      margin-top: 18px;
-      text-align: center;
+    /* FOOTER */
+    .footer {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 4px 2px 0 2px;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
     }
 
-    .btn-link {
-      display: block;
-      width: 100%;
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      color: #c7d2fe;
+    .footer a {
+      color: #60a5fa;
       text-decoration: none;
-      padding: 11px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 12.5px;
-      transition: all 0.2s;
     }
 
-    .btn-link:hover {
-      background: var(--primary);
-      color: #ffffff;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    .footer a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -340,87 +346,89 @@
     
     <!-- HEADER -->
     <div class="header">
-      <div class="logo-container">CP</div>
-      <div class="title-area">
-        <h1>ControlPlane AI</h1>
-        <p>Endpoint AI Connector & Governance</p>
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+      </div>
+      <div class="header-text">
+        <h1>ControlPlane AI Security</h1>
+        <p>Connect this browser to your organization</p>
       </div>
     </div>
 
-    <!-- TOAST -->
+    <!-- NOTIFICATION TOAST -->
     <div id="popup-toast" class="toast-msg"></div>
 
     <!-- STATUS CARD -->
     <div class="card">
-      <div class="card-title">
-        <span>Connection Status</span>
-        <div class="status-header">
-          <span class="status-dot" id="status-dot-indicator"></span>
-          <span id="token-status-pill">DISCONNECTED</span>
-        </div>
+      <div class="status-header">
+        <span class="status-dot disconnected" id="status-dot-indicator"></span>
+        <span class="status-title" id="token-status-pill">Disconnected</span>
       </div>
-      <div class="status-desc" id="status-message-text">
-        This browser is currently not connected to an active ControlPlane Tenant.
+      <div class="status-summary" id="status-message-text">
+        This browser is currently not connected to an organization.
       </div>
-      <div class="status-grid">
-        <div class="status-item">
-          <span class="status-label">Device ID</span>
-          <span class="status-value" id="status-device-id">Initializing...</span>
+      
+      <div class="meta-list">
+        <div class="meta-row">
+          <span class="meta-label">Device ID</span>
+          <span class="meta-value">
+            <span id="status-device-id">—</span>
+            <button class="copy-btn" id="copy-device-btn" title="Copy Device ID">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </span>
         </div>
-        <div class="status-item">
-          <span class="status-label">Server URL</span>
-          <span class="status-value" id="status-server-url">-</span>
+        <div class="meta-row">
+          <span class="meta-label">Server URL</span>
+          <span class="meta-value" id="status-server-url">—</span>
         </div>
-        <div class="status-item">
-          <span class="status-label">Last Heartbeat</span>
-          <span class="status-value" id="status-heartbeat">Offline</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">Scope</span>
-          <span class="status-value" style="color: var(--accent-cyan);">All AI Chat Portals</span>
+        <div class="meta-row">
+          <span class="meta-label">Last heartbeat</span>
+          <span class="meta-value" id="status-heartbeat">Offline</span>
         </div>
       </div>
     </div>
 
     <!-- CONNECTION SETTINGS CARD -->
     <div class="card">
-      <div class="card-title">Connection Settings</div>
+      <div class="card-heading">Connection settings</div>
       
       <div class="form-group">
-        <div class="form-label-row">
-          <label for="server-url-input">Server URL</label>
-          <span class="label-badge" style="background: rgba(99, 102, 241, 0.15); color: #a5b4fc;">Gateway</span>
-        </div>
-        <input type="text" id="server-url-input" class="input-field" placeholder="http://localhost:8000" value="http://localhost:8000">
+        <label for="server-url-input">Server URL</label>
+        <input type="text" id="server-url-input" class="input-field" placeholder="https://controlplane-ai.onrender.com" spellcheck="false" autocomplete="off">
+        <div class="form-hint">Use your deployed instance URL (e.g. https://controlplane-ai.onrender.com or http://localhost:8000).</div>
       </div>
 
       <div class="form-group">
-        <div class="form-label-row">
-          <label for="tenant-input">Tenant ID</label>
-          <span class="label-badge" style="background: rgba(16, 185, 129, 0.15); color: #6ee7b7;">Workspace</span>
-        </div>
-        <input type="text" id="tenant-input" class="input-field" placeholder="ankur-tenant-1" value="ankur-tenant-1">
+        <label for="tenant-input">Tenant ID</label>
+        <input type="text" id="tenant-input" class="input-field" placeholder="ankur-tenant-1" spellcheck="false" autocomplete="off">
+        <div class="form-hint">Your organization or workspace identifier (e.g. ankur-tenant-1).</div>
       </div>
 
       <div class="form-group">
-        <div class="form-label-row">
-          <label for="token-input">Enrollment Token</label>
-          <span class="label-badge" style="background: rgba(6, 182, 212, 0.15); color: #67e8f9;" id="token-days-tag">Activation Key</span>
-        </div>
-        <input type="password" id="token-input" class="input-field" placeholder="••••••••••••••••••••••••••••••••">
+        <label for="token-input">Enrollment token</label>
+        <input type="password" id="token-input" class="input-field" placeholder="••••••••••••••••••••••••••••••••" autocomplete="off">
+        <div class="form-hint">Copy from ControlPlane Studio → Enrollment Tokens.</div>
       </div>
 
-      <div class="btn-row">
+      <div class="btn-group">
         <button id="save-token-btn" class="btn btn-primary">Connect</button>
         <button id="disconnect-btn" class="btn btn-secondary">Disconnect</button>
         <button id="reset-btn" class="btn btn-danger">Reset</button>
-        <button id="auto-token-btn" class="btn btn-cyan">Auto-Enroll</button>
+        <button id="auto-token-btn" class="btn-dev" title="Auto-detect local dev server credentials">Auto-Detect (Local Dev)</button>
       </div>
     </div>
 
-    <!-- DASHBOARD FOOTER LINK -->
-    <div class="dashboard-btn-container">
-      <a id="dashboard-link" href="http://localhost:8000/#/dashboard" target="_blank" class="btn-link">Open Governance Studio →</a>
+    <!-- FOOTER -->
+    <div class="footer">
+      <div>Device credentials refresh automatically. If enrollment fails, generate a new token.</div>
+      <div><a id="dashboard-link" href="#" target="_blank">Open ControlPlane Studio →</a></div>
     </div>
 
   </div>

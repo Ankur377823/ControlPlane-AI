@@ -119,6 +119,21 @@ SCHEMA_TABLES = [
     );
     """,
     """
+    CREATE TABLE IF NOT EXISTS devices (
+        id TEXT PRIMARY KEY,
+        device_id TEXT NOT NULL,
+        token_key TEXT,
+        token_id TEXT,
+        tenant_id TEXT NOT NULL DEFAULT 'ankur-tenant-1',
+        device_name TEXT,
+        platform TEXT,
+        browser TEXT,
+        status TEXT NOT NULL DEFAULT 'active',
+        last_seen_at TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    );
+    """,
+    """
     CREATE TABLE IF NOT EXISTS interceptions (
         id TEXT PRIMARY KEY,
         resource_id TEXT NOT NULL,
@@ -602,13 +617,16 @@ def _seed_default_users(conn) -> None:
 
     users = []
     if admin_uname and admin_pwd:
-        users.append(("usr_admin", admin_uname, admin_email or f"{admin_uname}@domain.com", admin_pwd, admin_name or admin_uname, "ADMIN", "local", "approved", "tnt_84ndhdjdj94844hj", now))
+        users.append(("usr_admin", admin_uname, admin_email or f"{admin_uname}@domain.com", admin_pwd, admin_name or admin_uname, "ADMIN", "local", "approved", "ankur-tenant-1", now))
     if user1_uname and user1_pwd:
-        users.append(("usr_john", user1_uname, user1_email or f"{user1_uname}@domain.com", user1_pwd, user1_name or user1_uname, "USER", "local", "approved", "tnt_84ndhdjdj94844hj", now))
+        users.append(("usr_john", user1_uname, user1_email or f"{user1_uname}@domain.com", user1_pwd, user1_name or user1_uname, "USER", "local", "approved", "ankur-tenant-1", now))
     if user2_uname and user2_pwd:
-        users.append(("usr_alice", user2_uname, user2_email or f"{user2_uname}@domain.com", user2_pwd, user2_name or user2_uname, "USER", "local", "approved", "tnt_92kf74bc109312ae", now))
+        users.append(("usr_alice", user2_uname, user2_email or f"{user2_uname}@domain.com", user2_pwd, user2_name or user2_uname, "USER", "local", "approved", "ankur-tenant-1", now))
 
-
+    # Safe fallback defaults if no env vars are defined
+    if not users:
+        users.append(("usr_admin", "admin", "admin@controlplane.ai", "password123", "Admin User", "ADMIN", "local", "approved", "ankur-tenant-1", now))
+        users.append(("usr_ankur", "ankur", "ankur@acme.com", "password123", "Ankur Kumar Singh", "ADMIN", "local", "approved", "ankur-tenant-1", now))
 
     for u in users:
         row = conn.execute("SELECT id FROM users WHERE id = ? OR username = ?", (u[0], u[1])).fetchone()

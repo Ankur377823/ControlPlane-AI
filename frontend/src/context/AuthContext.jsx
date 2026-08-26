@@ -6,12 +6,12 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const stored = sessionStorage.getItem('cp_user') || localStorage.getItem('cp_user');
+    // Only persist session during active browser tab session to enforce login on new start
+    const stored = sessionStorage.getItem('cp_user');
     if (stored) {
       try {
         return JSON.parse(stored);
       } catch (e) {
-        localStorage.removeItem('cp_user');
         sessionStorage.removeItem('cp_user');
       }
     }
@@ -39,11 +39,10 @@ export function AuthProvider({ children }) {
       }
 
       const jsonStr = JSON.stringify(userData);
+      sessionStorage.setItem('cp_user', jsonStr);
       if (remember) {
         localStorage.setItem('cp_user', jsonStr);
-        sessionStorage.removeItem('cp_user');
       } else {
-        sessionStorage.setItem('cp_user', jsonStr);
         localStorage.removeItem('cp_user');
       }
 
@@ -93,12 +92,7 @@ export function AuthProvider({ children }) {
     if (user) {
       const updated = { ...user, tenant_id: newTenantId };
       setUser(updated);
-      const isRem = !!localStorage.getItem('cp_user');
-      if (isRem) {
-        localStorage.setItem('cp_user', JSON.stringify(updated));
-      } else {
-        sessionStorage.setItem('cp_user', JSON.stringify(updated));
-      }
+      sessionStorage.setItem('cp_user', JSON.stringify(updated));
     }
     showToast(`Switched active tenant workspace to: ${newTenantId}`, 'cyan');
   };
@@ -112,7 +106,6 @@ export function AuthProvider({ children }) {
   );
 
   const isAdmin = isSuperAdmin;
-
 
   return (
     <AuthContext.Provider

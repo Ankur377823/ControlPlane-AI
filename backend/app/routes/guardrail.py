@@ -21,6 +21,7 @@ class CheckRequest(BaseModel):
     session_id: Optional[str] = None
     tool_call: Optional[Dict[str, Any]] = None
     source: Optional[str] = None
+    device_id: Optional[str] = None
 
 
 @router.post("/{resource_id}/check")
@@ -29,10 +30,28 @@ def check_guardrail(
     payload: CheckRequest,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-ID"),
     x_source: Optional[str] = Header(None, alias="X-Source"),
+    x_device_id: Optional[str] = Header(None, alias="X-Device-ID"),
+    authorization: Optional[str] = Header(None, alias="Authorization"),
     tenant_id: Optional[str] = Query(None),
 ):
-    active_tenant = tenant_id or x_tenant_id or "acme-tenant-1"
+    active_tenant = tenant_id or x_tenant_id or "ankur-tenant-1"
     active_source = payload.source or x_source or "Browser Extension"
+    active_device_id = payload.device_id or x_device_id
+
+    # Record device presence
+    if active_device_id:
+        tok_key = ""
+        if authorization and authorization.startswith("Bearer "):
+            tok_key = authorization[7:].strip()
+        try:
+            db.record_device_heartbeat(
+                device_id=active_device_id,
+                token_key=tok_key,
+                tenant_id=active_tenant,
+                source=active_source
+            )
+        except Exception:
+            pass
 
     resource = db.get_resource(resource_id)
     if not resource and resource_id == "res_demo":

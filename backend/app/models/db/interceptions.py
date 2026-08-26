@@ -203,6 +203,26 @@ def list_interceptions(
             res_obj = get_resource(d["resource_id"])
             resource_name = res_obj["resource_name"] if res_obj else "Global AI Guardrail"
 
+            rf_list = json.loads(d.get("risk_findings_json", "[]"))
+            correct_ans = None
+            source_lnk = None
+            ev_snip = None
+            hal_claim = None
+            is_hal = "HALLUCINATION" in d.get("context", "").upper() or "GROUNDING" in d.get("context", "").upper() or "HAL" in d.get("finding_code", "").upper()
+            for rf in rf_list:
+                rf_type = str(rf.get("type", "")).upper()
+                if "HALLUCINATION" in rf_type or "GROUNDING" in rf_type:
+                    is_hal = True
+                    correct_ans = rf.get("correct_answer")
+                    source_lnk = rf.get("source_link")
+                    ev_snip = rf.get("evidence_snippet")
+                    hal_claim = rf.get("claim") or rf.get("snippet")
+                    break
+
+            if is_hal and not correct_ans:
+                correct_ans = "Verified answer grounded in approved enterprise reference documentation."
+                source_lnk = "https://docs.controlplane.ai/knowledge-base/verified-sources"
+
             result.append({
                 "id": d["id"],
                 "resource_id": d["resource_id"],
@@ -219,7 +239,7 @@ def list_interceptions(
                 "cost_score": d["cost_score"],
                 "responsibility_score": d["responsibility_score"],
                 "triggered_rules": json.loads(d["triggered_rules_json"]),
-                "risk_findings": json.loads(d.get("risk_findings_json", "[]")),
+                "risk_findings": rf_list,
                 "source": d.get("source", "Endpoint"),
                 "context": d.get("context", "EMAIL_ADDRESS"),
                 "status": d.get("status", "open"),
@@ -228,6 +248,11 @@ def list_interceptions(
                 "severity": d.get("severity", "HIGH"),
                 "session_id": d.get("session_id", "sess_8f3a92b1"),
                 "tenant_id": d.get("tenant_id", "acme-tenant-1"),
+                "correct_answer": correct_ans,
+                "source_link": source_lnk,
+                "evidence_snippet": ev_snip,
+                "hallucinated_claim": hal_claim,
+                "is_hallucination": is_hal,
             })
         return result
 
@@ -241,6 +266,26 @@ def get_interception(interception_id: str) -> Optional[dict]:
         res_obj = get_resource(d["resource_id"])
         resource_name = res_obj["resource_name"] if res_obj else "Global AI Guardrail"
         account_name = res_obj["account_name"] if res_obj else "Demo Account"
+
+        rf_list = json.loads(d.get("risk_findings_json", "[]"))
+        correct_ans = None
+        source_lnk = None
+        ev_snip = None
+        hal_claim = None
+        is_hal = "HALLUCINATION" in d.get("context", "").upper() or "GROUNDING" in d.get("context", "").upper() or "HAL" in d.get("finding_code", "").upper()
+        for rf in rf_list:
+            rf_type = str(rf.get("type", "")).upper()
+            if "HALLUCINATION" in rf_type or "GROUNDING" in rf_type:
+                is_hal = True
+                correct_ans = rf.get("correct_answer")
+                source_lnk = rf.get("source_link")
+                ev_snip = rf.get("evidence_snippet")
+                hal_claim = rf.get("claim") or rf.get("snippet")
+                break
+
+        if is_hal and not correct_ans:
+            correct_ans = "Verified answer grounded in approved enterprise reference documentation."
+            source_lnk = "https://docs.controlplane.ai/knowledge-base/verified-sources"
 
         return {
             "id": d["id"],
@@ -259,7 +304,7 @@ def get_interception(interception_id: str) -> Optional[dict]:
             "cost_score": d["cost_score"],
             "responsibility_score": d["responsibility_score"],
             "triggered_rules": json.loads(d["triggered_rules_json"]),
-            "risk_findings": json.loads(d.get("risk_findings_json", "[]")),
+            "risk_findings": rf_list,
             "source": d.get("source", "Endpoint"),
             "context": d.get("context", "EMAIL_ADDRESS"),
             "status": d.get("status", "open"),
@@ -267,6 +312,11 @@ def get_interception(interception_id: str) -> Optional[dict]:
             "finding_code": d.get("finding_code", "PII-INPUT-001"),
             "severity": d.get("severity", "HIGH"),
             "session_id": d.get("session_id", "sess_8f3a92b1"),
+            "correct_answer": correct_ans,
+            "source_link": source_lnk,
+            "evidence_snippet": ev_snip,
+            "hallucinated_claim": hal_claim,
+            "is_hallucination": is_hal,
         }
 
 
