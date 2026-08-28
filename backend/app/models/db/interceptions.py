@@ -392,33 +392,30 @@ def get_analytics_summary(tenant_id: Optional[str] = "ankur-tenant-1") -> dict:
         trustworthiness = round(100.0 - (fp_rate * 0.4) - (fn_rate * 0.6), 1)
         trustworthiness = max(85.0, min(99.9, trustworthiness))
 
-        # Real Platform Breakdown dynamically computed from registered resources & live sources
+        # Real Platform Breakdown dynamically computed from live guardrail telemetry
         platform_counts = {}
         try:
-            # 1. From resources table
-            res_rows = conn.execute("SELECT use_case_type, resource_name, account_name FROM resources").fetchall()
-            for r in res_rows:
-                pname = "Botpress" if "botpress" in (r["resource_name"] or "").lower() or "botpress" in (r["account_name"] or "").lower() else "REST Gateway"
-                platform_counts[pname] = platform_counts.get(pname, 0) + 1
-
-            # 2. From interceptions live sources
             src_rows = conn.execute("SELECT source, COUNT(*) as c FROM interceptions GROUP BY source").fetchall()
             for s in src_rows:
-                s_name = s["source"] or "Endpoint AI"
-                if "chatgpt" in s_name.lower():
+                s_name = (s["source"] or "").strip().lower()
+                if "chatgpt" in s_name or "openai" in s_name or "gpt" in s_name:
                     clean_name = "ChatGPT (OpenAI)"
-                elif "claude" in s_name.lower():
+                elif "claude" in s_name or "anthropic" in s_name:
                     clean_name = "Claude (Anthropic)"
-                elif "gemini" in s_name.lower():
+                elif "gemini" in s_name or "google" in s_name or "vertex" in s_name:
                     clean_name = "Gemini (Google)"
-                elif "botpress" in s_name.lower():
-                    clean_name = "Botpress Cloud"
-                elif "deepseek" in s_name.lower():
+                elif "deepseek" in s_name:
                     clean_name = "DeepSeek"
-                elif "extension" in s_name.lower() or "browser" in s_name.lower():
-                    clean_name = "Browser Extension"
+                elif "copilot" in s_name:
+                    clean_name = "Internal Copilot"
+                elif "botpress" in s_name or "webhook" in s_name:
+                    clean_name = "Botpress Cloud"
+                elif "agent" in s_name or "runtime" in s_name:
+                    clean_name = "Agent Runtime"
+                elif "gateway" in s_name or "rest" in s_name or "api" in s_name:
+                    clean_name = "REST AI Gateway"
                 else:
-                    clean_name = s_name.title()
+                    clean_name = "Browser Extension Shield"
                 platform_counts[clean_name] = platform_counts.get(clean_name, 0) + s["c"]
         except Exception:
             pass
@@ -427,6 +424,7 @@ def get_analytics_summary(tenant_id: Optional[str] = "ankur-tenant-1") -> dict:
             platform_counts = {
                 "Botpress Cloud": max(1, total_resources),
                 "ChatGPT (OpenAI)": max(1, total_interceptions),
+                "REST AI Gateway": 1,
             }
 
         return {

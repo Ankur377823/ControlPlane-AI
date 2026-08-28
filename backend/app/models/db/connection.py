@@ -74,6 +74,7 @@ SCHEMA_TABLES = [
         hallucination_threshold REAL NOT NULL DEFAULT 0.6,
         max_tokens_limit INTEGER NOT NULL DEFAULT 4096,
         require_human_review_below REAL NOT NULL DEFAULT 0.7,
+        custom_rules_json TEXT NOT NULL DEFAULT '[]',
         created_at TEXT NOT NULL
     );
     """,
@@ -333,6 +334,7 @@ def _migrate_db(conn) -> None:
             "ALTER TABLE resources ADD COLUMN IF NOT EXISTS validation_status TEXT NOT NULL DEFAULT 'not_validated'",
             "ALTER TABLE resources ADD COLUMN IF NOT EXISTS last_validated_at TEXT",
             "ALTER TABLE resources ADD COLUMN IF NOT EXISTS ai_provider TEXT NOT NULL DEFAULT 'custom'",
+            "ALTER TABLE policies ADD COLUMN IF NOT EXISTS custom_rules_json TEXT NOT NULL DEFAULT '[]'",
         ]
         for m in pg_migrations:
             try:
@@ -344,6 +346,8 @@ def _migrate_db(conn) -> None:
         pol_cols = [r["name"] for r in conn.execute("PRAGMA table_info(policies)").fetchall()]
         if "enforcement_mode" not in pol_cols:
             conn.execute("ALTER TABLE policies ADD COLUMN enforcement_mode TEXT NOT NULL DEFAULT 'block'")
+        if "custom_rules_json" not in pol_cols:
+            conn.execute("ALTER TABLE policies ADD COLUMN custom_rules_json TEXT NOT NULL DEFAULT '[]'")
 
         int_cols = [r["name"] for r in conn.execute("PRAGMA table_info(interceptions)").fetchall()]
         if "enforcement_mode" not in int_cols:

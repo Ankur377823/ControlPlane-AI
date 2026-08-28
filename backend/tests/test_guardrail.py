@@ -237,3 +237,42 @@ def test_enhanced_pii_and_secrets_detection():
     assert "[REDACTED_PRIVATE_KEY]" in res.sanitized_text
     assert "SuperSecret123" not in res.sanitized_text
 
+
+def test_custom_regex_rules():
+    policy_with_custom = {
+        "id": "pol_custom_test",
+        "enforcement_mode": "mask",
+        "custom_regex_rules": [
+            {
+                "id": "cr_apollo",
+                "name": "Project Apollo Codename",
+                "category": "Corporate Secrets",
+                "pattern": r"\bProject\s+Apollo\b",
+                "action": "MASK",
+                "redaction": "[REDACTED_PROJECT_CODENAME]",
+                "enabled": True,
+            },
+            {
+                "id": "cr_super_secret",
+                "name": "Super Secret Token",
+                "category": "Proprietary Tokens",
+                "pattern": r"\bSEC-TOKEN-[0-9]{5}\b",
+                "action": "BLOCK",
+                "enabled": True,
+            }
+        ]
+    }
+    guardrail = ControlPlaneGuardrail(policy_with_custom)
+
+    # 1. Test MASK custom rule
+    res_mask = guardrail.evaluate("Please send the architecture for Project Apollo to the client.")
+    assert "[REDACTED_PROJECT_CODENAME]" in res_mask["sanitized_prompt"]
+    assert "Project Apollo" not in res_mask["sanitized_prompt"]
+    assert any("Project Apollo" in r for r in res_mask["triggered_rules"])
+
+    # 2. Test BLOCK custom rule
+    res_block = guardrail.evaluate("Here is the key SEC-TOKEN-99281 for authentication.")
+    assert res_block["action"] == "BLOCK"
+    assert any("Super Secret Token" in r for r in res_block["triggered_rules"])
+
+

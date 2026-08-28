@@ -12,8 +12,12 @@ Coordinates the 9 evaluator modules across the full request lifecycle:
 
 from __future__ import annotations
 
+import logging
+import re
 import time
 from typing import Any, Dict, List, Optional
+
+logger = logging.getLogger("controlplane.guardrail")
 
 from .evaluators.action_risk import evaluate_agent_action_risk
 from .evaluators.ai_judge import evaluate_with_ai_judge, is_ambiguous_case
@@ -170,6 +174,62 @@ class ControlPlaneGuardrail:
                 })
 
         # ------------------------------------------------------------------
+        # 3.5 Dynamic Custom Regex Patterns & Policy Group Overrides
+        # ------------------------------------------------------------------
+        custom_rules = self.policy.get("custom_regex_rules", []) or []
+        has_custom_block = False
+        for cr in custom_rules:
+            if not cr.get("enabled", True):
+                continue
+            c_name = cr.get("name", "Custom Rule")
+            c_pattern = cr.get("pattern", "")
+            c_action = cr.get("action", "BLOCK").upper()
+            c_category = cr.get("category", "Custom Security")
+            c_redaction = cr.get("redaction") or f"[REDACTED_{c_name.upper().replace(' ', '_')}]"
+
+            if not c_pattern:
+                continue
+            try:
+                rx = re.compile(c_pattern, re.IGNORECASE)
+                # Check user prompt
+                matches = list(rx.finditer(sanitized_prompt))
+                if matches:
+                    triggered_rules.append(f"Custom Rule Triggered: {c_name}")
+                    for m in matches:
+                        matched_snippet = m.group(0)
+                        risk_findings.append({
+                            "type": f"CUSTOM_RULE_{c_name.upper().replace(' ', '_')}",
+                            "severity": "CRITICAL" if c_action == "BLOCK" else "HIGH",
+                            "location": "user_prompt",
+                            "snippet": matched_snippet,
+                            "description": f"Matched custom regex rule '{c_name}' in group '{c_category}': /{c_pattern}/",
+                        })
+                    if c_action in ("MASK", "REDACT"):
+                        sanitized_prompt = rx.sub(c_redaction, sanitized_prompt)
+                    elif c_action == "BLOCK":
+                        has_custom_block = True
+
+                # Check model response if present
+                if sanitized_response:
+                    resp_matches = list(rx.finditer(sanitized_response))
+                    if resp_matches:
+                        triggered_rules.append(f"Custom Rule Output Triggered: {c_name}")
+                        for m in resp_matches:
+                            risk_findings.append({
+                                "type": f"CUSTOM_RULE_{c_name.upper().replace(' ', '_')}",
+                                "severity": "CRITICAL" if c_action == "BLOCK" else "HIGH",
+                                "location": "model_response",
+                                "snippet": m.group(0),
+                                "description": f"Model output matched custom regex rule '{c_name}' ({c_category})",
+                            })
+                        if c_action in ("MASK", "REDACT"):
+                            sanitized_response = rx.sub(c_redaction, sanitized_response)
+                        elif c_action == "BLOCK":
+                            has_custom_block = True
+            except Exception as e:
+                logger.warning("Failed to evaluate custom regex rule '%s': %s", c_name, e)
+
+        # ------------------------------------------------------------------
         # 4. Evidence RAG Grounding & Live Hallucination Prediction
         # ------------------------------------------------------------------
         hal_thresh = float(self.policy.get("hallucination_threshold", 0.85))
@@ -285,7 +345,7 @@ class ControlPlaneGuardrail:
         action = "ALLOW"
         inj_action = self.policy.get("prompt_injection_action", "block")
 
-        if action_risk_tier == "CRITICAL":
+        if action_risk_tier == "CRITICAL" or has_custom_block:
             action = "BLOCK"
         elif injection_res.is_injection:
             if inj_action == "flag" and enf_mode in ("mask", "redact"):

@@ -182,7 +182,7 @@ export const REGULATORY_PRESETS = [
   },
   {
     id: 'FIN_ADVISORY',
-    name: 'SEC Reg SCI Financial Advisory',
+    name: 'SEC Reg SCI Financial',
     subtitle: 'Financial Numerics & Market Claims',
     icon: FileCheck,
     badge: 'SEC REG SCI',

@@ -161,12 +161,12 @@ export function DashboardView() {
           </div>
         </div>
 
-        {/* Card 2: Resources by Platform */}
+        {/* Card 2: Monitored AI Platforms */}
         <div className="glass-panel p-6 sm:p-7 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
               <Layers className="w-4 h-4 text-primary" />
-              <span>Resources by Platform</span>
+              <span>Monitored AI Platforms</span>
             </div>
             <a
               href="#/inventory/add"
@@ -191,9 +191,12 @@ export function DashboardView() {
                     </div>
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{p.name}</span>
                   </div>
-                  <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400">
-                    {p.count} {p.count === 1 ? 'Resource / Event' : 'Resources / Events'}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+                      {p.count.toLocaleString()} {p.count === 1 ? 'Event' : 'Events'}
+                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Active Protection"></span>
+                  </div>
                 </div>
               );
             })}
