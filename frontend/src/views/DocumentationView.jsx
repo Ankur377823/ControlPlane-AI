@@ -247,7 +247,7 @@ export function DocumentationView({ onBackToStudio }) {
                   <div key={group.id} className="space-y-1">
                     <button
                       onClick={() => toggleGroup(group.id)}
-                      className="w-full flex items-center justify-between py-2 px-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white uppercase tracking-wider text-left transition-colors"
+                      className="w-full flex items-center justify-between py-2 px-2 text-xs font-bold text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white uppercase tracking-wider text-left transition-colors"
                     >
                       <span>{group.title}</span>
                       {isExpanded ? (
@@ -265,7 +265,7 @@ export function DocumentationView({ onBackToStudio }) {
                             <button
                               key={item.id}
                               onClick={() => setActiveDocId(item.id)}
-                              className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                              className={`w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all ${
                                 isActive
                                   ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-semibold'
                                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-dark-900'
@@ -286,7 +286,7 @@ export function DocumentationView({ onBackToStudio }) {
           {/* Center Article Content */}
           <article className="lg:col-span-7 bg-white dark:bg-dark-850 p-6 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 min-h-[70vh] font-reading leading-relaxed">
             {/* Breadcrumb Header */}
-            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium pb-2 border-b border-slate-100 dark:border-slate-800/80">
+            <div className="flex items-center gap-2 text-[13px] text-slate-600 dark:text-slate-400 font-medium pb-2 border-b border-slate-100 dark:border-slate-800/80">
               <Home className="w-3.5 h-3.5 text-slate-400" />
               <ChevronRight className="w-3 h-3 text-slate-300 dark:text-slate-600" />
               <span>{groupTitle}</span>
@@ -305,7 +305,7 @@ export function DocumentationView({ onBackToStudio }) {
             <div className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
               On this page
             </div>
-            <div className="space-y-2 text-xs text-slate-600 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 pl-3">
+            <div className="space-y-2 text-[13px] text-slate-600 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 pl-3">
               <a href="#the-problem" className="block hover:text-primary transition-colors">
                 The Security Challenge
               </a>

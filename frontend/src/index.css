@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..800;1,14..32,300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,9 +11,12 @@
   --danger: #ef4444;
   --warning: #f59e0b;
   --cyan: #06b6d4;
+  --font-brand: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
 }
 
-/* Light Mode Defaults (Clean White Background, Crisp Slate Text) */
+/* Light Mode Defaults (Crisp High-Contrast Text & Clean Backgrounds) */
 html.light {
   color-scheme: light;
   --bg-page: #f8fafc;
@@ -22,12 +25,13 @@ html.light {
   --bg-input: #ffffff;
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-subtle: #94a3b8;
+  --text-main: #0f172a;      /* Deep Slate 900 for razor-sharp readability */
+  --text-body: #334155;      /* Rich Slate 700 for comfortable long reading */
+  --text-muted: #64748b;     /* Slate 500 */
+  --text-subtle: #94a3b8;    /* Slate 400 */
 }
 
-/* Dark Mode Defaults (Black & Orange) */
+/* Dark Mode Defaults (Pure Black, Slate Tones & High-Legibility Contrast) */
 html.dark {
   color-scheme: dark;
   --bg-page: #080808;
@@ -36,20 +40,39 @@ html.dark {
   --bg-input: #0b0b0b;
   --border: #292929;
   --border-strong: #3a3a3a;
-  --text-main: #f8fafc;
-  --text-muted: #a3a3a3;
-  --text-subtle: #737373;
+  --text-main: #f8fafc;      /* Crisp White/Slate 50 */
+  --text-body: #cbd5e1;      /* Crisp Slate 300 for eye-friendly dark reading */
+  --text-muted: #94a3b8;     /* Slate 400 */
+  --text-subtle: #64748b;    /* Slate 500 */
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  letter-spacing: 0;
+  font-family: var(--font-body);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
+  letter-spacing: -0.011em;
+  line-height: 1.625;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Enhanced Typography & Readability Styles */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.022em;
+  color: var(--text-main);
+}
+
+p, li, span, td, th {
+  letter-spacing: -0.008em;
+}
+
+code, kbd, pre, samp {
+  font-family: var(--font-mono);
+  letter-spacing: normal;
 }
 
 .font-black,

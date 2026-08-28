@@ -2,26 +2,26 @@ import React from 'react';
 
 export function GatewayGuideDoc() {
   return (
-    <div className="space-y-8 animate-fade-in text-slate-800 dark:text-slate-200">
+    <div className="space-y-10 animate-fade-in text-slate-800 dark:text-slate-200">
       <div>
-        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-brand tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-brand tracking-tight">
           AI Guardrail Interception & Integration
         </h1>
-        <p className="text-base text-slate-600 dark:text-slate-400 mt-4 leading-relaxed font-normal">
+        <p className="text-[16px] sm:text-[17px] text-slate-700 dark:text-slate-200 mt-4 leading-relaxed font-normal">
           Learn how to integrate ControlPlane AI into Python applications, agent workflows, and webhook proxy pipes.
         </p>
       </div>
 
-      <section id="fastapi-integration" className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+      <section id="fastapi-integration" className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
         <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-brand flex items-center gap-2">
           <span>Python Application Guardrail Interceptor</span>
           <span className="text-primary text-lg font-normal">#</span>
         </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300 font-normal leading-relaxed">
-          Call ControlPlane's <code>/api/v1/resources/&#123;resource_id&#125;/check</code> endpoint before submitting raw user prompts to OpenAI, Anthropic, or custom model endpoints:
+        <p className="text-[15px] text-slate-700 dark:text-slate-300 font-normal leading-relaxed">
+          Call ControlPlane's <code className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-dark-800 text-primary font-mono text-[13px]">/api/v1/resources/&#123;resource_id&#125;/check</code> endpoint before submitting raw user prompts to OpenAI, Anthropic, or custom model endpoints:
         </p>
         <div className="p-4 rounded-2xl bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-          <pre className="text-xs font-mono text-slate-800 dark:text-cyan-300 p-3 bg-white dark:bg-black/40 rounded-xl border border-slate-200 dark:border-transparent whitespace-pre overflow-x-auto">
+          <pre className="text-[13.5px] font-mono text-slate-800 dark:text-cyan-300 p-3 bg-white dark:bg-black/40 rounded-xl border border-slate-200 dark:border-transparent whitespace-pre overflow-x-auto leading-normal">
 {`import requests
 from openai import OpenAI
 
