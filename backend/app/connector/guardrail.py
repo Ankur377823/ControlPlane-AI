@@ -208,8 +208,16 @@ class ControlPlaneGuardrail:
 
         # 8. Apply Enforcement Mode & Decision
         action = "ALLOW"
-        if action_risk_tier == "CRITICAL" or injection_res.is_injection:
+        inj_action = self.policy.get("prompt_injection_action", "block")
+        if action_risk_tier == "CRITICAL":
             action = "BLOCK"
+        elif injection_res.is_injection:
+            if inj_action == "flag" and enf_mode in ("mask", "redact"):
+                action = "MASK"
+            elif inj_action == "flag":
+                action = "MONITOR"
+            else:
+                action = "BLOCK"
         elif action_risk_tier == "HIGH" or (action_eval.get("action") == "CONFIRM_REQUIRED"):
             action = "CONFIRM_REQUIRED"
         elif multi_turn_eval and multi_turn_eval.get("escalation_action") in ("BLOCK", "CONFIRM_REQUIRED"):

@@ -6,6 +6,7 @@ import {
   Bot,
   ShieldAlert,
   SearchCheck,
+  UserCheck,
   Sliders,
   KeyRound,
   Crosshair,
@@ -29,6 +30,7 @@ const NAV_GROUPS = [
     title: 'Security Center',
     items: [
       { id: 'security-center/overview', label: 'Overview', icon: SearchCheck },
+      { id: 'security-center/review-queue', label: 'HITL Review Queue', icon: UserCheck },
       { id: 'security-center/risk-findings', label: 'Risk Findings', icon: ShieldAlert },
       { id: 'security-center/policies', label: 'Policies', icon: Sliders },
     ],
@@ -43,7 +45,7 @@ const NAV_GROUPS = [
     title: 'Audit Tools',
     items: [
       { id: 'ai-red-team', label: 'AI Red Team Scanner', icon: Crosshair },
-      { id: 'hallucinations', label: 'Hallucination Detector', icon: Microscope },
+      { id: 'hallucinations', label: 'Hallucination & RAG Grounding', icon: Microscope },
       { id: 'documentation', label: 'Documentation', icon: BookOpen, externalTab: true },
     ],
   },

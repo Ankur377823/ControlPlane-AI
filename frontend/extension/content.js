@@ -354,12 +354,6 @@
     const text = getInputValue(inputEl);
     if (!text || text.length === 0) return;
 
-    if (blockedPromptsSet.has(text)) {
-      updateBannerUI("BLOCK", "Permanently Blocked: Prompt contains sensitive secret, PII, or injection threat.");
-      showInPageAlert("BLOCK", "Action Blocked", "Prompt is blocked by ControlPlane policy.");
-      return false;
-    }
-
     if (isChecking) return false;
     isChecking = true;
 
@@ -457,7 +451,6 @@
     }
 
     if (result.action === "BLOCK") {
-      blockedPromptsSet.add(rawText);
       if (inputEl) {
         inputEl.style.border = "2px solid #f43f5e";
         inputEl.style.boxShadow = "0 0 14px rgba(244, 63, 94, 0.35)";
@@ -472,8 +465,7 @@
       return;
     }
 
-    // Unblock if MASK, MONITOR, WARN, or ALLOW
-    blockedPromptsSet.delete(rawText);
+    // Reset border styling if MASK, MONITOR, WARN, or ALLOW
     if (inputEl) {
       inputEl.style.border = "";
       inputEl.style.boxShadow = "";

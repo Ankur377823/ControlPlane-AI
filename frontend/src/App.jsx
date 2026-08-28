@@ -10,10 +10,12 @@ import { DashboardView } from './views/DashboardView';
 import { SecurityCenterOverviewView } from './views/SecurityCenterOverviewView';
 import { RiskFindingsView } from './views/RiskFindingsView';
 import { FindingDetailView } from './views/FindingDetailView';
+import { ReviewQueueView } from './views/ReviewQueueView';
 import { InventoryView } from './views/InventoryView';
 import { OnboardResourceView } from './views/OnboardResourceView';
 import { AgentRuntimeView } from './views/AgentRuntimeView';
 import { PoliciesView } from './views/PoliciesView';
+import { PolicyDetailView } from './views/PolicyDetailView';
 import { EnrollmentTokensView } from './views/EnrollmentTokensView';
 import { RedTeamScannerView } from './views/RedTeamScannerView';
 import { HallucinationsView } from './views/HallucinationsView';
@@ -28,6 +30,7 @@ export function App() {
 
   const [selectedEventId, setSelectedEventId] = useState(null);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
+  const [selectedPolicyId, setSelectedPolicyId] = useState('EU_AI_ACT');
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
 
   // Sync hash routing
@@ -39,7 +42,13 @@ export function App() {
 
       if (query) {
         const params = new URLSearchParams(query);
-        if (params.get('id')) setSelectedEventId(params.get('id'));
+        if (params.get('id')) {
+          if (path === 'security-center/policies/detail') {
+            setSelectedPolicyId(params.get('id'));
+          } else {
+            setSelectedEventId(params.get('id'));
+          }
+        }
         if (params.get('session_id')) setSelectedSessionId(params.get('session_id'));
       }
     };
@@ -64,6 +73,11 @@ export function App() {
     navigate('security-center/finding-detail', { id });
   };
 
+  const handleViewPolicyDetail = (policyId) => {
+    setSelectedPolicyId(policyId);
+    navigate('security-center/policies/detail', { id: policyId });
+  };
+
   // If user is not authenticated, show login overlay
   if (!user) {
     return <LoginScreen />;
@@ -77,7 +91,7 @@ export function App() {
   const renderActiveView = () => {
     switch (route) {
       case 'dashboard':
-        return <DashboardView />;
+        return <DashboardView onNavigate={navigate} />;
       case 'inventory':
         return <InventoryView onNavigateOnboard={() => navigate('inventory/add')} />;
       case 'inventory/add':
@@ -91,8 +105,11 @@ export function App() {
             onSelectFinding={handleSelectFinding}
             onNavigatePolicies={() => navigate('security-center/policies')}
             onNavigateRiskFindings={() => navigate('security-center/risk-findings')}
+            onNavigateReviewQueue={() => navigate('security-center/review-queue')}
           />
         );
+      case 'security-center/review-queue':
+        return <ReviewQueueView />;
       case 'security-center/risk-findings':
         return <RiskFindingsView onSelectFinding={handleSelectFinding} />;
       case 'security-center/finding-detail':
@@ -103,7 +120,19 @@ export function App() {
           />
         );
       case 'security-center/policies':
-        return <PoliciesView />;
+        return (
+          <PoliciesView
+            onViewPolicyDetail={handleViewPolicyDetail}
+          />
+        );
+      case 'security-center/policies/detail':
+        return (
+          <PolicyDetailView
+            policyId={selectedPolicyId}
+            onBack={() => navigate('security-center/policies')}
+            onNavigatePolicies={() => navigate('security-center/policies')}
+          />
+        );
       case 'tokens':
         return <EnrollmentTokensView />;
       case 'ai-red-team':
@@ -111,7 +140,7 @@ export function App() {
       case 'hallucinations':
         return <HallucinationsView />;
       default:
-        return <DashboardView />;
+        return <DashboardView onNavigate={navigate} />;
     }
   };
 

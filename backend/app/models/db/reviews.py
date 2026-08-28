@@ -169,6 +169,7 @@ def get_trustworthiness_metrics(tenant_id: Optional[str] = "ankur-tenant-1") -> 
 
         return {
             "trustworthiness_score": trust_index,
+            "trust_index_percent": trust_index,
             "precision_percent": precision,
             "recall_percent": recall,
             "false_positive_rate_percent": fp_rate,

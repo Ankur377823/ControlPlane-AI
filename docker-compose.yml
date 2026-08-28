@@ -1,6 +1,6 @@
 # ControlPlane AI — Multi-Container / Production Composition
 # Usage:
-#   docker compose up --build
+#   docker compose up --build --watch
 #   open http://localhost:8000/
 
 services:
@@ -21,6 +21,16 @@ services:
       - TASK_TOKEN_SECRET=${TASK_TOKEN_SECRET:-}
     volumes:
       - botpress-data:/app/data
+    develop:
+      watch:
+        - action: rebuild
+          path: ./frontend
+        - action: rebuild
+          path: ./backend
+        - action: rebuild
+          path: ./requirements.txt
+        - action: rebuild
+          path: ./Dockerfile
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

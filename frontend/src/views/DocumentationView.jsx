@@ -284,7 +284,7 @@ export function DocumentationView({ onBackToStudio }) {
           </aside>
 
           {/* Center Article Content */}
-          <article className="lg:col-span-7 bg-white dark:bg-dark-850 p-6 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 min-h-[70vh]">
+          <article className="lg:col-span-7 bg-white dark:bg-dark-850 p-6 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 min-h-[70vh] font-reading leading-relaxed">
             {/* Breadcrumb Header */}
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium pb-2 border-b border-slate-100 dark:border-slate-800/80">
               <Home className="w-3.5 h-3.5 text-slate-400" />
