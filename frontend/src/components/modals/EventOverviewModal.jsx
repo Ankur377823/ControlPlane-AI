@@ -165,8 +165,22 @@ export function EventOverviewModal({ eventId, sessionId, isOpen, onClose }) {
                 </div>
               </div>
 
-              {/* Verified Fact & Source Evidence (for Hallucination / Grounding Events) */}
-              {(activeEvent.is_hallucination || activeEvent.correct_answer || activeEvent.source_link || (activeEvent.context && (activeEvent.context.includes('HALLUCINATION') || activeEvent.context.includes('GROUNDING')))) && (
+              {/* Verified Fact & Source Evidence (STRICTLY for Hallucination / Grounding Events) */}
+              {(() => {
+                const isPiiOrInj = Boolean(
+                  (activeEvent.context && (String(activeEvent.context).startsWith('PII') || String(activeEvent.context).includes('INJECTION') || String(activeEvent.context).includes('BIAS'))) ||
+                  (activeEvent.id && (String(activeEvent.id).startsWith('PII') || String(activeEvent.id).startsWith('INJ') || String(activeEvent.id).startsWith('BIAS') || String(activeEvent.id).startsWith('SEC'))) ||
+                  (activeEvent.finding_title && (String(activeEvent.finding_title).toLowerCase().includes('pii') || String(activeEvent.finding_title).toLowerCase().includes('injection') || String(activeEvent.finding_title).toLowerCase().includes('bias')))
+                );
+                const isHal = Boolean(
+                  activeEvent.is_hallucination ||
+                  (activeEvent.id && String(activeEvent.id).startsWith('HAL')) ||
+                  (activeEvent.context && (String(activeEvent.context).includes('HALLUCINATION') || String(activeEvent.context).includes('GROUNDING'))) ||
+                  (activeEvent.finding_title && String(activeEvent.finding_title).toLowerCase().includes('hallucination')) ||
+                  (activeEvent.risk_type && String(activeEvent.risk_type).includes('HALLUCINATION'))
+                );
+                return isHal && !isPiiOrInj;
+              })() && (
                 <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-300 dark:border-emerald-500/30 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300">
@@ -187,17 +201,32 @@ export function EventOverviewModal({ eventId, sessionId, isOpen, onClose }) {
                     </div>
 
                     <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-1">
-                      Knowledge Base Source Link
+                      Authoritative Evidence & Wikipedia Citation
                     </div>
                     <div>
-                      <a
-                        href={activeEvent.source_link || "https://docs.controlplane.ai/knowledge-base/verified-sources"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 hover:bg-emerald-200 dark:hover:bg-emerald-800 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 font-mono text-[11px] font-semibold transition-colors"
-                      >
-                        <span>🔗 {activeEvent.source_link || "https://docs.controlplane.ai/knowledge-base/verified-sources"}</span>
-                      </a>
+                      {(() => {
+                        const qText = (activeEvent.user_prompt && activeEvent.user_prompt !== 'General Query')
+                          ? activeEvent.user_prompt
+                          : (activeEvent.raw_response || 'fact check');
+                        const url = (activeEvent.source_link && !activeEvent.source_link.includes('docs.controlplane.ai'))
+                          ? activeEvent.source_link
+                          : `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(qText)}`;
+                        const isWikipedia = url.includes('wikipedia.org');
+                        const isGovOrEdu = url.includes('.gov') || url.includes('.edu') || url.includes('britannica.com');
+
+                        return (
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700/60 font-mono text-[11px] font-semibold transition-all shadow-sm group"
+                          >
+                            <span>{isWikipedia ? '📖' : (isGovOrEdu ? '🏛️' : '🌐')}</span>
+                            <span className="group-hover:underline">{isWikipedia ? 'Wikipedia Reference' : (isGovOrEdu ? 'Official Source' : 'Citation')}:</span>
+                            <span className="text-emerald-700 dark:text-emerald-300 font-normal truncate max-w-xs">{url}</span>
+                          </a>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>

@@ -33,7 +33,7 @@ def list_review_queue(
         params = []
 
         if status == "pending":
-            query += " AND (i.status IN ('open', 'pending', 'pending_review') OR i.action = 'CONFIRM_REQUIRED')"
+            query += " AND (i.action IN ('CONFIRM_REQUIRED', 'BLOCK') OR (i.status IN ('open', 'pending', 'pending_review') AND (i.action != 'ALLOW' OR (i.risk_findings_json IS NOT NULL AND i.risk_findings_json != '[]'))))"
         elif status and status.lower() != "all":
             query += " AND LOWER(i.status) = LOWER(?)"
             params.append(status)

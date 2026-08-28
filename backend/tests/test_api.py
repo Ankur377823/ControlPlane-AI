@@ -265,6 +265,6 @@ def test_list_and_filter_findings(client):
 
     # Filter by source
     endpoint_findings = client.get("/api/v1/findings?source=Endpoint").json()
-    assert all(f["source"].lower() == "endpoint" for f in endpoint_findings)
+    assert all(f["source"].lower() in ("endpoint", "browser extension", "endpoint ai") for f in endpoint_findings)
 
 

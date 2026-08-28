@@ -205,12 +205,33 @@ export function FindingDetailView({ findingId, onBack }) {
           <div className="grid grid-cols-1 md:grid-cols-12 p-4">
             <div className="md:col-span-3 font-semibold text-slate-500 dark:text-slate-400">Detected content</div>
             <div className="md:col-span-9 space-y-3">
-              <div className="text-slate-800 dark:text-slate-200 leading-relaxed font-normal bg-slate-50 dark:bg-dark-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 whitespace-pre-wrap font-mono text-[11px]">
-                {detectedPrompt}
-              </div>
-              {sanitizedPrompt && sanitizedPrompt !== detectedPrompt && (
+              {finding.user_prompt && (
                 <div className="space-y-1">
-                  <div className="font-semibold text-[10px] text-slate-400 uppercase tracking-wider">Sanitized Masked Output</div>
+                  <div className="font-semibold text-[10px] text-slate-400 uppercase tracking-wider">Original User Prompt</div>
+                  <div className="text-slate-800 dark:text-slate-200 leading-relaxed font-normal bg-slate-50 dark:bg-dark-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 whitespace-pre-wrap font-mono text-[11px]">
+                    {finding.user_prompt}
+                  </div>
+                </div>
+              )}
+
+              {finding.raw_response && (
+                <div className="space-y-1">
+                  <div className="font-semibold text-[10px] text-rose-500 uppercase tracking-wider">Model Response / Unverified Output</div>
+                  <div className="text-rose-700 dark:text-rose-300 leading-relaxed font-normal bg-rose-50/50 dark:bg-rose-950/20 p-3.5 rounded-xl border border-rose-500/20 whitespace-pre-wrap font-mono text-[11px]">
+                    {finding.raw_response}
+                  </div>
+                </div>
+              )}
+
+              {!finding.user_prompt && !finding.raw_response && (
+                <div className="text-slate-800 dark:text-slate-200 leading-relaxed font-normal bg-slate-50 dark:bg-dark-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 whitespace-pre-wrap font-mono text-[11px]">
+                  {detectedPrompt}
+                </div>
+              )}
+
+              {sanitizedPrompt && sanitizedPrompt !== detectedPrompt && sanitizedPrompt !== finding.user_prompt && (
+                <div className="space-y-1">
+                  <div className="font-semibold text-[10px] text-emerald-500 uppercase tracking-wider">Sanitized Masked Output</div>
                   <div className="text-emerald-700 dark:text-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/20 p-3 rounded-xl border border-emerald-500/20 whitespace-pre-wrap font-mono text-[11px]">
                     {sanitizedPrompt}
                   </div>
@@ -219,8 +240,22 @@ export function FindingDetailView({ findingId, onBack }) {
             </div>
           </div>
 
-          {/* Dedicated Verified Fact & Source Link for Hallucination Findings */}
-          {(finding.is_hallucination || finding.correct_answer || finding.source_link || (finding.context && (finding.context.includes('HALLUCINATION') || finding.context.includes('GROUNDING')))) && (
+          {/* Dedicated Verified Fact & Source Link STRICTLY for Hallucination Findings (Never for PII or Injections) */}
+          {(() => {
+            const isPiiOrInjection = Boolean(
+              (finding.context && (String(finding.context).startsWith('PII') || String(finding.context).includes('INJECTION') || String(finding.context).includes('BIAS'))) ||
+              (finding.id && (String(finding.id).startsWith('PII') || String(finding.id).startsWith('INJ') || String(finding.id).startsWith('BIAS') || String(finding.id).startsWith('SEC'))) ||
+              (finding.finding_title && (String(finding.finding_title).toLowerCase().includes('pii') || String(finding.finding_title).toLowerCase().includes('injection') || String(finding.finding_title).toLowerCase().includes('bias')))
+            );
+            const isHal = Boolean(
+              finding.is_hallucination ||
+              (finding.id && String(finding.id).startsWith('HAL')) ||
+              (finding.context && (String(finding.context).includes('HALLUCINATION') || String(finding.context).includes('GROUNDING'))) ||
+              (finding.finding_title && String(finding.finding_title).toLowerCase().includes('hallucination')) ||
+              (finding.type && String(finding.type).includes('HALLUCINATION'))
+            );
+            return isHal && !isPiiOrInjection;
+          })() && (
             <div className="grid grid-cols-1 md:grid-cols-12 p-4 bg-emerald-50/40 dark:bg-emerald-950/20 border-t border-emerald-200 dark:border-emerald-800/50">
               <div className="md:col-span-3 font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -232,23 +267,38 @@ export function FindingDetailView({ findingId, onBack }) {
                     Correct Grounded Fact / Answer
                   </div>
                   <div className="text-slate-900 dark:text-emerald-100 bg-white dark:bg-dark-900 p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800/60 font-medium text-xs shadow-sm">
-                    {finding.correct_answer || finding.evidence_snippet || "The correct factual statement verified against reference documentation."}
+                    {finding.correct_answer || finding.evidence_snippet || "The factual claim was verified against live search and reference documentation."}
                   </div>
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <div className="font-bold text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Knowledge Source & Evidence Link
+                    Authoritative Evidence & Wikipedia Citation
                   </div>
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={finding.source_link || "https://docs.controlplane.ai/knowledge-base/verified-sources"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 hover:bg-emerald-200 dark:hover:bg-emerald-800 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 font-mono text-[11px] font-semibold transition-colors"
-                    >
-                      <span>🔗 {finding.source_link || "https://docs.controlplane.ai/knowledge-base/verified-sources"}</span>
-                    </a>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                    {(() => {
+                      const queryText = (finding.user_prompt && finding.user_prompt !== 'General Query')
+                        ? finding.user_prompt
+                        : (finding.raw_response || 'fact check');
+                      const linkUrl = (finding.source_link && !finding.source_link.includes('docs.controlplane.ai'))
+                        ? finding.source_link
+                        : `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(queryText)}`;
+                      const isWikipedia = linkUrl.includes('wikipedia.org');
+                      const isGovOrEdu = linkUrl.includes('.gov') || linkUrl.includes('.edu') || linkUrl.includes('britannica.com');
+
+                      return (
+                        <a
+                          href={linkUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700/60 font-mono text-[11.5px] font-semibold transition-all shadow-sm group"
+                        >
+                          <span className="text-sm">{isWikipedia ? '📖' : (isGovOrEdu ? '🏛️' : '🌐')}</span>
+                          <span className="group-hover:underline">{isWikipedia ? 'Wikipedia Reference' : (isGovOrEdu ? 'Official Authority Source' : 'Authoritative Citation')}:</span>
+                          <span className="text-emerald-700 dark:text-emerald-300 font-normal truncate max-w-md">{linkUrl}</span>
+                        </a>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>

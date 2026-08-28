@@ -14,16 +14,41 @@ import re
 from typing import Dict, Any, List
 
 _SAFETY_PATTERNS = [
-    ("cyberattack_malware", re.compile(r"\b(?:create|generate|write)\s+(?:a\s+)?(?:ransomware|keylogger|trojan|rootkit|exploit\s+payload|ddos\s+script|reverse\s+shell|zero-day)\b", re.IGNORECASE)),
-    ("vulnerability_exploit", re.compile(r"\b(?:sql\s+injection\s+payload|xss\s+payload|bypass\s+waf|crack\s+password\s+hash|buffer\s+overflow\s+exploit)\b", re.IGNORECASE)),
-    ("severe_toxicity", re.compile(r"\b(?:kill\s+yourself|commit\s+suicide|self[\s-]harm|how\s+to\s+make\s+a\s+bomb|synthesize\s+(?:poison|explosives))\b", re.IGNORECASE)),
-    ("hate_speech", re.compile(r"\b(?:subhuman\s+race|ethnic\s+cleansing|white\s+supremacy|racial\s+slur|inferior\s+gender)\b", re.IGNORECASE)),
+    # 1. Cyberattacks, Malware & Exploitation
+    ("cyberattack_malware", re.compile(r"\b(?:create|generate|write|code|develop)\s+(?:a\s+)?(?:ransomware|keylogger|trojan|rootkit|exploit\s+payload|ddos\s+script|reverse\s+shell|zero-day|c2\s+beacon|wiper\s+malware|spyware)\b", re.IGNORECASE)),
+    ("vulnerability_exploit", re.compile(r"\b(?:sql\s+injection\s+payload|xss\s+payload|bypass\s+waf|crack\s+password\s+hash|buffer\s+overflow\s+exploit|privilege\s+escalation\s+script|credential\s+stuffing|mitm\s+attack)\b", re.IGNORECASE)),
+    
+    # 2. Destructive Operations & Database/Record Tampering
+    ("destructive_data_tampering", re.compile(r"\b(?:delete|drop|purge|truncate|wipe|erase|destroy|remove)\s+(?:all\s+)?(?:customer|user|patient|employee|financial|loan|dispute|account|billing|audit|database|table|records?|transactions?)\b", re.IGNORECASE)),
+    ("unauthorized_system_command", re.compile(r"\b(?:drop\s+table|truncate\s+table|delete\s+from\s+[a-zA-Z0-9_]+|rm\s+-rf\s+[\/\*]|format\s+c:|destroy\s+database|wipe\s+hard\s+drive)\b", re.IGNORECASE)),
+
+    # 3. Weapons, CBRN & Extreme Physical Threats
+    ("weapons_cbrn_threats", re.compile(r"\b(?:how\s+to\s+(?:make|build|synthesize|manufacture|assemble)\s+(?:a\s+)?(?:bomb|pipe\s+bomb|ied|molotov|poison|ricin|anthrax|sarin|nerve\s+agent|explosive|dirty\s+bomb|biological\s+weapon))\b", re.IGNORECASE)),
+
+    # 4. Severe Toxicity, Self-Harm & Violence
+    ("severe_toxicity", re.compile(r"\b(?:kill\s+yourself|commit\s+suicide|self[\s-]harm|how\s+to\s+hang\s+myself|ways\s+to\s+end\s+my\s+life|assassinate|hire\s+a\s+hitman)\b", re.IGNORECASE)),
+    
+    # 5. Hate Speech, Religious & Ethnic Intolerance
+    ("hate_speech", re.compile(r"\b(?:subhuman\s+race|ethnic\s+cleansing|white\s+supremacy|racial\s+slur|inferior\s+gender|death\s+to\s+(?:all\s+)?(?:jews|muslims|christians|hindus|blacks|whites|asians|immigrants)|caste\s+supremacy)\b", re.IGNORECASE)),
+
+    # 6. Financial Fraud, Market Manipulation & Social Engineering
+    ("financial_fraud", re.compile(r"\b(?:(?:how\s+to\s+)?(?:clone\s+credit\s+cards|forge\s+identity\s+documents|create\s+fake\s+kyc|commit\s+wire\s+fraud|launder\s+money|generate\s+stolen\s+bank\s+accounts|spoof\s+caller\s+id\s+for\s+banking|skim\s+atm\s+cards|bypass\s+anti[-\s]?fraud\s+filters|generate\s+fake\s+paystubs\s+for\s+loans))\b", re.IGNORECASE)),
+    ("market_manipulation", re.compile(r"\b(?:(?:how\s+to\s+)?(?:execute|coordinate)\s+(?:a\s+)?(?:pump\s+and\s+dump|stock\s+spoofing\s+order|wash\s+trading|market\s+manipulation\s+scheme)|(?:insider\s+trading\s+tips|trade\s+on\s+material\s+non[-\s]?public\s+information|mnpi\s+leak))\b", re.IGNORECASE)),
+    ("money_laundering_structuring", re.compile(r"\b(?:(?:structure|structuring)\s+cash\s+deposits?|smurfing\s+cash|avoid\s+ctr\s+reporting|evade\s+fincen\s+reporting|launder\s+illicit\s+crypto|tornado\s+cash\s+layering|structure\s+deposits?\s+to\s+avoid\s+ctr)\b", re.IGNORECASE)),
+    ("phishing_social_engineering", re.compile(r"\b(?:(?:write|generate|draft)\s+(?:a\s+)?(?:spear\s+phishing\s+email|credential\s+harvesting\s+template|ceo\s+fraud\s+email|fake\s+bank\s+login\s+page|invoice\s+redirection\s+fraud\s+(?:email|letter|notice))|invoice\s+redirection\s+fraud)\b", re.IGNORECASE)),
+    ("crypto_scam_drainer", re.compile(r"\b(?:(?:create|write|deploy)\s+(?:a\s+)?(?:wallet\s+drainer\s+script|crypto\s+honeypot\s+contract|rugpull\s+token|fake\s+airdrop\s+site))\b", re.IGNORECASE)),
+
+    # 7. Unregulated Medical, Pediatric Dosage & High-Risk Clinical Advice
+    ("unregulated_medical_dosage_advice", re.compile(r"\b(?:(?:what\s+is\s+the\s+)?(?:safe\s+)?(?:pediatric|infant|child|toddler|baby|neonatal)\s+(?:dosage|dose|amount|mg\/kg)\s+for|(?:safe|recommended|lethal|toxic|maximum)\s+(?:dosage|dose)\s+for\s+(?:a\s+)?\d+[-\s]?(?:year|month|week|day)[-\s]?old|(?:calculate|prescribe|recommend|administer)\s+(?:pediatric|infant)\s+(?:dosage|dose|medication|syrup)|(?:combine|combining|mixing)\s+(?:high[-\s]?dose\s+)?aspirin\s+for\s+(?:a\s+)?(?:child|pediatric|infant|\d+[-\s]?year[-\s]?old)|(?:prescribe|calculate\s+dose|safe\s+dose|lethal\s+dose|fatal\s+dose|overdose)\s+(?:of|for)\s+(?:controlled\s+substances?|prescription\s+drugs?|opioids?|narcotics?|pediatric\s+patients?|fentanyl|morphine|oxycodone|adderall|xanax|insulin|potassium\s+chloride))\b", re.IGNORECASE)),
+    ("dangerous_drug_interaction", re.compile(r"\b(?:(?:how\s+to\s+fake|forge|counterfeit)\s+(?:a\s+)?(?:doctor(?:'s)?\s+)?(?:prescription|rx\s+pad|medical\s+certificate)|(?:is\s+it\s+safe\s+to\s+mix|dangerous\s+combination\s+of)\s+(?:maois|ssris|sedatives|opioids|alcohol\s+and\s+benzos))\b", re.IGNORECASE)),
 ]
 
 BIAS_KEYWORDS = {
-    "hate_speech": ["hate", "racist", "sexist", "bigot", "discriminate", "racial stereotyping"],
-    "toxicity": ["violent", "attack", "kill", "harm", "abuse", "terrorist"],
-    "bias": ["inferior race", "gender inferior", "racial stereotyping", "unqualified gender", "ageist discrimination"]
+    "hate_speech": ["hate", "racist", "sexist", "bigot", "discriminate", "racial stereotyping", "casteist", "xenophobic"],
+    "toxicity": ["violent", "attack", "kill", "harm", "abuse", "terrorist", "harass", "threaten"],
+    "bias": ["inferior race", "gender inferior", "racial stereotyping", "unqualified gender", "ageist discrimination", "religious bias"],
+    "fraud": ["money laundering", "credit card fraud", "identity theft", "fake passport", "fake kyc", "prescription fraud", "pump and dump", "insider trading", "smurfing", "wallet drainer", "invoice fraud"],
+    "medical_dosage_risk": ["pediatric dosage", "infant dose", "aspirin for 4-year-old", "calculate safe dose for child", "unregulated medical advice", "lethal dose of", "overdose threshold", "fake rx pad"],
 }
 
 

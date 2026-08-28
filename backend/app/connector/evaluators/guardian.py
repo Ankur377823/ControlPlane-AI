@@ -37,10 +37,12 @@ DESTRUCTIVE_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"env\s*\|\s*grep", re.IGNORECASE),
     ],
     "SHELL_INJECTION": [
-        re.compile(r";\s*(?:rm\s+-rf|sudo|chmod|chown|wget|curl|nc|bash|sh|exec)\b", re.IGNORECASE),
-        re.compile(r"\|\s*(?:bash|sh|python|perl|ruby)\b", re.IGNORECASE),
+        re.compile(r";\s*(?:rm\s+-rf|sudo|chmod|chown|wget|curl|nc|bash|sh|exec|powershell|pwsh|iex)\b", re.IGNORECASE),
+        re.compile(r"\|\s*(?:bash|sh|python|perl|ruby|powershell|pwsh|iex)\b", re.IGNORECASE),
         re.compile(r"`[^`]*`|\$\([^)]*\)", re.IGNORECASE),
-        re.compile(r"\brm\s+-rf\b", re.IGNORECASE),
+        re.compile(r"\b(?:rm\s+-rf|del\s+/[fF]\s+/[sS]|format\s+[c-zC-Z]:)\b", re.IGNORECASE),
+        re.compile(r"(?:nc\s+(?:-e|-c)|bash\s+-i\s+>&|/dev/tcp/\d{1,3}\.)", re.IGNORECASE),
+        re.compile(r"(?:Invoke-Expression|IEX\s*\(|DownloadString|Set-ExecutionPolicy\s+Bypass)", re.IGNORECASE),
     ],
     "BULK_EXFILTRATION": [
         re.compile(r"(?:select\s+\*\s+from|copy\s+.*to|dump(?:all)?|pg_dump)\b", re.IGNORECASE),
@@ -58,6 +60,7 @@ DESTRUCTIVE_PATTERNS: Dict[str, List[re.Pattern]] = {
     "PRIVILEGE_ESCALATION": [
         re.compile(r"sudo\s+su|su\s+-|pkexec|doas", re.IGNORECASE),
         re.compile(r"chmod\s+(?:777|u\+s|\+x)", re.IGNORECASE),
+        re.compile(r"(?:docker\s+run\s+.*--privileged|nsenter\s+--mount)", re.IGNORECASE),
     ],
     "PATH_TRAVERSAL": [
         re.compile(r"\.\./\.\./|\.\.\\\.\.\\", re.IGNORECASE),
@@ -83,7 +86,15 @@ DEFAULT_SEQUENCE_PLAYBOOKS: Dict[str, List[str]] = {
 # Standard Default Tool Hashes (Check 5)
 DEFAULT_TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
     "web_search": {"status": "active", "hash": None},
+    "search_web": {"status": "active", "hash": None},
     "read_file": {"status": "active", "hash": None},
+    "send_email": {"status": "active", "hash": None},
+    "query_db": {"status": "active", "hash": None},
+    "post_message": {"status": "active", "hash": None},
+    "get_weather": {"status": "active", "hash": None},
+    "read_email": {"status": "active", "hash": None},
+    "create_file": {"status": "active", "hash": None},
+    "update_record": {"status": "active", "hash": None},
     "fetch_dataset": {"status": "active", "hash": None},
     "validate_schema": {"status": "active", "hash": None},
     "transform_data": {"status": "active", "hash": None},
@@ -235,11 +246,52 @@ def evaluate_guardian_checks(
     }
 
 
+def evaluate_guardian_security(
+    tool_call: Optional[Dict[str, Any]] = None,
+    prompt: Optional[str] = None,
+    policy_id: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Wrapper for Guardian 7-check evaluation for tool calls and prompts.
+    """
+    if not tool_call and not prompt:
+        return {"is_allowed": True, "triggered_rules": [], "risk_findings": []}
+
+    tool_name = (tool_call.get("name") or tool_call.get("tool_name") if tool_call else None) or "action"
+    args = (tool_call.get("parameters") or tool_call.get("arguments") if tool_call else None) or {"query": prompt or ""}
+
+    res = evaluate_guardian_checks(
+        tool_id=tool_name,
+        action="invoke",
+        args=args,
+    )
+
+    triggered_rules = []
+    risk_findings = []
+    if not res["allowed"]:
+        triggered_rules.append(res["reason"])
+        risk_findings.append({
+            "rule": res["threat_type"],
+            "severity": "CRITICAL" if res["tier"] == "halt" else "HIGH",
+            "snippet": f"Tool '{tool_name}' triggered Guardian Check {res.get('failed_check', 3)}",
+            "description": res["reason"],
+        })
+
+    return {
+        "is_allowed": res["allowed"],
+        "tier": res["tier"],
+        "triggered_rules": triggered_rules,
+        "risk_findings": risk_findings,
+    }
+
+
 def compute_audit_hash(prev_hash: Optional[str], record_data: Dict[str, Any]) -> str:
     """
     Computes SHA-256 hash chain for audit log records:
     Hash_N = SHA256(Hash_{N-1} + canonical_json(record_data))
     """
     prev = prev_hash or "GENESIS_HASH_00000000000000000000000000000000"
+    return hashlib.sha256(f"{prev}{record_data}".encode()).hexdigest()
+
     raw_payload = f"{prev}:{str(sorted(record_data.items()))}"
     return hashlib.sha256(raw_payload.encode("utf-8")).hexdigest()

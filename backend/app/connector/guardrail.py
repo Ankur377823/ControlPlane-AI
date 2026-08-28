@@ -1,18 +1,13 @@
 """
-ControlPlaneGuardrail: Orchestrates real-time P, $, R evaluations.
+Master Multi-Tier Guardrail Orchestrator for ControlPlane AI.
 
-Supports 4 Policy Enforcement Modes:
-  1. MONITOR: Logs prompt, response, and risk findings to DB without modifying text or blocking.
-  2. MASK: Redacts sensitive secrets (PII/tokens) before sending, and logs to DB.
-  3. BLOCK: Immediately halts execution when any secret, PII, or injection is detected.
-  4. CONFIRM_REQUIRED: Halts action and routes to Human-in-the-Loop Review Queue.
-
-Includes Round 2 Responsible AI capabilities:
-  - Use-case / resource risk profile awareness
-  - Evidence-backed RAG context grounding & claim verification
-  - Compound tool sequence risk detection
-  - Multi-turn cumulative session risk tracking
-  - AI-as-a-Judge fallback for ambiguous/high-risk edge cases
+Coordinates the 9 evaluator modules across the full request lifecycle:
+1. Deterministic Fast-Path (PII, Injections, Zero-LLM Guardian, Cost) <15ms
+2. Evidence RAG Grounding & Factuality (Atomic Claim Extraction & Live Search)
+3. Multi-Turn Session Trajectory Accumulator (Exponential Risk Decay)
+4. Compound Agent Action Risk (State Machine & Exfiltration Chains)
+5. Secondary Semantic AI-as-a-Judge (Borderline Scores 0.40 - 0.75)
+6. Dual-Phase Support (Input Pre-flight Guarding + Output Real-time Grounding & Badging)
 """
 
 from __future__ import annotations
@@ -20,19 +15,36 @@ from __future__ import annotations
 import time
 from typing import Any, Dict, List, Optional
 
-from .evaluators.action_risk import evaluate_action_risk
+from .evaluators.action_risk import evaluate_agent_action_risk
 from .evaluators.ai_judge import evaluate_with_ai_judge, is_ambiguous_case
 from .evaluators.bias_safety import scan_bias_and_toxicity
 from .evaluators.cost import analyze_cost
 from .evaluators.grounding import evaluate_grounding
+from .evaluators.guardian import evaluate_guardian_security
 from .evaluators.injection import scan_prompt_injection
 from .evaluators.multi_turn_risk import update_multi_turn_risk
 from .evaluators.pii import scan_and_redact_pii
 
 
 class ControlPlaneGuardrail:
-    def __init__(self, policy: Dict[str, Any]):
-        self.policy = policy
+    """
+    Main evaluation pipeline orchestrating sub-15ms fast-path guards,
+    RAG evidence grounding, multi-turn risk drift, and dual-phase input/output monitoring.
+    """
+
+    def __init__(self, policy: Optional[Dict[str, Any]] = None):
+        self.policy = policy or {
+            "id": "pol_unified_master",
+            "name": "All-in-One Enterprise Master Shield",
+            "use_case_type": "customer_support",
+            "enforcement_mode": "mask",
+            "pii_redaction_enabled": True,
+            "pii_sensitivity": "critical",
+            "prompt_injection_action": "block",
+            "hallucination_threshold": 0.85,
+            "max_tokens_limit": 4096,
+            "require_human_review_below": 0.85,
+        }
 
     def evaluate(
         self,
@@ -41,32 +53,64 @@ class ControlPlaneGuardrail:
         tool_call: Optional[Dict[str, Any]] = None,
         context_docs: Optional[List[str]] = None,
         session_id: Optional[str] = None,
-        tool_history: Optional[List[Dict[str, Any]]] = None,
+        tool_history: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
+        """
+        Executes end-to-end evaluation across input prompts, tool calls, and model outputs.
+        """
         start = time.monotonic()
-        triggered_rules: list[str] = []
-        risk_findings: list[dict] = []
+        triggered_rules: List[str] = []
+        risk_findings: List[Dict[str, Any]] = []
 
-        enf_mode = self.policy.get("enforcement_mode", "block").lower()
+        enf_mode = self.policy.get("enforcement_mode", "mask").lower()
         use_case = self.policy.get("use_case_type", "customer_support")
 
-        # 0. Agent Tool Call & Compound Action Risk Evaluation
-        action_eval = evaluate_action_risk(tool_call, user_prompt, tool_history=tool_history)
-        action_risk_tier = action_eval["action_risk_tier"]
-        if action_eval["risk_findings"]:
-            for rf in action_eval["risk_findings"]:
-                triggered_rules.append(rf["rule"])
-                risk_findings.append({
-                    "type": f"ACTION_RISK_{action_risk_tier}",
-                    "severity": rf["severity"],
-                    "location": "agent_tool_call",
-                    "snippet": f"Tool: {rf.get('tool_name', 'action')}",
-                    "description": rf["description"],
-                })
+        # ------------------------------------------------------------------
+        # 0. Zero-LLM Guardian & Agent Tool Evaluation
+        # ------------------------------------------------------------------
+        action_eval = {"action_risk_tier": "NONE", "risk_tier": "NONE", "tool_call": tool_call, "action": "ALLOW", "risk_findings": []}
+        if tool_call:
+            guardian_eval = evaluate_guardian_security(
+                tool_call=tool_call,
+                prompt=user_prompt,
+                policy_id=self.policy.get("id"),
+            )
+            if not guardian_eval["is_allowed"]:
+                triggered_rules.extend(guardian_eval["triggered_rules"])
+                for rf in guardian_eval["risk_findings"]:
+                    risk_findings.append({
+                        "type": rf["rule"],
+                        "severity": rf["severity"],
+                        "location": "agent_tool_guardian",
+                        "snippet": rf["snippet"],
+                        "description": rf["description"],
+                    })
 
-        # 1. PII Scan (Responsibility)
-        prompt_pii = scan_and_redact_pii(user_prompt)
-        response_pii = scan_and_redact_pii(raw_response) if raw_response else None
+            action_eval = evaluate_agent_action_risk(
+                tool_call=tool_call,
+                user_prompt=user_prompt,
+                tool_history=tool_history,
+            )
+            action_risk_tier = action_eval.get("risk_tier", "LOW")
+            if action_risk_tier in ("HIGH", "CRITICAL"):
+                for rf in action_eval.get("risk_findings", []):
+                    triggered_rules.append(rf["rule"])
+                    risk_findings.append({
+                        "type": f"ACTION_RISK_{action_risk_tier}",
+                        "severity": rf["severity"],
+                        "location": "agent_tool_call",
+                        "snippet": f"Tool: {rf.get('tool_name', 'action')}",
+                        "description": rf["description"],
+                    })
+        else:
+            action_risk_tier = "NONE"
+
+        # ------------------------------------------------------------------
+        # 1. Smart Hybrid PII & Secrets Redaction (Luhn, Cloud Signatures, Entropy)
+        # ------------------------------------------------------------------
+        pii_sens = self.policy.get("pii_sensitivity", "critical")
+        prompt_pii = scan_and_redact_pii(user_prompt, sensitivity=pii_sens)
+        response_pii = scan_and_redact_pii(raw_response, sensitivity=pii_sens) if raw_response else None
 
         has_pii = prompt_pii.has_pii or (response_pii.has_pii if response_pii else False)
         sanitized_prompt = prompt_pii.sanitized_text
@@ -94,7 +138,9 @@ class ControlPlaneGuardrail:
                     "description": f"Model output generated sensitive {ptype} data.",
                 })
 
-        # 2. Prompt Injection & Bias Scan (Responsibility)
+        # ------------------------------------------------------------------
+        # 2. Prompt Injection, Jailbreaks & Delimiter Hijacking (ChatML, Llama)
+        # ------------------------------------------------------------------
         injection_res = scan_prompt_injection(user_prompt)
         if injection_res.is_injection:
             reason = injection_res.reason or "Adversarial Prompt Injection Detected"
@@ -107,6 +153,9 @@ class ControlPlaneGuardrail:
                 "description": reason,
             })
 
+        # ------------------------------------------------------------------
+        # 3. Bias, Toxicity & Cyberattack Exploit Filtering
+        # ------------------------------------------------------------------
         bias_prompt = scan_bias_and_toxicity(user_prompt)
         bias_response = scan_bias_and_toxicity(raw_response) if raw_response else {"has_bias": False, "risk_findings": []}
         if bias_prompt["has_bias"] or bias_response["has_bias"]:
@@ -120,27 +169,45 @@ class ControlPlaneGuardrail:
                     "description": rf["description"],
                 })
 
-        # 3. Grounding / Factuality / Hallucination Score (Performance - P)
-        hal_thresh = float(self.policy.get("hallucination_threshold", 0.65))
+        # ------------------------------------------------------------------
+        # 4. Evidence RAG Grounding & Live Hallucination Prediction
+        # ------------------------------------------------------------------
+        hal_thresh = float(self.policy.get("hallucination_threshold", 0.85))
+        eval_text_for_grounding = raw_response if raw_response else (user_prompt if len(user_prompt) > 40 else "")
         grounding_eval = evaluate_grounding(
             prompt=user_prompt,
-            response=raw_response or "",
+            response=eval_text_for_grounding,
             context_docs=context_docs,
             hallucination_threshold=hal_thresh,
         )
-        if not grounding_eval["is_grounded"] and raw_response:
+
+        is_hallucination = False
+        if raw_response and not grounding_eval["is_grounded"]:
+            is_hallucination = True
+            top_source_url = grounding_eval.get("source_link")
+            top_correct_ans = grounding_eval.get("correct_answer")
+
             for uc in grounding_eval.get("ungrounded_claims", []):
+                ev_snippet = uc.get("evidence_snippet") or "Claim lacks grounding or context support in reference materials."
+                claim_source_url = uc.get("source_link") or top_source_url or f"https://www.google.com/search?q={urllib.parse.quote_plus(user_prompt or raw_response[:60])}"
+                claim_correct_ans = uc.get("correct_answer") or top_correct_ans or ev_snippet
+
                 triggered_rules.append(f"Ungrounded Claim: {uc['claim'][:50]}...")
                 risk_findings.append({
                     "type": "LOW_GROUNDING_HALLUCINATION",
                     "severity": "MEDIUM",
                     "location": "model_response",
                     "snippet": uc["claim"][:80],
-                    "description": "Claim lacks grounding or context support in reference materials.",
+                    "description": ev_snippet,
+                    "evidence_snippet": ev_snippet,
+                    "source_link": claim_source_url,
+                    "correct_answer": claim_correct_ans,
                 })
 
-        # 4. Token & Cost Efficiency (Cost - $)
-        max_tok = int(self.policy.get("max_tokens_limit", 2048))
+        # ------------------------------------------------------------------
+        # 5. Token & Cost Efficiency
+        # ------------------------------------------------------------------
+        max_tok = int(self.policy.get("max_tokens_limit", 4096))
         cost_res = analyze_cost(user_prompt, raw_response, max_token_limit=max_tok)
         if cost_res.exceeds_budget:
             reason = cost_res.reason or "Token Budget Exceeded"
@@ -153,7 +220,9 @@ class ControlPlaneGuardrail:
                 "description": reason,
             })
 
-        # 5. Multi-Turn Cumulative Risk Tracking (if session_id provided)
+        # ------------------------------------------------------------------
+        # 6. Multi-Turn Cumulative Session Risk Drift Tracking
+        # ------------------------------------------------------------------
         turn_risk_score = 0.0
         if injection_res.is_injection or action_risk_tier == "CRITICAL":
             turn_risk_score = 90.0
@@ -176,13 +245,15 @@ class ControlPlaneGuardrail:
                     "severity": multi_turn_eval["risk_level"],
                     "location": "session_trajectory",
                     "snippet": f"Cumulative score {multi_turn_eval['cumulative_risk_score']}/100 across {multi_turn_eval['turn_index']} turns",
-                    "description": "Multi-turn risk accumulation indicates probing, repeated boundary crossing, or escalating drift.",
+                    "description": "Multi-turn risk accumulation indicates probing or escalating boundary crossing.",
                 })
 
-        # 6. AI-as-a-Judge for Ambiguous / Edge Cases
+        # ------------------------------------------------------------------
+        # 7. Secondary Semantic AI-as-a-Judge for Borderline Nuance
+        # ------------------------------------------------------------------
         ai_judge_verdict = None
         norm_risk = turn_risk_score / 100.0
-        if is_ambiguous_case(norm_risk) and use_case == "decision_support":
+        if is_ambiguous_case(norm_risk) and use_case in ("decision_support", "high_risk"):
             judge_res = evaluate_with_ai_judge(user_prompt, raw_response)
             ai_judge_verdict = judge_res
             if judge_res["violation_detected"]:
@@ -195,7 +266,9 @@ class ControlPlaneGuardrail:
                     "description": f"Secondary AI Judge detected borderline policy violation with {int(judge_res['confidence']*100)}% confidence.",
                 })
 
-        # 7. Calculate Scores
+        # ------------------------------------------------------------------
+        # 8. Compute Composite Governance Scores
+        # ------------------------------------------------------------------
         performance_score = round(grounding_eval["grounding_score"] * 100, 1)
         cost_score = round(cost_res.cost_score * 100, 1)
         responsibility_score = 100.0
@@ -206,9 +279,12 @@ class ControlPlaneGuardrail:
         elif risk_findings:
             responsibility_score = max(50.0, 100.0 - (len(risk_findings) * 15.0))
 
-        # 8. Apply Enforcement Mode & Decision
+        # ------------------------------------------------------------------
+        # 9. Smart Decision Routing (ALLOW / MASK / CONFIRM / BLOCK)
+        # ------------------------------------------------------------------
         action = "ALLOW"
         inj_action = self.policy.get("prompt_injection_action", "block")
+
         if action_risk_tier == "CRITICAL":
             action = "BLOCK"
         elif injection_res.is_injection:
@@ -232,7 +308,6 @@ class ControlPlaneGuardrail:
             else:
                 action = "MONITOR"
 
-
         elapsed_ms = int((time.monotonic() - start) * 1000)
 
         return {
@@ -250,7 +325,15 @@ class ControlPlaneGuardrail:
             "responsibility_score": responsibility_score,
             "triggered_rules": triggered_rules,
             "risk_findings": risk_findings,
-            "grounding_details": grounding_eval,
+            "grounding_details": {
+                "is_grounded": grounding_eval.get("is_grounded", True),
+                "grounding_score": grounding_eval.get("grounding_score", 1.0),
+                "total_claims": grounding_eval.get("total_claims", 0),
+                "supported_claims": grounding_eval.get("verified_claims", []),
+                "verified_claims": grounding_eval.get("verified_claims", []),
+                "ungrounded_claims": grounding_eval.get("ungrounded_claims", []),
+                "is_hallucination": is_hallucination,
+            },
             "session_telemetry": multi_turn_eval,
             "ai_judge_verdict": ai_judge_verdict,
             "policy_applied": {

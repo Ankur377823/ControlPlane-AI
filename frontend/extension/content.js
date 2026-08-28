@@ -920,71 +920,84 @@
   };
 
   function observeAssistantResponses() {
-    const observer = new MutationObserver(() => {
-      clearTimeout(responseDebounceTimer);
-      responseDebounceTimer = setTimeout(() => {
-        findAndEvaluateCompletedResponses();
-      }, 1000);
-    });
+    function startObserver() {
+      const targetNode = document.body || document.documentElement;
+      if (!targetNode) {
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", startObserver, { once: true });
+        } else {
+          setTimeout(startObserver, 200);
+        }
+        return;
+      }
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
+      try {
+        const observer = new MutationObserver(() => {
+          clearTimeout(responseDebounceTimer);
+          responseDebounceTimer = setTimeout(() => {
+            findAndEvaluateCompletedResponses();
+          }, 1000);
+        });
 
-    // Also run periodic scan every 2.5s for dynamic SPA chat history loads
-    setInterval(() => {
-      findAndEvaluateCompletedResponses();
-    }, 2500);
+        observer.observe(targetNode, {
+          childList: true,
+          subtree: true,
+          characterData: true,
+        });
 
-    // Initial check
-    setTimeout(() => {
-      findAndEvaluateCompletedResponses();
-    }, 800);
+        // Also run periodic scan every 2.5s for dynamic SPA chat history loads
+        setInterval(() => {
+          findAndEvaluateCompletedResponses();
+        }, 2500);
+
+        // Initial check
+        setTimeout(() => {
+          findAndEvaluateCompletedResponses();
+        }, 800);
+      } catch (err) {
+        console.warn("ControlPlane observer init:", err);
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", startObserver, { once: true });
+    } else {
+      startObserver();
+    }
   }
 
   function getAssistantNodes() {
     const candidateNodes = [];
 
-    // 1. ChatGPT Turn & Assistant Selectors
-    const chatgptSelectors = [
-      "[data-message-author-role='assistant']",
-      "article[data-testid*='conversation-turn']",
-      "div.agent-turn",
-      "div[class*='agent-turn']",
-      "div.font-claude-message",
-      "model-response",
-      ".ds-markdown",
-      "[data-testid*='bot-message']"
-    ];
+    // 1. Direct Assistant Turn Selectors across ChatGPT, Claude, Gemini, DeepSeek
+    const assistantTurns = document.querySelectorAll(
+      "[data-message-author-role='assistant'], div.text-message-assistant, div[data-message-id], article:not([data-message-author-role='user']), div.agent-turn, div.font-claude-message, model-response, .ds-markdown, [data-testid*='bot-message']"
+    );
 
-    const turns = document.querySelectorAll(chatgptSelectors.join(","));
-    turns.forEach((turn) => {
-      // Check if turn contains user input marker (skip user's own prompt bubbles)
+    assistantTurns.forEach((turn) => {
+      // Exclude user input turns
       if (turn.getAttribute("data-message-author-role") === "user") return;
-      if (turn.querySelector("[data-message-author-role='user']")) return;
-      if (turn.classList.contains("font-user-message")) return;
+      if (turn.querySelector && turn.querySelector("[data-message-author-role='user']")) return;
+      if (turn.classList && turn.classList.contains("font-user-message")) return;
 
-      // Find the main text/markdown content block inside the turn
-      const contentEl = turn.querySelector(".markdown, .prose, div[class*='markdown'], div[class*='prose'], .ds-markdown") || turn;
+      // Find the main text container inside the assistant turn
+      const textContainer = turn.querySelector(".markdown, .prose, div[class*='markdown'], div[class*='prose'], .ds-markdown, p") || turn;
 
-      // Filter out footer disclaimers, input forms, buttons
-      if (contentEl.closest("form, footer, header, #prompt-textarea, [contenteditable='true'], button")) {
+      // Skip input forms, footer disclaimers, modals, or existing badges
+      if (textContainer.closest("form, footer, header, #prompt-textarea, [contenteditable='true'], button, .cp-factuality-inline-badge, .cp-modal-overlay")) {
         return;
       }
 
-      if (!candidateNodes.includes(contentEl)) {
-        candidateNodes.push(contentEl);
+      if (!candidateNodes.includes(textContainer)) {
+        candidateNodes.push(textContainer);
       }
     });
 
-    // 2. Generic fallback if no specific turns matched
+    // 2. Generic fallback: search all markdown blocks in main container
     if (candidateNodes.length === 0) {
-      const mainArea = document.querySelector("main") || document.body;
-      const genericMarkdowns = mainArea.querySelectorAll("div.markdown, div.prose");
-      genericMarkdowns.forEach((el) => {
-        if (!el.closest("form, footer, header, #prompt-textarea, [contenteditable='true'], button")) {
+      const markdowns = document.querySelectorAll("main .markdown, main .prose, main p, div.markdown, div.prose");
+      markdowns.forEach((el) => {
+        if (!el.closest("form, footer, header, #prompt-textarea, [contenteditable='true'], button, .cp-factuality-inline-badge, [data-message-author-role='user'], .font-user-message")) {
           candidateNodes.push(el);
         }
       });
@@ -995,11 +1008,13 @@
 
   function findPromptForAssistantNode(targetNode) {
     try {
-      const turn = targetNode.closest("article[data-testid*='conversation-turn'], div[class*='turn'], div.agent-turn");
+      // Walk up to find the message turn container
+      const turn = targetNode.closest("article, [data-message-author-role='assistant'], div.agent-turn, div[data-message-id], div[class*='turn']");
       if (turn) {
         let prev = turn.previousElementSibling;
         while (prev) {
-          const userEl = prev.querySelector("[data-message-author-role='user'], div.font-user-message, div[class*='user'], div.markdown, p");
+          const userEl = prev.querySelector("[data-message-author-role='user'], div.font-user-message, div[class*='user'], div.markdown, p") ||
+            (prev.getAttribute("data-message-author-role") === "user" ? prev : null);
           if (userEl) {
             const txt = (userEl.innerText || userEl.textContent || "").trim();
             if (txt && txt.length > 2 && !txt.toLowerCase().includes("chatgpt can make mistakes")) {
@@ -1029,15 +1044,15 @@
       // Check if already evaluated or already has factuality badge rendered
       if (node.dataset.cpEvaluated === "true" || evaluatedResponsesSet.has(node)) return;
 
-      const parentTurn = node.closest("article, [data-message-author-role='assistant'], div.agent-turn, model-response") || node;
-      if (parentTurn.querySelector(".cp-factuality-inline-badge")) {
+      const parentTurn = node.closest("article, [data-message-author-role='assistant'], div.agent-turn, model-response, div[data-message-id]") || node;
+      if (parentTurn.querySelector(".cp-factuality-inline-badge") || node.querySelector(".cp-factuality-inline-badge")) {
         node.dataset.cpEvaluated = "true";
         evaluatedResponsesSet.add(node);
         return;
       }
 
       const responseText = (node.innerText || node.textContent || "").trim();
-      if (!responseText || responseText.length < 15) return;
+      if (!responseText || responseText.length < 5) return;
 
       // Filter out system disclaimers like "ChatGPT can make mistakes. Check important info."
       if (responseText.startsWith("ChatGPT can make mistakes") || responseText.includes("Continue chatting with text only")) {
@@ -1048,11 +1063,11 @@
       evaluatedResponsesSet.add(node);
 
       const promptText = findPromptForAssistantNode(node);
-      evaluateAssistantResponse(promptText, responseText, node);
+      evaluateAssistantResponse(promptText, responseText, node, parentTurn);
     });
   }
 
-  async function evaluateAssistantResponse(prompt, response, targetNode) {
+  async function evaluateAssistantResponse(prompt, response, targetNode, parentTurn) {
     try {
       const data = await sendGuardrailCheck({
         user_prompt: prompt,
@@ -1075,7 +1090,7 @@
       badge.className = "cp-factuality-inline-badge";
       badge.style.cssText = `
         margin-top: 10px;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
         padding: 6px 12px;
         border-radius: 6px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -1085,12 +1100,12 @@
         justify-content: space-between;
         gap: 10px;
         background: #090e17;
-        border: 1px solid ${hasHallucination ? "rgba(244, 63, 94, 0.35)" : "rgba(16, 185, 129, 0.25)"};
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        border: 1px solid ${hasHallucination ? "rgba(244, 63, 94, 0.45)" : "rgba(16, 185, 129, 0.35)"};
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
         color: #cbd5e1;
         transition: all 0.2s ease;
         position: relative;
-        z-index: 5;
+        z-index: 999;
         width: fit-content;
         max-width: 100%;
       `;
@@ -1107,9 +1122,11 @@
         </span>
       `;
 
-      // Insert badge neatly right after the markdown content block
+      // Insert badge neatly right after targetNode or inside parentTurn
       if (targetNode.parentElement && targetNode.parentElement !== document.body) {
         targetNode.insertAdjacentElement("afterend", badge);
+      } else if (parentTurn && parentTurn !== document.body) {
+        parentTurn.appendChild(badge);
       } else {
         targetNode.appendChild(badge);
       }

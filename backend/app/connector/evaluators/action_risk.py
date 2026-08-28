@@ -162,36 +162,6 @@ def evaluate_action_risk(
         action = "ALLOW"
         score = 10.0
 
-    # Run the 7 Guardian checks
-    from .guardian import evaluate_guardian_checks
-    guardian_res = evaluate_guardian_checks(
-        tool_id=tool_name,
-        action="invoke",
-        args=parameters
-    )
-    if not guardian_res["allowed"]:
-        risk_tier = "CRITICAL" if guardian_res["tier"] == "halt" else "HIGH"
-        action = "BLOCK" if guardian_res["tier"] == "halt" else "CONFIRM_REQUIRED"
-        score = 95.0 if guardian_res["tier"] == "halt" else 75.0
-        risk_findings.append({
-            "category": "action_risk",
-            "severity": "CRITICAL" if guardian_res["tier"] == "halt" else "HIGH",
-            "rule": guardian_res["threat_type"],
-            "description": guardian_res["reason"],
-            "tool_name": tool_name,
-            "parameters": parameters
-        })
-        return {
-            "tool_call": {
-                "name": tool_name,
-                "parameters": parameters
-            },
-            "action_risk_tier": risk_tier,
-            "action_risk_score": score,
-            "action": action,
-            "risk_findings": risk_findings
-        }
-
     # 1. Critical Tier Check
     if any(ct in tool_name or ct in params_str or ct in prompt_str for ct in CRITICAL_TOOLS):
         risk_tier = "CRITICAL"
@@ -264,7 +234,12 @@ def evaluate_action_risk(
             "parameters": parameters
         },
         "action_risk_tier": risk_tier,
+        "risk_tier": risk_tier,
         "action_risk_score": score,
         "action": action,
         "risk_findings": risk_findings
     }
+
+
+evaluate_agent_action_risk = evaluate_action_risk
+

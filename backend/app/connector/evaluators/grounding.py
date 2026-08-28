@@ -88,6 +88,17 @@ def verify_against_context(claim: str, context_docs: List[str]) -> Tuple[bool, f
 
 
 
+_HALLUCINATION_OR_PARODY_PATTERNS = [
+    re.compile(r"wrong\s+answer\s*[:\-]?", re.IGNORECASE),
+    re.compile(r"incorrect\s+answer\s*[:\-]?", re.IGNORECASE),
+    re.compile(r"fake\s+answer\s*[:\-]?", re.IGNORECASE),
+    re.compile(r"false\s+answer\s*[:\-]?", re.IGNORECASE),
+    re.compile(r"factually\s+(?:incorrect|false|wrong)", re.IGNORECASE),
+    re.compile(r"this\s+is\s+untrue", re.IGNORECASE),
+    re.compile(r"hypothetically\s+speaking,\s+if\s+we\s+pretend", re.IGNORECASE),
+    re.compile(r"in\s+an\s+alternate\s+universe", re.IGNORECASE),
+]
+
 _HEDGING_PATTERNS = [
     re.compile(r"i'm\s+not\s+entirely\s+sure", re.IGNORECASE),
     re.compile(r"i\s+believe\s+that\s+might\s+be", re.IGNORECASE),
@@ -101,6 +112,12 @@ _HEDGING_PATTERNS = [
 ]
 
 
+_CONVERSATIONAL_BENIGN_PATTERNS = [
+    re.compile(r"^(?:got\s+it|understood|okay|sure|hello|hi|hey|thanks|thank\s+you|noted|i'll\s+remember|i\s+will\s+remember|sounds\s+good|glad\s+to\s+help|no\s+problem|you're\s+welcome)\b", re.IGNORECASE),
+    re.compile(r"^(?:i\s+can(?:'t|\s+not)\s+help\s+with\s+that|how\s+can\s+i\s+(?:assist|help)\s+you)\b", re.IGNORECASE),
+]
+
+
 def evaluate_grounding(
     prompt: str,
     response: str,
@@ -110,14 +127,22 @@ def evaluate_grounding(
 ) -> Dict[str, Any]:
     """
     Comprehensive grounding and factuality evaluation.
-    
-    Returns structured evaluation with:
-    - is_grounded (bool)
-    - grounding_score (0.0 - 1.0)
-    - ungrounded_claims (List[Dict])
-    - risk_tier (LOW / MEDIUM / HIGH)
-    - action (ALLOW / MONITOR / CONFIRM_REQUIRED / BLOCK)
     """
+    resp_clean = response.strip()
+    if not resp_clean or any(p.search(resp_clean) for p in _CONVERSATIONAL_BENIGN_PATTERNS):
+        return {
+            "is_grounded": True,
+            "grounding_score": 1.0,
+            "total_claims": 0,
+            "verified_claims": [],
+            "ungrounded_claims": [],
+            "source_link": None,
+            "correct_answer": None,
+            "risk_tier": "LOW",
+            "action": "ALLOW",
+            "evidence_source": "conversational_acknowledgment"
+        }
+
     claims = extract_claims(response)
     context_docs = context_docs or []
     
@@ -126,18 +151,27 @@ def evaluate_grounding(
     
     total_score = 0.0
     serper_key = serper_api_key or os.environ.get("SERPER_API_KEY", "")
-
     for c in claims:
-        # Check against RAG context first if provided
+        source_link = None
+        correct_answer = None
+
         if context_docs:
             grounded, conf, snippet = verify_against_context(c, context_docs)
+            source_link = "Enterprise Internal Knowledge Base"
+            correct_answer = snippet
         elif serper_key:
             # Live Serper Web Search Verification
-            grounded, conf, snippet = verify_against_serper(prompt, c, serper_key)
+            grounded, conf, snippet, source_link, correct_answer = verify_against_serper(prompt, c, serper_key)
         else:
-            # Direct response evaluation: check for hedging or self-contradiction
+            # Direct response evaluation: check for explicit contradiction, wrong answers, or hedging
+            is_parody_or_wrong = any(p.search(c) for p in _HALLUCINATION_OR_PARODY_PATTERNS)
             is_hedging = any(p.search(c) for p in _HEDGING_PATTERNS)
-            if is_hedging:
+
+            if is_parody_or_wrong:
+                grounded = False
+                conf = 0.20
+                snippet = "Explicit contradictory / false answer assertion detected"
+            elif is_hedging:
                 grounded = False
                 conf = 0.35
                 snippet = "Hedging or low-confidence phrasing detected"
@@ -146,12 +180,13 @@ def evaluate_grounding(
                 conf = 0.95
                 snippet = "Direct high-confidence factual assertion"
 
-
         claim_record = {
             "claim": c,
             "grounded": grounded,
             "confidence": conf,
-            "evidence_snippet": snippet
+            "evidence_snippet": snippet,
+            "source_link": source_link,
+            "correct_answer": correct_answer or snippet,
         }
 
         if grounded:
@@ -164,6 +199,9 @@ def evaluate_grounding(
     num_claims = max(1, len(claims))
     grounding_score = round(total_score / num_claims, 2)
     has_hallucination = grounding_score < hallucination_threshold or len(ungrounded_claims) > 0
+
+    top_evidence_link = (ungrounded_claims[0].get("source_link") if ungrounded_claims else None) or (verified_claims[0].get("source_link") if verified_claims else None)
+    top_correct_answer = (ungrounded_claims[0].get("correct_answer") if ungrounded_claims else None) or (verified_claims[0].get("correct_answer") if verified_claims else None)
 
     if grounding_score >= 0.80 and not ungrounded_claims:
         risk_tier = "LOW"
@@ -181,21 +219,28 @@ def evaluate_grounding(
         "total_claims": len(claims),
         "verified_claims": verified_claims,
         "ungrounded_claims": ungrounded_claims,
+        "source_link": top_evidence_link,
+        "correct_answer": top_correct_answer,
         "risk_tier": risk_tier,
         "action": action,
         "evidence_source": "rag_context" if context_docs else ("serper_live_search" if serper_key else "heuristic_search")
     }
 
 
-def verify_against_serper(prompt: str, claim: str, serper_key: str) -> Tuple[bool, float, Optional[str]]:
+def verify_against_serper(prompt: str, claim: str, serper_key: str) -> Tuple[bool, float, Optional[str], Optional[str], Optional[str]]:
     """
-    Queries Google via Serper API and evaluates whether the claim correctly answers the prompt.
-    Uses OpenAI for intelligent evidence comparison if OPENAI_API_KEY is configured.
+    FacTool Core Web Factuality Engine:
+    Queries Google via Serper across the entire web, extracts multi-source evidence snippets and direct URLs,
+    and uses LLM reasoning to determine truthfulness and identify the precise citation link.
+    Returns: (is_factual, confidence, reasoning, authoritative_source_link, correct_grounded_answer)
     """
+    import urllib.parse
+    search_query = prompt[:120] if prompt and len(prompt) > 5 else claim[:120]
+    authoritative_url = f"https://www.google.com/search?q={urllib.parse.quote_plus(search_query)}"
+    correct_fact = None
+
     try:
         import httpx
-        # Search the original question to retrieve ground truth evidence
-        search_query = prompt[:120] if prompt and len(prompt) > 5 else claim[:120]
         resp = httpx.post(
             'https://google.serper.dev/search',
             headers={'X-API-KEY': serper_key, 'Content-Type': 'application/json'},
@@ -206,28 +251,53 @@ def verify_against_serper(prompt: str, claim: str, serper_key: str) -> Tuple[boo
             data = resp.json()
             organics = data.get('organic', [])
             answer_box = data.get('answerBox', {}).get('answer') or data.get('answerBox', {}).get('snippet', '')
-            
-            snippets = []
+
+            sources = []
             if answer_box:
-                snippets.append(answer_box)
-            for org in organics[:3]:
-                if org.get('snippet'):
-                    snippets.append(org['snippet'])
-            
-            combined_evidence = " | ".join(snippets) if snippets else ""
-            
+                sources.append({
+                    "id": 0,
+                    "title": "Google Knowledge Graph Answer",
+                    "link": organics[0].get('link', '') if organics else authoritative_url,
+                    "snippet": str(answer_box)
+                })
+
+            for idx, org in enumerate(organics[:6]):
+                if org.get('snippet') or org.get('link'):
+                    sources.append({
+                        "id": idx + 1,
+                        "title": org.get('title', 'Web Source'),
+                        "link": org.get('link', ''),
+                        "snippet": org.get('snippet', '')
+                    })
+
+            if sources and sources[0].get('link'):
+                authoritative_url = sources[0]['link']
+
             openai_key = os.environ.get("OPENAI_API_KEY", "")
-            if openai_key and combined_evidence:
+            if openai_key and sources:
                 try:
                     import openai
                     client = openai.OpenAI(api_key=openai_key)
-                    judge_prompt = (
-                        f"Question: \"{prompt}\"\n"
-                        f"Proposed Answer/Claim: \"{claim}\"\n"
-                        f"Google Web Search Evidence: \"{combined_evidence[:500]}\"\n\n"
-                        f"Is the Proposed Answer factually correct according to the real-world evidence?\n"
-                        f"Return JSON: {{\"factuality\": true/false, \"reasoning\": \"brief explanation\"}}"
-                    )
+                    judge_prompt = f"""You are the FacTool Core Factuality Engine. Verify the factual accuracy of the Proposed Answer against live search evidence gathered from across the Internet.
+
+User Question: "{prompt}"
+Proposed Answer: "{claim}"
+
+Live Web Sources:
+{json.dumps(sources, indent=2)}
+
+Tasks:
+1. Determine if the Proposed Answer is factually correct.
+2. What is the verified grounded correct answer in 1 concise sentence?
+3. Select the exact source link from the live web sources that proves the correct answer.
+
+Return JSON:
+{{
+  "factuality": true/false,
+  "correct_answer": "verified correct answer in 1 sentence",
+  "reasoning": "clear explanation comparing claim vs evidence",
+  "source_url": "exact link from sources that proves the answer"
+}}"""
                     j_comp = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[{"role": "user", "content": judge_prompt}],
@@ -236,25 +306,31 @@ def verify_against_serper(prompt: str, claim: str, serper_key: str) -> Tuple[boo
                     )
                     j_res = json.loads(j_comp.choices[0].message.content.strip())
                     is_factual = bool(j_res.get("factuality", False))
-                    reasoning = j_res.get("reasoning", combined_evidence[:150])
+                    reasoning = j_res.get("reasoning", "")
+                    correct_fact = j_res.get("correct_answer", "")
+                    selected_url = j_res.get("source_url", "")
+                    if selected_url and selected_url.startswith("http"):
+                        authoritative_url = selected_url
+
                     conf = 0.95 if is_factual else 0.10
-                    return is_factual, conf, reasoning
+                    return is_factual, conf, reasoning, authoritative_url, correct_fact
                 except Exception as e:
-                    logger.debug(f"OpenAI serper judge notice: {e}")
+                    logger.debug(f"FacTool OpenAI judge notice: {e}")
 
             # Fallback heuristic if OpenAI is not available
-            if combined_evidence:
+            combined_text = " ".join([s['snippet'] for s in sources])
+            if combined_text:
                 claim_words = [w.lower() for w in re.findall(r'\b[a-zA-Z0-9_\-]{3,}\b', claim)]
-                comb_lower = combined_evidence.lower()
+                comb_lower = combined_text.lower()
                 matches = sum(1 for w in claim_words if w in comb_lower)
                 ratio = matches / max(1, len(claim_words))
                 if ratio >= 0.60:
-                    return True, 0.85, combined_evidence[:150]
+                    return True, 0.85, combined_text[:150], authoritative_url, sources[0]['snippet'] if sources else combined_text[:150]
                 else:
-                    return False, 0.20, f"Search evidence contradicts claim: {combined_evidence[:150]}..."
+                    return False, 0.20, f"Web evidence contradicts claim: {combined_text[:150]}...", authoritative_url, sources[0]['snippet'] if sources else combined_text[:150]
 
     except Exception as e:
         logger.debug(f"Serper check notice: {e}")
-    return False, 0.40, "No supporting search evidence retrieved"
+    return False, 0.40, "No supporting search evidence retrieved", authoritative_url, correct_fact
 
 

@@ -47,31 +47,39 @@ def log_interception(
     timestamp = _now()
 
     # Determine finding details based on risk_findings
-    finding_title = "PII Detected in User Input"
-    finding_code = "PII-INPUT-001"
-    severity = "HIGH" if action == "BLOCK" else ("MEDIUM" if risk_findings else "LOW")
-    if risk_findings:
-        f0 = risk_findings[0]
-        context = f0.get("type", context)
-        severity = f0.get("severity", severity)
-        if "injection" in context.lower():
-            finding_title = "Prompt Injection Attack"
-            finding_code = "INJ-002"
-        elif "secret" in context.lower() or "key" in context.lower():
-            finding_title = "Secret / API Key Leakage"
-            finding_code = "SEC-003"
-        elif "hallucination" in context.lower() or "grounding" in context.lower():
-            finding_title = "Low-Grounding / Hallucination Detected"
-            finding_code = "HAL-004"
-        elif "bias" in context.lower() or "toxic" in context.lower():
-            finding_title = "Bias & Toxic Content Flagged"
-            finding_code = "TOX-005"
-        elif "action" in context.lower():
-            finding_title = "Risky Agent Tool Action"
-            finding_code = "ACT-006"
-        elif "budget" in context.lower() or "cost" in context.lower():
-            finding_title = "Token Limit Budget Exceeded"
-            finding_code = "CST-007"
+    if not risk_findings and action == "ALLOW":
+        finding_title = "Clean Request (Passed)"
+        finding_code = "PASS-000"
+        context = "CLEAN"
+        severity = "LOW"
+        initial_status = "resolved"
+    else:
+        finding_title = "PII Detected in User Input"
+        finding_code = "PII-INPUT-001"
+        severity = "HIGH" if action == "BLOCK" else ("MEDIUM" if risk_findings else "LOW")
+        initial_status = "open"
+        if risk_findings:
+            f0 = risk_findings[0]
+            context = f0.get("type", context)
+            severity = f0.get("severity", severity)
+            if "injection" in context.lower():
+                finding_title = "Prompt Injection Attack"
+                finding_code = "INJ-002"
+            elif "secret" in context.lower() or "key" in context.lower():
+                finding_title = "Secret / API Key Leakage"
+                finding_code = "SEC-003"
+            elif "hallucination" in context.lower() or "grounding" in context.lower():
+                finding_title = "Low-Grounding / Hallucination Detected"
+                finding_code = "HAL-004"
+            elif "bias" in context.lower() or "toxic" in context.lower():
+                finding_title = "Bias & Toxic Content Flagged"
+                finding_code = "TOX-005"
+            elif "action" in context.lower():
+                finding_title = "Risky Agent Tool Action"
+                finding_code = "ACT-006"
+            elif "budget" in context.lower() or "cost" in context.lower():
+                finding_title = "Token Limit Budget Exceeded"
+                finding_code = "CST-007"
 
     with get_conn() as conn:
         from .connection import is_postgres
@@ -99,7 +107,7 @@ def log_interception(
                 sanitized_prompt, sanitized_response, action, enforcement_mode, latency_ms,
                 performance_score, cost_score, responsibility_score, triggered_rules_json, risk_findings_json,
                 source, context, status, finding_title, finding_code, severity, session_id, tenant_id, hash_chain
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 intercept_id,
@@ -119,6 +127,7 @@ def log_interception(
                 json.dumps(risk_findings),
                 source,
                 context,
+                initial_status,
                 finding_title,
                 finding_code,
                 severity,
