@@ -86,11 +86,14 @@ def _cosine_similarity(vec_a: Dict[str, float], vec_b: Dict[str, float]) -> floa
     return dot_product / (norm_a * norm_b)
 
 
-# Initialize mathematical centroid projections dynamically
-_PRECOMPUTED_CENTROID_VECTORS: Dict[str, Dict[str, float]] = {
-    cat_id: _generate_subword_ngrams(data["text_corpus"])
-    for cat_id, data in _DYNAMIC_CENTROIDS.items()
-}
+def get_dynamic_centroids() -> tuple[Dict[str, Dict[str, Any]], Dict[str, Dict[str, float]]]:
+    """Returns dynamically loaded centroids and precomputed vectors."""
+    centroids = load_threat_taxonomies()
+    vectors = {
+        cat_id: _generate_subword_ngrams(data["text_corpus"])
+        for cat_id, data in centroids.items()
+    }
+    return centroids, vectors
 
 
 # ==============================================================================
@@ -119,11 +122,13 @@ def evaluate_universal_vector_threat(prompt: str | None) -> VectorScoreResult:
     best_similarity = 0.0
     best_meta = None
 
+    centroids, centroid_vectors = get_dynamic_centroids()
+
     # 2. Compute Cosine Distance across dynamically loaded centroids
-    for cat_id, centroid_vec in _PRECOMPUTED_CENTROID_VECTORS.items():
+    for cat_id, centroid_vec in centroid_vectors.items():
         similarity = _cosine_similarity(prompt_vec, centroid_vec)
-        meta = _DYNAMIC_CENTROIDS.get(cat_id, {})
-        threshold = meta.get("threshold", 0.25)
+        meta = centroids.get(cat_id, {})
+        threshold = meta.get("threshold", 0.20)
 
         if similarity >= threshold and similarity > best_similarity:
             best_similarity = similarity
