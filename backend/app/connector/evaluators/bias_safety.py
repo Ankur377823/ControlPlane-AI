@@ -82,7 +82,7 @@ def scan_bias_and_toxicity(text: str) -> Dict[str, Any]:
     # 2. Keyword Biases & Moderation Triggers
     for category, keywords in BIAS_KEYWORDS.items():
         for kw in keywords:
-            if kw in lower_text:
+            if re.search(r"\b" + re.escape(kw) + r"\b", lower_text):
                 if category not in detected_types:
                     detected_types.append(category)
                 risk_findings.append({

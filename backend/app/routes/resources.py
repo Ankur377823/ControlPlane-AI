@@ -17,7 +17,7 @@ Routes:
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -77,13 +77,17 @@ class CheckRequest(BaseModel):
 
 
 class UpdatePolicyRequest(BaseModel):
-    enforcement_mode: Optional[str] = "block"
+    enforcement_mode: Optional[str] = "mask"
     pii_redaction_enabled: bool = True
     pii_sensitivity: str = "high"
     prompt_injection_action: str = "block"
     hallucination_threshold: float = Field(0.65, ge=0.0, le=1.0)
     max_tokens_limit: int = Field(2048, ge=256, le=32768)
     require_human_review_below: float = Field(0.75, ge=0.0, le=1.0)
+    custom_regex_rules: Optional[List[Dict[str, Any]]] = None
+    custom_rules_json: Optional[str] = None
+
+    model_config = {"extra": "allow"}
 
 
 
@@ -347,7 +351,7 @@ def get_resource_policy(resource_id: str):
 def update_resource_policy(resource_id: str, payload: UpdatePolicyRequest):
     resource = _resource_or_404(resource_id)
     policy_id = resource.get("policy_id") or "pol_customer_support"
-    updated_policy = db.update_policy(policy_id, payload.model_dump())
+    updated_policy = db.update_policy(policy_id, payload.model_dump(exclude_unset=True))
     return updated_policy
 
 

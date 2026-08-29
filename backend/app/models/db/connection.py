@@ -402,13 +402,15 @@ def _migrate_db(conn) -> None:
     # Clean legacy session IDs if present
     try:
         conn.execute("UPDATE interceptions SET session_id = REPLACE(session_id, 'garak', 'botpress') WHERE session_id LIKE '%garak%'")
+        # Ensure customer support and default policies default to mask mode for PII
+        conn.execute("UPDATE policies SET enforcement_mode = 'mask' WHERE id = 'pol_customer_support' AND enforcement_mode = 'block'")
     except Exception:
         pass
 
 
 def _seed_default_policies(conn) -> None:
     defaults = [
-        ("pol_customer_support", "Customer Support Policy", "customer_support", "block", 1, "high", "block", 0.65, 2048, 0.75),
+        ("pol_customer_support", "Customer Support Policy", "customer_support", "mask", 1, "high", "block", 0.65, 2048, 0.75),
         ("pol_internal_copilot", "Internal Employee Copilot", "internal_copilot", "mask", 1, "medium", "flag", 0.50, 4096, 0.60),
         ("pol_decision_support", "Regulated Decision Support", "decision_support", "monitor", 1, "high", "block", 0.80, 8192, 0.85),
         ("pol_ai_agent", "Autonomous Agent Trajectory Policy", "agent", "confirm_required", 1, "high", "block", 0.70, 4096, 0.80),
@@ -429,6 +431,9 @@ def _seed_default_policies(conn) -> None:
                 """,
                 (pol_id, name, uc_type, enf_mode, pii_en, pii_sens, inj_act, hal_thresh, max_tok, rev_thresh, now),
             )
+        else:
+            if pol_id == "pol_customer_support":
+                conn.execute("UPDATE policies SET enforcement_mode = 'mask' WHERE id = 'pol_customer_support'")
 
 
 def _seed_default_resource(conn) -> None:

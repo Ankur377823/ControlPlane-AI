@@ -152,10 +152,27 @@ def evaluate_action_risk(
             "risk_findings": risk_findings
         }
 
-    tool_name = str(tool_call.get("name", "")).lower().strip()
-    parameters = tool_call.get("parameters", {})
+    tool_name = str(tool_call.get("name") or tool_call.get("tool_name") or "").lower().strip()
+    parameters = tool_call.get("parameters") if tool_call.get("parameters") is not None else tool_call.get("arguments", {})
     params_str = str(parameters).lower()
     prompt_str = user_prompt.lower()
+
+    # Also evaluate destructive commands in tool parameters
+    for cat_id, pattern, pat_tier, pat_action, pat_desc in DESTRUCTIVE_PATTERNS:
+        match = pattern.search(params_str)
+        if match:
+            risk_tier = pat_tier
+            action = pat_action
+            score = 95.0 if pat_tier == "CRITICAL" else 75.0
+            risk_findings.append({
+                "category": "action_risk",
+                "severity": pat_tier,
+                "rule": f"Destructive Command Intercepted ({cat_id.replace('_', ' ').title()})",
+                "description": f"{pat_desc}: '{match.group(0)}'",
+                "tool_name": tool_name or match.group(0),
+                "snippet": match.group(0),
+            })
+            break
 
     if risk_tier == "NONE":
         risk_tier = "LOW"

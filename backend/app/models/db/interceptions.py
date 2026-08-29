@@ -54,32 +54,40 @@ def log_interception(
         severity = "LOW"
         initial_status = "resolved"
     else:
-        finding_title = "PII Detected in User Input"
-        finding_code = "PII-INPUT-001"
+        finding_title = "Policy Risk Detected"
+        finding_code = "RISK-001"
         severity = "HIGH" if action == "BLOCK" else ("MEDIUM" if risk_findings else "LOW")
         initial_status = "open"
         if risk_findings:
             f0 = risk_findings[0]
             context = f0.get("type", context)
             severity = f0.get("severity", severity)
-            if "injection" in context.lower():
+            ctx_lower = context.lower()
+            if "custom_rule" in ctx_lower or "custom" in ctx_lower:
+                clean_name = context.replace("CUSTOM_RULE_", "").replace("_", " ").title()
+                finding_title = f"Custom Rule Matched: {clean_name}"
+                finding_code = "CUST-008"
+            elif "injection" in ctx_lower:
                 finding_title = "Prompt Injection Attack"
                 finding_code = "INJ-002"
-            elif "secret" in context.lower() or "key" in context.lower():
+            elif "secret" in ctx_lower or "key" in ctx_lower:
                 finding_title = "Secret / API Key Leakage"
                 finding_code = "SEC-003"
-            elif "hallucination" in context.lower() or "grounding" in context.lower():
+            elif "hallucination" in ctx_lower or "grounding" in ctx_lower:
                 finding_title = "Low-Grounding / Hallucination Detected"
                 finding_code = "HAL-004"
-            elif "bias" in context.lower() or "toxic" in context.lower():
+            elif "bias" in ctx_lower or "toxic" in ctx_lower:
                 finding_title = "Bias & Toxic Content Flagged"
                 finding_code = "TOX-005"
-            elif "action" in context.lower():
+            elif "action" in ctx_lower:
                 finding_title = "Risky Agent Tool Action"
                 finding_code = "ACT-006"
-            elif "budget" in context.lower() or "cost" in context.lower():
+            elif "budget" in ctx_lower or "cost" in ctx_lower:
                 finding_title = "Token Limit Budget Exceeded"
                 finding_code = "CST-007"
+            elif "pii" in ctx_lower or "email" in ctx_lower or "phone" in ctx_lower or "ssn" in ctx_lower or "card" in ctx_lower:
+                finding_title = "PII Detected in User Input"
+                finding_code = "PII-INPUT-001"
 
     with get_conn() as conn:
         from .connection import is_postgres

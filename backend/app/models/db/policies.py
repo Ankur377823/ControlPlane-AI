@@ -54,11 +54,26 @@ def get_policy_for_resource(resource_id: str) -> dict:
 
 
 def update_policy(policy_id: str, data: dict) -> dict:
+    existing = get_policy(policy_id) or get_policy("pol_customer_support") or {}
+    
+    enf_mode = data["enforcement_mode"] if "enforcement_mode" in data and data["enforcement_mode"] is not None else existing.get("enforcement_mode", "mask")
+    pii_en = int(data["pii_redaction_enabled"]) if "pii_redaction_enabled" in data and data["pii_redaction_enabled"] is not None else int(existing.get("pii_redaction_enabled", 1))
+    pii_sens = data["pii_sensitivity"] if "pii_sensitivity" in data and data["pii_sensitivity"] is not None else existing.get("pii_sensitivity", "critical")
+    inj_act = data["prompt_injection_action"] if "prompt_injection_action" in data and data["prompt_injection_action"] is not None else existing.get("prompt_injection_action", "block")
+    hal_thresh = float(data["hallucination_threshold"]) if "hallucination_threshold" in data and data["hallucination_threshold"] is not None else float(existing.get("hallucination_threshold", 0.85))
+    max_tok = int(data["max_tokens_limit"]) if "max_tokens_limit" in data and data["max_tokens_limit"] is not None else int(existing.get("max_tokens_limit", 4096))
+    rev_thresh = float(data["require_human_review_below"]) if "require_human_review_below" in data and data["require_human_review_below"] is not None else float(existing.get("require_human_review_below", 0.85))
+
     custom_rules = data.get("custom_regex_rules") or data.get("custom_rules")
     if custom_rules is not None:
         custom_rules_json_str = json.dumps(custom_rules) if not isinstance(custom_rules, str) else custom_rules
+    elif data.get("custom_rules_json") is not None:
+        custom_rules_json_str = data.get("custom_rules_json")
     else:
-        custom_rules_json_str = data.get("custom_rules_json", "[]")
+        custom_rules_json_str = existing.get("custom_rules_json") or (json.dumps(existing.get("custom_regex_rules", [])) if existing.get("custom_regex_rules") else "[]")
+
+    if not custom_rules_json_str:
+        custom_rules_json_str = "[]"
 
     with get_conn() as conn:
         conn.execute(
@@ -75,13 +90,13 @@ def update_policy(policy_id: str, data: dict) -> dict:
             WHERE id = ? OR id = 'pol_customer_support' OR id = 'pol_default'
             """,
             (
-                data.get("enforcement_mode", "mask"),
-                int(data.get("pii_redaction_enabled", 1)),
-                data.get("pii_sensitivity", "critical"),
-                data.get("prompt_injection_action", "block"),
-                float(data.get("hallucination_threshold", 0.85)),
-                int(data.get("max_tokens_limit", 4096)),
-                float(data.get("require_human_review_below", 0.85)),
+                enf_mode,
+                pii_en,
+                pii_sens,
+                inj_act,
+                hal_thresh,
+                max_tok,
+                rev_thresh,
                 custom_rules_json_str,
                 policy_id,
             ),

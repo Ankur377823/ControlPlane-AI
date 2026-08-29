@@ -178,12 +178,13 @@ class ControlPlaneGuardrail:
         # ------------------------------------------------------------------
         custom_rules = self.policy.get("custom_regex_rules", []) or []
         has_custom_block = False
+        has_custom_mask = False
         for cr in custom_rules:
             if not cr.get("enabled", True):
                 continue
             c_name = cr.get("name", "Custom Rule")
             c_pattern = cr.get("pattern", "")
-            c_action = cr.get("action", "BLOCK").upper()
+            c_action = cr.get("action", "MASK").upper()
             c_category = cr.get("category", "Custom Security")
             c_redaction = cr.get("redaction") or f"[REDACTED_{c_name.upper().replace(' ', '_')}]"
 
@@ -199,13 +200,14 @@ class ControlPlaneGuardrail:
                         matched_snippet = m.group(0)
                         risk_findings.append({
                             "type": f"CUSTOM_RULE_{c_name.upper().replace(' ', '_')}",
-                            "severity": "CRITICAL" if c_action == "BLOCK" else "HIGH",
+                            "severity": "CRITICAL" if c_action == "BLOCK" else "MEDIUM",
                             "location": "user_prompt",
                             "snippet": matched_snippet,
                             "description": f"Matched custom regex rule '{c_name}' in group '{c_category}': /{c_pattern}/",
                         })
                     if c_action in ("MASK", "REDACT"):
                         sanitized_prompt = rx.sub(c_redaction, sanitized_prompt)
+                        has_custom_mask = True
                     elif c_action == "BLOCK":
                         has_custom_block = True
 
@@ -358,6 +360,9 @@ class ControlPlaneGuardrail:
             action = "CONFIRM_REQUIRED"
         elif multi_turn_eval and multi_turn_eval.get("escalation_action") in ("BLOCK", "CONFIRM_REQUIRED"):
             action = multi_turn_eval["escalation_action"]
+        elif has_custom_mask and not has_custom_block:
+            # Custom rule explicitly requested MASK — honor MASK action directly
+            action = "MASK"
         elif bool(risk_findings):
             if enf_mode in ("monitor", "detect", "warn"):
                 action = "MONITOR"
