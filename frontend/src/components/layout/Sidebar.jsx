@@ -111,18 +111,18 @@ export function Sidebar({ activeRoute, onNavigate }) {
                   <button
                     key={item.id}
                     onClick={() => handleItemClick(item)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-150 text-left ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-mono font-medium transition-all duration-150 text-left ${
                       isActive
-                        ? 'bg-primary/10 dark:bg-primary/15 text-primary dark:text-orange-400 font-semibold shadow-sm ring-1 ring-primary/25'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100/70 dark:hover:bg-dark-800/60'
+                        ? 'bg-[#0f172a] dark:bg-[#181b22] text-white dark:text-white font-bold shadow-md border border-[#0f172a] dark:border-[#2a2d36]'
+                        : 'text-slate-600 dark:text-[#8a8f98] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#181b22]'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-slate-400 dark:text-slate-500'}`} />
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500 dark:text-[#717682]'}`} />
                       <span>{item.label}</span>
                     </div>
                     {item.externalTab && (
-                      <ExternalLink className="w-3.5 h-3.5 text-slate-400 opacity-60" />
+                      <ExternalLink className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-400 opacity-60'}`} />
                     )}
                   </button>
                 );

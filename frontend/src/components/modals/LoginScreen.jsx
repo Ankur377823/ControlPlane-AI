@@ -82,7 +82,7 @@ export function LoginScreen() {
             <div className="space-y-1.5 text-xs text-[#8a8f98] font-mono tracking-tight pt-1">
               <div className="flex items-center gap-3">
                 <span className="text-[#454a54]">{timeStr}</span>
-                <span className="text-[#a1a1aa]">INITIALIZING ZERO-TRUST AI GOVERNANCE SHIELD ...</span>
+                <span className="text-[#a1a1aa]">INITIALIZING RESPONSIBLE AI GOVERNANCE SHIELD ...</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-[#454a54]">{timeStr}</span>
@@ -235,7 +235,7 @@ export function LoginScreen() {
           </div>
 
           <div className="mt-8 pt-4 border-t border-[#22252c] text-center text-[10px] text-[#555a64] font-mono uppercase tracking-wider">
-            <span>SECURE SYSTEM ACCESS // ZERO-TRUST CERTIFIED</span>
+            <span>SECURE SYSTEM ACCESS // COMPLIANCE CERTIFIED</span>
           </div>
         </div>
       </div>

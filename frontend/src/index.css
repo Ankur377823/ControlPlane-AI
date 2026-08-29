@@ -119,3 +119,71 @@ code, kbd, pre, samp {
   background: #22252c;
   border-radius: 3px;
 }
+
+/* Light Mode Universal Contrast & Alignment Overrides */
+html.light body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light input,
+html.light textarea,
+html.light select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+html.light .bg-\[\#08090b\],
+html.light .bg-\[\#0e1014\],
+html.light .bg-\[\#050608\],
+html.light .bg-\[\#090a0d\],
+html.light .bg-\[\#0b0c0f\] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light .bg-\[\#181b22\] {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light .border-\[\#22252c\],
+html.light .border-\[\#2a2d36\] {
+  border-color: #cbd5e1 !important;
+}
+
+html.light .text-white {
+  color: #0f172a !important;
+}
+
+html.light .text-\[\#8a8f98\],
+html.light .text-\[\#717682\],
+html.light .text-\[\#a1a1aa\],
+html.light .text-\[\#555a64\],
+html.light .text-\[\#454a54\] {
+  color: #475569 !important;
+}
+
+html.light button.bg-white,
+html.light a.bg-white {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #0f172a !important;
+}
+
+html.light button.bg-white *,
+html.light button.bg-white svg,
+html.light a.bg-white *,
+html.light a.bg-white svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}

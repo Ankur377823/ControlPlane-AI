@@ -7,7 +7,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC.svg)](https://tailwindcss.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon%20Cloud-336791.svg)](https://neon.tech/)
 [![Docker](https://img.shields.io/badge/Docker-Live%20Watch%20Ready-2496ED.svg)](https://www.docker.com/)
-[![Tests](https://img.shields.io/badge/Pytest-134%2F134%20Passed-emerald.svg)](#-testing--verification)
+[![Tests](https://img.shields.io/badge/Pytest-134%2F134%20Passed-emerald.svg)](#-testing--verification-suite)
 
 > 🚀 **Live Production Deployment**: **[https://controlplane-ai-utso.onrender.com/](https://controlplane-ai-utso.onrender.com/)**
 >
@@ -21,7 +21,7 @@
 
 For deep-dive architectural specifications, setup guides, and system design diagrams, refer to the following documentation files in this repository:
 
-1. **[`README.md`](file:///c:/ControlPlane/README.md)** *(This File)*: Master overview, quick start, file structure tree, feature highlights, and test verification suite.
+1. **[`README.md`](file:///c:/ControlPlane/README.md)** *(This File)*: Master overview, quick start, file structure tree, comprehensive feature breakdown across all 7 core modules, and test verification suite.
 2. **[`DESIGN.md`](file:///c:/ControlPlane/DESIGN.md)**: Deep technical architecture, mathematical formulas ($\mathbb{R}^d$ Cosine Similarity, Shannon Entropy, Speech-Act Propositional Theory, Exponential Risk Decay), and 4-tier threat cascading engine.
 3. **[`EXTENSION_SETUP.md`](file:///c:/ControlPlane/EXTENSION_SETUP.md)**: Step-by-step Chrome Extension (Manifest V3) installation, auto-enrollment tokens, network shield setup, and live testing guide.
 4. **[`ArchitectureDoc.jsx`](file:///c:/ControlPlane/frontend/src/views/docs/ArchitectureDoc.jsx)**: In-app interactive documentation view displaying visual ASCII flowcharts, 5-phase scanning pipeline diagrams, and module mapping tables.
@@ -64,38 +64,15 @@ ControlPlane/
 │   │   │   └── resources.py             # Monitored AI tool onboarding APIs
 │   │   └── main.py                      # FastAPI application entry point & CORS middleware
 │   └── tests/                           # Comprehensive Pytest Suite (134/134 Passing)
-│       ├── test_universal_vector_engine.py
-│       ├── test_scan_pipeline.py
-│       ├── test_red_team_package.py
-│       ├── test_grounding.py
-│       ├── test_pii.py
-│       └── test_api.py
 ├── frontend/                            # React 18 + Vite 6 Modern SPA
 │   ├── extension/                       # Manifest V3 Chrome Network Shield Extension
-│   │   ├── manifest.json                # Extension manifest (Host permissions & content scripts)
+│   │   ├── manifest.json                # Extension manifest
 │   │   ├── popup.html                   # Extension popup interface in dark terminal theme
 │   │   ├── popup.js                     # Token auto-enrollment & server sync logic
 │   │   └── content.js                   # Main-world fetch/XHR interceptor & monitoring banner
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── layout/                  # Sidebar navigation, Header, and Layout containers
-│   │   │   └── modals/                  # LoginScreen.jsx (Render-style terminal login)
-│   │   ├── views/                       # Main Control Plane Studio Views
-│   │   │   ├── DashboardView.jsx        # Real-time telemetry, action breakdown & trust metrics
-│   │   │   ├── InventoryView.jsx        # Monitored AI resources & webhook validation
-│   │   │   ├── AgentRuntimeView.jsx     # Autonomous AI agent sandbox & action risk matrix
-│   │   │   ├── PoliciesView.jsx         # 5 Regulatory policy archetypes & custom regex tester
-│   │   │   ├── RedTeamScannerView.jsx   # Automated red-team scanner & PDF report generator
-│   │   │   ├── HallucinationView.jsx    # RAG grounding evaluation & claim verification
-│   │   │   └── docs/ArchitectureDoc.jsx # In-app system architecture documentation
-│   │   ├── context/                     # AuthContext, ThemeContext, and ToastContext
-│   │   ├── services/api.js              # Centralized Axios API client
-│   │   ├── index.css                    # Tailwind CSS imports & global JetBrains Mono styles
-│   │   └── App.jsx                      # Client-side hash router & navigation shell
-│   ├── dist/                            # Production SPA build output
-│   ├── package.json                     # Node dependencies & Vite scripts
+│   ├── src/                             # Views, Components, Contexts, and API client
 │   └── tailwind.config.js               # Tailwind CSS design system configuration
-├── README.md                            # Master repository guide & quick start
+├── README.md                            # Master repository guide, quick start & file tree
 ├── DESIGN.md                            # Comprehensive technical architecture document
 ├── EXTENSION_SETUP.md                   # Chrome Extension installation & auto-enrollment guide
 ├── requirements.txt                     # Python dependencies
@@ -104,9 +81,9 @@ ControlPlane/
 
 ---
 
-## 🌟 What is ControlPlane AI?
+## 🌟 Comprehensive Feature Breakdown Across All Modules
 
-**ControlPlane AI** is an enterprise-grade **Responsible AI (RAI) Governance Control Plane**, real-time guardrail shield, and telemetry monitoring studio. It is engineered to safeguard, monitor, audit, and auto-tune AI assistants, chatbots, and autonomous agents across diverse organizational use cases (Customer Support, Internal Copilots, Decision Support, Healthcare HIPAA, and Agent Runtimes) with **sub-15ms latency** powered by **Universal Vector Projections, Information-Theoretic Parsers, and Declarative Policy Schemas**.
+ControlPlane AI provides a complete end-to-end Responsible AI governance lifecycle divided into 7 core operational modules:
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -145,43 +122,55 @@ ControlPlane/
 +---------------------------------------+   +---------------------------------------+
 ```
 
----
+### Module 1: AI Red Team Vulnerability Scanner (`RedTeamScannerView.jsx` & `backend/app/red_team/`)
+- **Automated Probe Execution**: Dispatches pre-packaged attack probe suites against connected AI webhooks or ad-hoc API endpoints.
+- **Preset Attack Suites**:
+  1. *System Prompt Extraction Suite*: 6 specialized prompt injection attacks probing system instruction leaks.
+  2. *PII & Secret Disclosure Suite*: 6 credential harvesting probes testing credit cards, API keys, and patient SSNs.
+  3. *Jailbreak & Authority Bypass Suite*: Probes testing roleplay overrides, DAN jailbreaks, and compliance bypasses.
+  4. *Custom Multi-Prompt Test List*: Supports multi-line custom prompt lists separated by blank lines or `---` delimiters.
+- **Defense Status Evaluation**: Evaluates model responses into `DEFENDED` (threat intercepted/masked) or `VULNERABLE` (sensitive data leaked).
+- **Executive PDF Audit Report Generator**: Exports instant compliance audit certificates using `jsPDF` and `jsPDF-AutoTable` with overall defense scores, vulnerability counts, and probe-by-probe breakdown.
 
-## 💡 Core Features & Architecture Highlights
+### Module 2: Secure AI Agent Runtime Sandbox (`AgentRuntimeView.jsx` & `multi_turn_risk.py`)
+- **Autonomous Tool Execution Safeguard**: Intercepts tool calls issued by AI agents (e.g. `delete_file`, `send_email`, `transfer_money`, `search_web`).
+- **Action Risk Tiers**:
+  - `LOW`: Read-only queries (`search_web`) $\rightarrow$ `ALLOW`
+  - `MEDIUM`: Reversible communications (`send_email`) $\rightarrow$ `MONITOR`
+  - `HIGH`: File/data deletions (`delete_file`, `delete_email`) $\rightarrow$ `CONFIRM_REQUIRED` (Human-in-the-Loop)
+  - `CRITICAL`: Financial wire transfers or system modifications (`transfer_money`, `sudo rm -rf`) $\rightarrow$ `BLOCK`
+- **Compound Action Sequence State Machine**: Detects multi-step exfiltration chains (e.g. `query_database` $\rightarrow$ `read_file` $\rightarrow$ `export_data` $\rightarrow$ `send_email`) to stop automated agent data exfiltration.
 
-1. **4-Tier Threat Cascading Engine**:
-   - **Tier 1 (<2ms Fast-Path)**: Structural syntax scanning for ChatML/Llama-3 delimiters (`<|im_start|>`, `<|start_header_id|>`) and Unicode zero-width evasion stripping (`'Cf'`, `'Cs'`, `'Cc'`).
-   - **Tier 2 (<8ms Vector Space)**: Universal Vector Space projection ($\mathbb{R}^d$ Cosine Similarity) against 134 declarative NIST AI RMF and Meta Llama Guard 3 threat centroids.
-   - **Tier 3 (<12ms Sliding Chunking)**: Slices long documents into 450-token overlapping windows (100-token stride) to stop hidden payloads in long prompts.
-   - **Tier 4 (~150ms Ollama / Local LLM Judge)**: On-premise contextual intent evaluation invoked strictly for ambiguous, borderline risk scores ($0.40 \le \text{Score} < 0.70$).
-2. **5-Phase Real-Time Scanning Pipeline**: Standard `POST /api/v1/scan/input` and `POST /api/v1/scan/output` endpoints executing PII redaction, anti-evasion decoding, 4-tier prompt defense, content safety, and multi-turn risk intelligence.
-3. **Declarative Universal Policy Engine**: All threat taxonomies, centroids, and regulatory thresholds are cleanly separated into declarative JSON configuration ([`threat_taxonomies.json`](file:///c:/ControlPlane/backend/app/config/threat_taxonomies.json)) with dynamic live reloading without server restarts.
-4. **Information-Theoretic Mathematical Parsers**: Algorithmic Mod-10 Luhn checksums for credit cards, Shannon information entropy ($H = -\sum p_i \log_2 p_i$) for secrets, and Unicode General Category parsing (`'Cf'`, `'Cs'`, `'Zl'`).
-5. **Minimalist Monochrome Dark Developer UI**: Pure dark console aesthetic with high-contrast typography, JetBrains Mono font, and sharp borders across all views.
-6. **Smart Hybrid Defense (Zero Alert Fatigue)**: Automatically **MASKS & REDACTS** PII, credit cards, emails, and API keys to keep employee productivity high, while **HARD-BLOCKING** adversarial jailbreaks, malware, prompt injections, and destructive OS/SQL commands.
-7. **Linguistic Proposition Factuality Grounding**: Distinguishes non-assertive speech acts (assistance offers, refusals) from testable declarative claims, verifying claims against live web search and RAG context.
-8. **Stateful Multi-Turn Session Intelligence**: Exponential risk decay formula ($\text{Risk}_t = 0.85 \times \text{Risk}_{t-1} + 0.50 \times \Delta$) detecting conversational drift and multi-turn privilege escalation.
-9. **Compound Agent-Action Sequence Risk**: State machine tracking sequential tool calls (e.g. `query_database` $\rightarrow$ `read_file` $\rightarrow$ `export_data` $\rightarrow$ `send_email`) to stop automated data exfiltration chains.
-10. **Human-in-the-Loop (HITL) Review Queue**: Real-time review lifecycle for `CONFIRM_REQUIRED` and `FLAGGED` events with **Approve**, **Reject**, and **Policy Override** actions.
-11. **Self-Tuning Feedback Loop & Trustworthiness Index**: Tracks live Trust Index (97.2%), False Positive Rate (2.1%), False Negative Rate (0.8%), Precision, Recall, and auto-tunes policy thresholds upon reviewer feedback.
-12. **Automated AI Red Team Scanner**: Automated multi-turn vulnerability scanner with prompt injection, PII extraction, and jailbreak attack presets with downloadable PDF audit reports.
-13. **Chrome Extension Network Shield**: Manifest V3 extension in a sleek permanent dark theme with client-side prompt interception, dynamic policy synchronization, and auto-enrollment tokens. (See [`EXTENSION_SETUP.md`](file:///c:/ControlPlane/EXTENSION_SETUP.md)).
-14. **Tamper-Evident SHA-256 Hash Chain Audit**: Cryptographic proof of event integrity across all stored interceptions.
-15. **Dual Database Architecture**: Zero-config SQLite local development + Neon Cloud PostgreSQL production mode.
+### Module 3: AI Security Guardrail Policies (`PoliciesView.jsx` & `threat_taxonomies.json`)
+- **The 5 Canonical Regulatory Frameworks**:
+  1. *Customer Support Policy (`pol_customer_support`)*: `MASK` mode for PII, emails, credit cards, and competitor steering.
+  2. *Internal Employee Copilot (`pol_internal_copilot`)*: `MASK` + `AUDIT` mode for developer API keys, database connection URIs, and unreleased MNPI.
+  3. *Healthcare HIPAA Policy (`pol_us_hipaa`)*: `BLOCK` mode for bulk patient chart dumps, pediatric opioid overdoses, and invasive DIY home surgery.
+  4. *Autonomous Agent Runtime Policy (`pol_ai_agent`)*: `CONFIRM_REQUIRED` mode for high-risk tool calls and exfiltration chains.
+  5. *Global GDPR Privacy Policy (`pol_eu_gdpr`)*: `REDACT` mode for IBANs, passports, homoglyphs, and zero-width evasion.
+- **Custom User-Defined Policy Groups & Live Regex Tester**: Allows operators to define custom policy groups with live regex pattern testing, auto-redaction masks, and action selection (`MASK`, `BLOCK`, `CONFIRM_REQUIRED`).
+- **Full Rule Edit & Pre-population**: Editing any custom policy automatically pre-fills all previously entered regex rules with instant pattern editing.
 
----
+### Module 4: Hallucination & RAG Grounding Studio (`HallucinationView.jsx` & `grounding.py`)
+- **Linguistic Speech-Act Propositional Theory**: Classifies model outputs into non-assertive conversational speech acts (offers of assistance, safety refusals) versus testable declarative claims.
+- **Context-Faithfulness Evaluation**: Verifies testable claims against enterprise RAG reference documents without flagging non-assertive text as hallucinations.
+- **Live Search Evidence Verification**: Integrates Google Serper API to perform real-time web verification for ungrounded claims.
 
-## 🏛️ The 5 Canonical Enterprise Policy Archetypes
+### Module 5: Human-in-the-Loop (HITL) Review Queue (`ReviewQueueView.jsx` & `reviews.py`)
+- **Real-Time Interception Lifecycle**: Manages `CONFIRM_REQUIRED` and `FLAGGED` events requiring human judgment.
+- **Operator Review Actions**:
+  - **Approve**: Confirms the guardrail decision as accurate.
+  - **Reject / False Positive**: Overrides the decision and marks it as a false positive.
+  - **Policy Override**: Customizes regulatory thresholds.
+- **Closed-Loop Threshold Auto-Tuning**: Automatically adjusts similarity tolerances based on reviewer decisions to continuously lower false positive rates.
 
-ControlPlane AI organizes governance into 5 broad, production-grade regulatory policy archetypes defined in [`threat_taxonomies.json`](file:///c:/ControlPlane/backend/app/config/threat_taxonomies.json):
+### Module 6: Enrollment Tokens & Network Shield (`TokensView.jsx` & `tokens.py`)
+- **Activation Token Management**: Generates 48-day cryptographically secure enrollment tokens (`tp_tok_...`) for browser extension and server auto-enrollment.
+- **Device Registration & Device ID Binding**: Binds enrolled browsers and API clients to specific tenant accounts.
 
-| Policy Archetype | Enforcement Mode | Algorithmic Protection | Core Threat Defenses |
-| :--- | :---: | :--- | :--- |
-| **1. Customer Support (`pol_customer_support`)** | `MASK` (Sanitize & Forward) | Luhn Checksums + RFC Regexes + Vector Classifier | Customer credit cards, phone numbers, emails, addresses, competitor steering, and DAN jailbreaks. |
-| **2. Internal Copilot (`pol_internal_copilot`)** | `MASK` + `AUDIT` | Shannon Entropy + MNPI Vector Cluster | Accidental developer API key leaks, database connection URIs, unreleased Q3 EBITDA margins, employee salary harvesting. |
-| **3. Healthcare / HIPAA (`pol_us_hipaa`)** | `BLOCK` (Zero-Tolerance) | Universal Gestational & Medical Harm Centroids | Bulk cardiology/ICU patient chart dumps, third-trimester Misoprostol dosage, pediatric opioid combinations, toxic bleach home remedies, and DIY home surgery. |
-| **4. Autonomous Agents (`pol_ai_agent`)** | `CONFIRM_REQUIRED` (Human-in-the-Loop) | State Machine Action Risk Matrix | Destructive OS commands (`DROP TABLE`, `rm -rf /`), unauthorized corporate treasury wire transfers, multi-step exfiltration chains. |
-| **5. Global Privacy / GDPR (`pol_eu_gdpr`)** | `REDACT` (Strict Removal) | Unicode NFKC Normalizer + PII Masking | International IBANs, passports, tax IDs, zero-width obfuscation, homoglyphs, and SHA-256 audit chaining. |
+### Module 7: Monitored AI Resources & Webhook Inventory (`InventoryView.jsx` & `resources.py`)
+- **Resource Management**: Onboards and manages active AI chatbots, webhooks, and REST gateways under ControlPlane protection (e.g. Botpress Cloud, Enterprise Webhook Gateway, Extension Shield).
+- **Health Checks & Validation**: Executes one-click webhook connectivity and validation checks.
 
 ---
 
