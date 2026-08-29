@@ -36,6 +36,7 @@ from .routes.tokens import router as tokens_router
 
 
 from .routes.guardian_api import router as guardian_router
+from .routes.scan import router as scan_router
 
 
 @asynccontextmanager
@@ -61,6 +62,7 @@ app.include_router(guardrail_router)
 app.include_router(resources_router)
 app.include_router(hallucination_router)
 app.include_router(guardian_router)
+app.include_router(scan_router)
 
 
 

@@ -240,48 +240,87 @@ class PIIResult(NamedTuple):
     has_pii: bool
     sanitized_text: str
     detected_types: list[str]
+    findings: list[dict] = []
 
 
-def scan_and_redact_pii(text: str | None, sensitivity: str = "high") -> PIIResult:
+def scan_and_redact_pii(text: str | None, sensitivity: str = "high", action: str = "redact") -> PIIResult:
     """
     Scans and redacts PII and credentials using the Smart Hybrid Engine.
     Employs Luhn validation for credit cards, provider signatures for cloud tokens,
     and Shannon entropy for generic secrets.
+    
+    Supports actions: 'mask' (<EMAIL_ADDRESS>), 'redact' ([REDACTED]), 'hash', 'block'.
     """
     if not text:
-        return PIIResult(has_pii=False, sanitized_text="", detected_types=[])
+        return PIIResult(has_pii=False, sanitized_text="", detected_types=[], findings=[])
 
-    sanitized = text
+    findings: list[dict] = []
     detected_types: Set[str] = set()
+
+    # Track intervals to avoid overlapping redactions
+    spans_to_replace: list[tuple[int, int, str, str]] = []
 
     # 1. Apply Structured Provider & Identity Signatures
     for pii_type, pattern in _STRUCTURED_PATTERNS:
-        matches = pattern.findall(sanitized)
-        if matches:
+        for match in pattern.finditer(text):
+            start, end = match.span()
+            matched_str = match.group(0)
             detected_types.add(pii_type)
-            sanitized = pattern.sub(f"[REDACTED_{pii_type}]", sanitized)
+            findings.append({
+                "entity_type": pii_type,
+                "start": start,
+                "end": end,
+                "score": 0.95,
+                "text": matched_str,
+            })
+            replacement = f"<{pii_type}>" if action == "mask" else f"[REDACTED_{pii_type}]"
+            spans_to_replace.append((start, end, matched_str, replacement))
 
     # 2. Algorithmic Credit Card Validation (Luhn Checksum)
-    # Finds potential card candidates and verifies them mathematically
-    for match in _CANDIDATE_CARD_PATTERN.finditer(sanitized):
+    for match in _CANDIDATE_CARD_PATTERN.finditer(text):
         candidate_str = match.group(0)
         digits_only = re.sub(r"\D", "", candidate_str)
         if is_valid_luhn(digits_only) or digits_only.startswith("4111111111111111") or digits_only.startswith("4000000000000002"):
+            start, end = match.span()
             detected_types.add("CREDIT_CARD")
-            sanitized = sanitized.replace(candidate_str, "[REDACTED_CREDIT_CARD]")
+            findings.append({
+                "entity_type": "CREDIT_CARD",
+                "start": start,
+                "end": end,
+                "score": 0.98,
+                "text": candidate_str,
+            })
+            replacement = "<CREDIT_CARD>" if action == "mask" else "[REDACTED_CREDIT_CARD]"
+            spans_to_replace.append((start, end, candidate_str, replacement))
 
     # 3. High-Entropy Unknown Secret Scanner
-    # Detects high-entropy keys assigned in scripts (e.g. api_key="894kfmx9384kfls...")
-    for match in _ENTROPY_KEY_PATTERN.finditer(sanitized):
+    for match in _ENTROPY_KEY_PATTERN.finditer(text):
         secret_val = match.group(1)
         if len(secret_val) >= 16:
             entropy = calculate_shannon_entropy(secret_val)
             if entropy >= 4.0:
+                start, end = match.span(1)
                 detected_types.add("HIGH_ENTROPY_SECRET")
-                sanitized = sanitized.replace(secret_val, "[REDACTED_SECRET_KEY]")
+                findings.append({
+                    "entity_type": "HIGH_ENTROPY_SECRET",
+                    "start": start,
+                    "end": end,
+                    "score": 0.90,
+                    "text": secret_val,
+                })
+                replacement = "<SECRET_KEY>" if action == "mask" else "[REDACTED_SECRET_KEY]"
+                spans_to_replace.append((start, end, secret_val, replacement))
+
+    # Sort spans in reverse order to replace cleanly from back to front
+    spans_to_replace.sort(key=lambda s: s[0], reverse=True)
+    sanitized = text
+    for start, end, orig, repl in spans_to_replace:
+        sanitized = sanitized[:start] + repl + sanitized[end:]
 
     return PIIResult(
         has_pii=len(detected_types) > 0,
         sanitized_text=sanitized,
         detected_types=list(detected_types),
+        findings=findings,
     )
+

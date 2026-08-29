@@ -19,36 +19,47 @@ from typing import Optional, Dict, Any, List, Tuple
 logger = logging.getLogger("controlplane.grounding")
 
 
+def is_assertive_factual_proposition(sentence: str) -> bool:
+    """
+    Linguistic speech-act classifier:
+    Determines if a sentence constitutes an assertive, testable factual proposition.
+    Filters out non-declarative discourse acts (questions, first-person performatives, polite imperatives, safety refusals).
+    """
+    s = sentence.strip()
+    if len(s) < 15 or s.endswith("?"):
+        return False
+
+    lower_s = s.lower()
+
+    # 1. First-person performative speech acts (offers of assistance, safety refusals, AI persona)
+    if re.match(r"^(?:i\s+(?:cannot|can't|am\s+unable|must\s+decline|apologize|would\s+be\s+happy|can\s+help|am\s+happy|recommend)|as\s+an?\s+(?:ai|assistant))\b", lower_s):
+        return False
+
+    # 2. Polite imperative prompts & conversational interaction markers
+    if re.match(r"^(?:please\s+|feel\s+free\s+to\s+|let\s+me\s+know\s+|if\s+you\s+(?:are|need|want|have)\s+|thank\s+you|hope\s+this\s+helps|what\s+(?:subject|topic|problem|would))\b", lower_s):
+        return False
+
+    # 3. Compliance and legal risk warnings
+    if re.search(r"\b(?:carries\s+(?:severe\s+)?legal|violat(?:es|ing)\s+(?:laws?|regulation|policy|sec)|against\s+(?:policy|rules?|law))\b", lower_s):
+        return False
+
+    return True
+
+
 def extract_claims(text: str) -> List[str]:
     """
-    Extract discrete, testable factual propositions/claims from generated text.
-    Handles sentence-level propositions and filters conversational fluff, greetings, and clarifying questions.
+    Extract discrete, testable factual propositions from generated text.
+    Uses linguistic speech-act classification to separate empirical assertions from discourse markers.
     """
     if not text or not text.strip():
         return []
 
-    # Clean text and split by sentence terminators
     sentences = re.split(r'(?<=[.!?])\s+', text.strip())
     claims = []
 
-    # Filter non-factual or purely conversational statements, questions, and offers
-    fluff_patterns = [
-        r"^(hello|hi|hey|sure|certainly|i can help|i would be happy|i'd be happy|i am happy|as an ai|thank you|good day)",
-        r"^(let me know|feel free|hope this helps|is there anything else|please share|please provide|share the problem)",
-        r"^(what (?:subject|topic|problem|question|task|project)|how can i help|what can i do|how may i assist)",
-    ]
-
     for sent in sentences:
         s = sent.strip()
-        if len(s) < 15:
-            continue
-        # Questions are not factual assertions
-        if s.endswith("?"):
-            continue
-        if any(re.search(p, s, re.IGNORECASE) for p in fluff_patterns):
-            continue
-        # Deduplicate and append
-        if s not in claims:
+        if is_assertive_factual_proposition(s) and s not in claims:
             claims.append(s)
 
     return claims

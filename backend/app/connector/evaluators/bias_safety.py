@@ -52,10 +52,11 @@ BIAS_KEYWORDS = {
 }
 
 
-def scan_bias_and_toxicity(text: str) -> Dict[str, Any]:
+def scan_bias_and_toxicity(text: str, competitors: Optional[List[str]] = None) -> Dict[str, Any]:
     if not text or not isinstance(text, str):
         return {
             "has_bias": False,
+            "has_competitor": False,
             "detected_types": [],
             "risk_findings": [],
             "confidence_score": 1.0
@@ -64,6 +65,7 @@ def scan_bias_and_toxicity(text: str) -> Dict[str, Any]:
     lower_text = text.lower()
     detected_types: List[str] = []
     risk_findings: List[Dict[str, Any]] = []
+    has_competitor = False
 
     # 1. Advanced Regex Threat Scans
     for cat_name, pattern in _SAFETY_PATTERNS:
@@ -93,8 +95,25 @@ def scan_bias_and_toxicity(text: str) -> Dict[str, Any]:
                     "snippet": kw
                 })
 
+    # 3. Competitor Brand Mentions
+    if competitors:
+        for comp in competitors:
+            comp_clean = comp.strip()
+            if comp_clean and re.search(r"\b" + re.escape(comp_clean.lower()) + r"\b", lower_text):
+                has_competitor = True
+                if "competitor_mention" not in detected_types:
+                    detected_types.append("competitor_mention")
+                risk_findings.append({
+                    "category": "competitor",
+                    "severity": "MEDIUM",
+                    "rule": "Competitor Brand Mention",
+                    "description": f"Text references competitor brand/product: '{comp_clean}'",
+                    "snippet": comp_clean
+                })
+
     return {
         "has_bias": len(detected_types) > 0,
+        "has_competitor": has_competitor,
         "detected_types": detected_types,
         "risk_findings": risk_findings,
         "confidence_score": 0.3 if any(f["severity"] == "CRITICAL" for f in risk_findings) else (0.5 if detected_types else 1.0)

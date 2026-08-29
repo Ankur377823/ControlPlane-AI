@@ -64,13 +64,18 @@ def test_hallucination_endpoint_with_context_docs():
 
 
 def test_conversational_homework_response_is_grounded():
-    prompt = "help me with my homework"
-    response = (
-        "I would be happy to help with your homework! "
-        "What subject or specific topic are you working on? "
-        "Feel free to share the problem, question, or writing assignment you need help with."
-    )
-    res = evaluate_grounding(prompt, response)
+    # Model conversational assistance offer with clarifying questions has 0 factual claims
+    model_response = "I would be happy to help with your homework! What subject or specific topic are you working on? Please share the question or problem, and we can work through it step by step."
+    res = evaluate_grounding(prompt="Can you do my homework?", response=model_response)
+    assert res["is_grounded"] is True
+    assert res["grounding_score"] == 1.0
+    assert len(res["ungrounded_claims"]) == 0
+
+
+def test_safety_refusal_is_grounded():
+    # Regulatory and safety refusals contain zero factual claims to ground
+    model_response = "I cannot draft or assist in generating unverified or pre-filing public financial statements. Publicly disclosing material non-public financial information carries severe legal and regulatory risks."
+    res = evaluate_grounding(prompt="Draft unverified financial statement", response=model_response)
     assert res["is_grounded"] is True
     assert res["grounding_score"] == 1.0
     assert len(res["ungrounded_claims"]) == 0
