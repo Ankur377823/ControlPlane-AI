@@ -59,20 +59,20 @@ export function ArchitectureDoc() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 text-xs">
                 <div className="p-3 rounded-lg bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">1. PII & Secrets</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400">Luhn cards, SSNs, PHI, API keys (`sk-...`)</div>
+                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">1. PII & Shannon Entropy</div>
+                  <div className="text-[12px] text-slate-600 dark:text-slate-400">Luhn cards, Shannon secrets, SSNs, PHI</div>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">2. Prompt Injection</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400">L1 Regex + L2 Indicator Scoring</div>
+                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">2. Unicode Anti-Evasion</div>
+                  <div className="text-[12px] text-slate-600 dark:text-slate-400">Zero-width stripper ('Cf', 'Cs'), homoglyphs</div>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">3. Zero-LLM Guardian</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400">7 checks: Shell (`rm -rf`), SQL Drop</div>
+                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">3. Vector Cosine Space</div>
+                  <div className="text-[12px] text-slate-600 dark:text-slate-400">Dense N-gram vectorizer across NIST centroids</div>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">4. Token Budget</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400">Max token enforcement (2k-8k)</div>
+                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">4. Sliding Chunking</div>
+                  <div className="text-[12px] text-slate-600 dark:text-slate-400">450-token windows to stop hidden payloads</div>
                 </div>
               </div>
             </div>
@@ -86,7 +86,7 @@ export function ArchitectureDoc() {
                 <div className="flex items-center gap-2">
                   <Scale className="w-4 h-4 text-blue-500" />
                   <span className="text-xs font-bold text-slate-900 dark:text-white font-brand uppercase tracking-wider">
-                    STAGE 3: Deep Context, Trajectory & Secondary Judge Layer
+                    STAGE 3: Deep Context, Multi-Turn Trajectory & Tier 4 LLM Judge
                   </span>
                 </div>
                 <span className="text-[10px] font-mono text-slate-400">Contextual Verification</span>
@@ -94,16 +94,16 @@ export function ArchitectureDoc() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
                 <div className="p-3.5 rounded-lg bg-blue-500/5 border border-blue-500/20 space-y-1">
-                  <div className="font-bold text-[13.5px] text-blue-700 dark:text-blue-300">RAG Context Grounding</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed">Atomic claim extraction & reference document overlap verification.</div>
+                  <div className="font-bold text-[13.5px] text-blue-700 dark:text-blue-300">Speech-Act Grounding</div>
+                  <div className="text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed">Propositional claim extraction vs conversational acts with live RAG/web verification.</div>
                 </div>
                 <div className="p-3.5 rounded-lg bg-purple-500/5 border border-purple-500/20 space-y-1">
                   <div className="font-bold text-[13.5px] text-purple-700 dark:text-purple-300">Multi-Turn Decay Tracker</div>
                   <div className="text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed">Rolling session accumulator (alpha = 0.85) to stop salami-slicing attacks.</div>
                 </div>
                 <div className="p-3.5 rounded-lg bg-amber-500/5 border border-amber-500/20 space-y-1">
-                  <div className="font-bold text-[13.5px] text-amber-700 dark:text-amber-300">AI-as-a-Judge Tier</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed">Invoked only on ambiguous scores (0.40 - 0.70) to evaluate nuance.</div>
+                  <div className="font-bold text-[13.5px] text-amber-700 dark:text-amber-300">Tier 4 Ollama LLM Judge</div>
+                  <div className="text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed">Local on-device reasoning invoked only for ambiguous scores (0.40 - 0.70).</div>
                 </div>
               </div>
             </div>

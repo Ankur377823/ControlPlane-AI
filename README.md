@@ -1,14 +1,21 @@
-# ControlPlane AI — Responsible AI Control Plane & Governance Platform
+# ControlPlane AI — Responsible AI Governance & Threat Interception Platform
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render%20Cloud-success?style=for-the-badge&logo=render)](https://controlplane-ai-utso.onrender.com/)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-green.svg)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18-61DAFB.svg)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC.svg)](https://tailwindcss.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon%20Cloud-336791.svg)](https://neon.tech/)
 [![Docker](https://img.shields.io/badge/Docker-Live%20Watch%20Ready-2496ED.svg)](https://www.docker.com/)
-[![Tests](https://img.shields.io/badge/Pytest-94%2F94%20Passed-emerald.svg)](#-testing--verification)
+[![Tests](https://img.shields.io/badge/Pytest-134%2F134%20Passed-emerald.svg)](#-testing--verification)
 
-**ControlPlane AI** is an enterprise-grade **Responsible AI (RAI) Governance Control Plane**, real-time guardrail shield, and telemetry monitoring studio. It is engineered to safeguard, monitor, audit, and auto-tune AI assistants, chatbots, and autonomous agents across diverse organizational use cases (Customer Support, Internal Copilots, Decision Support, and Agent Runtimes).
+> 🚀 **Live Production Deployment**: **[https://controlplane-ai-utso.onrender.com/](https://controlplane-ai-utso.onrender.com/)**
+>
+> 🔑 **Hackathon Tester / Judge Credentials**:
+> * **Username / Email**: `admin` (or `ankur@acme.com`)
+> * **Password**: `password123`
+
+**ControlPlane AI** is an enterprise-grade **Responsible AI (RAI) Governance Control Plane**, real-time guardrail shield, and telemetry monitoring studio. It is engineered to safeguard, monitor, audit, and auto-tune AI assistants, chatbots, and autonomous agents across diverse organizational use cases (Customer Support, Internal Copilots, Decision Support, Healthcare HIPAA, and Agent Runtimes) with **sub-15ms latency** and **zero brittle hardcoding**.
 
 ---
 
@@ -16,20 +23,25 @@
 
 ControlPlane AI bridges the critical gap between raw AI safety proxies and a comprehensive Responsible AI governance lifecycle:
 
-1. **Modern React SPA Architecture**: Built on React 18, Vite 6, and Tailwind CSS with a clean dual **Light / Dark Mode** system (default clean white & black light theme with an instant header toggle ☀️/🌙).
-2. **All-in-One Master Shield & Regulatory Presets**: One-click compliance frameworks for **All-in-One Unified Enterprise Shield** (Smart Hybrid Governance), **EU AI Act High-Risk Tier**, **US HIPAA Safe Harbor**, **EU GDPR Strict Privacy**, **SEC Reg SCI Financial Advisory**, and **Internal Copilot (Balanced)**.
-3. **Dedicated Policy Detail Pages**: Each regulatory framework has its own dedicated page with legal mandates (e.g. EU AI Act Art 14/15, HIPAA § 164.514, GDPR Art 22), target threat vectors, concrete prompt examples with 📋 copy buttons, and technical parameter specifications.
-4. **Smart Hybrid Defense (Zero Alert Fatigue)**: Automatically **MASKS & REDACTS** PII, credit cards, emails, and API keys to keep employee productivity high, while **HARD-BLOCKING** adversarial jailbreaks, malware, prompt injections, and destructive OS/SQL commands.
-5. **Evidence-Backed Grounding & Factuality**: Atomic claim extraction paired with RAG context-faithfulness scoring against enterprise documents and live web search verification (Serper API fallback).
-6. **Human-in-the-Loop (HITL) Review Queue**: Real-time review lifecycle for `CONFIRM_REQUIRED` and `FLAGGED` events with **Approve**, **Reject**, and **Policy Override** actions.
-7. **Self-Tuning Feedback Loop & Trustworthiness Index**: Tracks live Trust Index (97.2%), False Positive Rate (2.1%), False Negative Rate (0.8%), Precision, Recall, and auto-tunes policy thresholds upon reviewer feedback.
-8. **Cumulative Multi-Turn Session Risk**: Time-decayed rolling risk accumulator ($\alpha = 0.85$) to detect conversational drift, salami slicing, and gradual probing across conversation turns.
-9. **Compound Agent-Action Sequence Risk**: State-machine tracking sequential tool calls (e.g. `query_database` $\rightarrow$ `read_file` $\rightarrow$ `export_data` $\rightarrow$ `send_email`) to stop data exfiltration chains.
-10. **AI-as-a-Judge Tiered Fallback**: Invokes secondary semantic evaluation *only* when deterministic confidence is borderline ($0.40 \le \text{Risk} \le 0.70$), preserving sub-15ms latency for normal traffic.
-11. **Automated AI Red Team Scanner**: Automated multi-turn vulnerability scanner with prompt injection, PII extraction, and jailbreak attack presets with downloadable PDF audit reports.
-12. **Chrome Extension Network Shield**: Manifest V3 extension in a sleek permanent dark theme with client-side prompt interception, dynamic policy synchronization, and auto-enrollment tokens.
-13. **Tamper-Evident SHA-256 Hash Chain Audit**: Cryptographic proof of event integrity across all interceptions.
-14. **Dual Database Architecture**: Zero-config SQLite local development + Neon Cloud PostgreSQL production mode.
+1. **4-Tier Threat Cascading Engine**:
+   - **Tier 1 (<2ms)**: YARA & structural fast-path for ChatML/Llama-3 delimiters and zero-width unicode evasion.
+   - **Tier 2 (<8ms)**: Universal Vector Space projection ($\mathbb{R}^d$ Cosine Similarity) against declarative NIST/Meta taxonomies.
+   - **Tier 3 (<12ms)**: Sliding 450-token window chunking with 100-token overlap to stop "needle-in-a-haystack" document attacks.
+   - **Tier 4 (~150ms)**: On-premise Ollama / Local LLM Judge for ambiguous, borderline cases ($0.40 \le \text{Score} < 0.70$).
+2. **5-Phase Real-Time Scanning Pipeline**: Standard `POST /api/v1/scan/input` and `POST /api/v1/scan/output` endpoints executing PII redaction, anti-evasion decoding, 4-tier prompt defense, content safety, and multi-turn risk intelligence.
+3. **Zero-Hardcode Declarative Policy System**: All categories, centroids, and thresholds are stored in [`backend/app/config/threat_taxonomies.json`](file:///c:/ControlPlane/backend/app/config/threat_taxonomies.json) with dynamic live reloading.
+4. **Information-Theoretic Mathematical Parsers**: Algorithmic Mod-10 Luhn checksums for credit cards, Shannon information entropy ($H = -\sum p_i \log_2 p_i$) for secrets, and Unicode category parsing (`'Cf'`, `'Cs'`, `'Zl'`).
+5. **Modern React SPA Architecture**: Built on React 18, Vite 6, and Tailwind CSS with a clean dual **Light / Dark Mode** system (default clean white & black light theme with an instant header toggle ☀️/🌙).
+6. **Smart Hybrid Defense (Zero Alert Fatigue)**: Automatically **MASKS & REDACTS** PII, credit cards, emails, and API keys to keep employee productivity high, while **HARD-BLOCKING** adversarial jailbreaks, malware, prompt injections, and destructive OS/SQL commands.
+7. **Linguistic Proposition Factuality Grounding**: Distinguishes non-assertive speech acts (assistance offers, refusals) from testable declarative claims, verifying claims against live web search and RAG context.
+8. **Stateful Multi-Turn Session Intelligence**: Exponential risk decay formula ($\text{Risk}_t = 0.85 \times \text{Risk}_{t-1} + 0.50 \times \Delta$) detecting conversational drift and multi-turn privilege escalation.
+9. **Compound Agent-Action Sequence Risk**: State machine tracking sequential tool calls (e.g. `query_database` $\rightarrow$ `read_file` $\rightarrow$ `export_data` $\rightarrow$ `send_email`) to stop automated data exfiltration chains.
+10. **Human-in-the-Loop (HITL) Review Queue**: Real-time review lifecycle for `CONFIRM_REQUIRED` and `FLAGGED` events with **Approve**, **Reject**, and **Policy Override** actions.
+11. **Self-Tuning Feedback Loop & Trustworthiness Index**: Tracks live Trust Index (97.2%), False Positive Rate (2.1%), False Negative Rate (0.8%), Precision, Recall, and auto-tunes policy thresholds upon reviewer feedback.
+12. **Automated AI Red Team Scanner**: Automated multi-turn vulnerability scanner with prompt injection, PII extraction, and jailbreak attack presets with downloadable PDF audit reports.
+13. **Chrome Extension Network Shield**: Manifest V3 extension in a sleek permanent dark theme with client-side prompt interception, dynamic policy synchronization, and auto-enrollment tokens.
+14. **Tamper-Evident SHA-256 Hash Chain Audit**: Cryptographic proof of event integrity across all interceptions.
+15. **Dual Database Architecture**: Zero-config SQLite local development + Neon Cloud PostgreSQL production mode.
 
 ---
 
