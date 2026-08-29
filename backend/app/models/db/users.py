@@ -13,10 +13,6 @@ import os
 
 ALL_TENANTS = [
     "ankur-tenant-1",
-    "acme-tenant-1",
-    "globex-tenant-2",
-    "stark-tenant-3",
-    "tnt_84ndhdjdj94844hj",
 ]
 
 
@@ -50,7 +46,7 @@ def authenticate_user(username: str, password: str) -> Optional[dict]:
             "name": "Ankur Kumar Singh",
             "role": "ADMIN",
             "status": "approved",
-            "tenant_id": "tnt_84ndhdjdj94844hj",
+            "tenant_id": "ankur-tenant-1",
             "allowed_tenants": ALL_TENANTS,
             "token": "cp_auth_token_admin_demo",
         }

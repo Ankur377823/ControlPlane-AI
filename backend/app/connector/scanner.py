@@ -211,6 +211,7 @@ class BotpressScanner:
                 return {
                     "success": False,
                     "model_response": None,
+                    "bot_response": None,
                     "execution_time_ms": elapsed_ms,
                     "error": "Bot did not reply within the configured timeout.",
                     "metadata": {**metadata, "message_id": None},
@@ -219,6 +220,7 @@ class BotpressScanner:
             return {
                 "success": True,
                 "model_response": bot_text,
+                "bot_response": bot_text,
                 "execution_time_ms": elapsed_ms,
                 "error": None,
                 "metadata": {**metadata, "message_id": bot_message_id},
@@ -229,6 +231,7 @@ class BotpressScanner:
             return {
                 "success": False,
                 "model_response": None,
+                "bot_response": None,
                 "execution_time_ms": elapsed_ms,
                 "error": str(exc),
                 "metadata": metadata,
@@ -238,6 +241,7 @@ class BotpressScanner:
             return {
                 "success": False,
                 "model_response": None,
+                "bot_response": None,
                 "execution_time_ms": elapsed_ms,
                 "error": str(sanitize_error(exc)),
                 "metadata": metadata,

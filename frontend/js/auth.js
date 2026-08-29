@@ -55,12 +55,12 @@ export function checkAuth() {
     if (tenantEl) {
       const allowed = (Array.isArray(user.allowed_tenants) && user.allowed_tenants.length > 0)
         ? user.allowed_tenants
-        : [user.tenant_id || 'acme-tenant-1'];
+        : [user.tenant_id || 'ankur-tenant-1'];
       if (isAdmin && allowed.length > 1) {
         let opts = allowed.map(t => `<option value="${t}" ${t === user.tenant_id ? 'selected' : ''}>${t}</option>`).join('');
         tenantEl.innerHTML = `<select id="header-tenant-switcher" style="background:transparent; color:#fff; border:none; font-family:var(--font-mono); font-size:0.82rem; font-weight:700; cursor:pointer;" onchange="changeActiveTenant(this.value)">${opts}</select>`;
       } else {
-        tenantEl.innerText = user.tenant_id || 'globex-tenant-2';
+        tenantEl.innerText = user.tenant_id || 'ankur-tenant-1';
       }
     }
 
@@ -133,8 +133,8 @@ export async function handleGoogleLoginPrompt(onLoginSuccess) {
 
   try {
     const user = await googleLoginUser(emailInput, nameInput || emailInput);
-    user.tenant_id = 'acme-tenant-1';
-    user.allowed_tenants = ['acme-tenant-1'];
+    user.tenant_id = 'ankur-tenant-1';
+    user.allowed_tenants = ['ankur-tenant-1'];
     const rememberCheckbox = document.getElementById('login-remember');
     const remember = rememberCheckbox ? rememberCheckbox.checked : false;
     setStoredUser(user, remember);
@@ -150,7 +150,7 @@ export async function handleGoogleLoginPrompt(onLoginSuccess) {
 export async function switchAccount(username, password, tenantId) {
   try {
     const user = await loginUser(username, password);
-    const allowed = user.allowed_tenants || [user.tenant_id || 'acme-tenant-1'];
+    const allowed = user.allowed_tenants || [user.tenant_id || 'ankur-tenant-1'];
     user.tenant_id = allowed.includes(tenantId) ? tenantId : allowed[0];
     const remember = isRemembered();
     setStoredUser(user, remember);

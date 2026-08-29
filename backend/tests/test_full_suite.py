@@ -26,7 +26,7 @@ def test_01_authentication_flow():
     assert res.status_code == 200
     data = res.json()
     assert data["role"] == "ADMIN"
-    assert data["tenant_id"] == "tnt_84ndhdjdj94844hj"
+    assert data["tenant_id"] == "ankur-tenant-1"
     assert "token" in data
 
     # Failure Login

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import uuid
+from typing import Optional
 
 from .connection import get_conn, _now
 
@@ -21,17 +22,22 @@ def create_scan(resource_id: str, results: list[dict]) -> dict:
     return {"id": scan_id, "resource_id": resource_id, "created_at": created_at, "results": results}
 
 
-def list_scans(resource_id: str) -> list[dict]:
+def list_scans(resource_id: Optional[str] = None, limit: int = 50) -> list[dict]:
     with get_conn() as conn:
-        rows = conn.execute(
-            "SELECT * FROM scans WHERE resource_id = ? ORDER BY created_at DESC", (resource_id,)
-        ).fetchall()
+        if resource_id:
+            rows = conn.execute(
+                "SELECT * FROM scans WHERE resource_id = ? ORDER BY created_at DESC LIMIT ?", (resource_id, limit)
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM scans ORDER BY created_at DESC LIMIT ?", (limit,)
+            ).fetchall()
         return [
             {
                 "id": r["id"],
                 "resource_id": r["resource_id"],
                 "created_at": r["created_at"],
-                "results": json.loads(r["results_json"]),
+                "results": json.loads(r["results_json"]) if r["results_json"] else [],
             }
             for r in rows
         ]

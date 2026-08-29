@@ -24,6 +24,7 @@ from pydantic import BaseModel, Field
 
 from ..connector import BotpressScanner
 from ..connector.guardrail import ControlPlaneGuardrail
+from ..red_team.evaluator import evaluate_red_team_response
 from ..models import db
 
 router = APIRouter(prefix="/api/v1", tags=["resources"])
@@ -218,17 +219,49 @@ def run_scan(resource_id: str, payload: ScanRequest):
             attack_id=prompt.attack_id,
             test_input=prompt.test_input,
         )
+        bot_resp = result.get("bot_response") or result.get("model_response")
+        
+        # Evaluate response for vulnerability vs defense
+        eval_res = evaluate_red_team_response(
+            test_input=prompt.test_input,
+            target_response=bot_resp,
+            vulnerability_id=prompt.vulnerability_id or prompt.attack_id or "LLM01_PROMPT_INJECTION",
+            latency_ms=result.get("execution_time_ms", 0),
+        )
+
         results.append(
             {
                 "vulnerability_id": prompt.vulnerability_id,
                 "attack_id": prompt.attack_id,
                 "test_input": prompt.test_input,
+                "bot_response": bot_resp,
+                "model_response": bot_resp,
+                "defense_status": eval_res["defense_status"],
+                "vulnerability_detected": eval_res["vulnerability_detected"],
+                "security_score": eval_res["security_score"],
+                "details": eval_res["details"],
+                "pii_detected_types": eval_res.get("pii_detected_types", []),
+                "injection_detected": eval_res.get("injection_detected", False),
+                "bias_findings": eval_res.get("bias_findings", []),
                 **result,
             }
         )
 
+    vulns_count = sum(1 for r in results if r.get("vulnerability_detected"))
+    defended_count = sum(1 for r in results if r.get("defense_status") in ("DEFENDED", "SAFE"))
+    total_count = len(results)
+    defense_rate = round((defended_count / total_count * 100) if total_count > 0 else 100, 1)
+
     scan = db.create_scan(resource_id, results)
-    return {"resource_id": resource_id, "scan_id": scan["id"], "results": results}
+    return {
+        "resource_id": resource_id,
+        "scan_id": scan["id"],
+        "total_probes": total_count,
+        "vulnerabilities_count": vulns_count,
+        "defended_count": defended_count,
+        "defense_rate": defense_rate,
+        "results": results,
+    }
 
 
 @router.post("/scan/adhoc")
@@ -253,22 +286,55 @@ def run_adhoc_scan(payload: AdhocScanRequest):
             attack_id=prompt.attack_id,
             test_input=prompt.test_input,
         )
+        bot_resp = result.get("bot_response") or result.get("model_response")
+
+        # Evaluate response for vulnerability vs defense
+        eval_res = evaluate_red_team_response(
+            test_input=prompt.test_input,
+            target_response=bot_resp,
+            vulnerability_id=prompt.vulnerability_id or prompt.attack_id or "LLM01_PROMPT_INJECTION",
+            latency_ms=result.get("execution_time_ms", 0),
+        )
+
         results.append(
             {
                 "vulnerability_id": prompt.vulnerability_id,
                 "attack_id": prompt.attack_id,
                 "test_input": prompt.test_input,
+                "bot_response": bot_resp,
+                "model_response": bot_resp,
+                "defense_status": eval_res["defense_status"],
+                "vulnerability_detected": eval_res["vulnerability_detected"],
+                "security_score": eval_res["security_score"],
+                "details": eval_res["details"],
+                "pii_detected_types": eval_res.get("pii_detected_types", []),
+                "injection_detected": eval_res.get("injection_detected", False),
+                "bias_findings": eval_res.get("bias_findings", []),
                 **result,
             }
         )
+
+    vulns_count = sum(1 for r in results if r.get("vulnerability_detected"))
+    defended_count = sum(1 for r in results if r.get("defense_status") in ("DEFENDED", "SAFE"))
+    total_count = len(results)
+    defense_rate = round((defended_count / total_count * 100) if total_count > 0 else 100, 1)
 
     scan = db.create_scan("res_demo", results)
     return {
         "webhook_id": payload.webhook_id,
         "resource_name": payload.resource_name or "Custom Webhook Target",
         "scan_id": scan["id"],
+        "total_probes": total_count,
+        "vulnerabilities_count": vulns_count,
+        "defended_count": defended_count,
+        "defense_rate": defense_rate,
         "results": results,
     }
+
+
+@router.get("/scans")
+def list_all_scans(resource_id: Optional[str] = None):
+    return db.list_scans(resource_id=resource_id)
 
 
 @router.get("/resources/{resource_id}/scans")

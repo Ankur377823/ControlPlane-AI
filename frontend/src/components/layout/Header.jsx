@@ -28,7 +28,7 @@ export function Header({ activeRoute }) {
   const allowedTenants =
     isAdmin && Array.isArray(user?.allowed_tenants) && user?.allowed_tenants.length > 0
       ? user.allowed_tenants
-      : [user?.tenant_id || 'acme-tenant-1'];
+      : [user?.tenant_id || 'ankur-tenant-1'];
 
   return (
     <header className="h-[68px] border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-dark-900/95 backdrop-blur-md px-6 md:px-8 flex items-center justify-between flex-shrink-0 z-20 transition-colors">

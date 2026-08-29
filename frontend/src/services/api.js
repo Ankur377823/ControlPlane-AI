@@ -147,6 +147,13 @@ export async function runAdhocScan(webhookId, resourceName, prompts) {
   });
 }
 
+export async function fetchScans(resourceId = null) {
+  if (resourceId) {
+    return apiFetch(`/resources/${resourceId}/scans`);
+  }
+  return apiFetch('/scans');
+}
+
 export async function runCheck(resourceId, userPrompt, toolCall = null) {
   return apiFetch(`/resources/${resourceId}/check`, {
     method: 'POST',

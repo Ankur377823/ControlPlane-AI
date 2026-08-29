@@ -59,7 +59,7 @@ SCHEMA_TABLES = [
         expires_at TEXT NOT NULL,
         days_valid INTEGER NOT NULL DEFAULT 48,
         status TEXT NOT NULL DEFAULT 'active',
-        tenant_id TEXT NOT NULL DEFAULT 'tnt_84ndhdjdj94844hj'
+        tenant_id TEXT NOT NULL DEFAULT 'ankur-tenant-1'
     );
     """,
     """
@@ -158,7 +158,7 @@ SCHEMA_TABLES = [
         finding_code TEXT NOT NULL DEFAULT 'PII-INPUT-001',
         severity TEXT NOT NULL DEFAULT 'HIGH',
         session_id TEXT NOT NULL DEFAULT 'sess_8f3a92b1',
-        tenant_id TEXT NOT NULL DEFAULT 'tnt_84ndhdjdj94844hj',
+        tenant_id TEXT NOT NULL DEFAULT 'ankur-tenant-1',
         hash_chain TEXT
     );
     """
@@ -305,6 +305,14 @@ def init_db() -> None:
         _seed_default_resource(conn)
         _seed_default_interceptions(conn)
         _seed_default_users(conn)
+        # Consolidate all records under the single primary tenant 'ankur-tenant-1'
+        try:
+            conn.execute("UPDATE interceptions SET tenant_id = 'ankur-tenant-1' WHERE tenant_id IS NULL OR tenant_id != 'ankur-tenant-1'")
+            conn.execute("UPDATE tokens SET tenant_id = 'ankur-tenant-1' WHERE tenant_id IS NULL OR tenant_id != 'ankur-tenant-1'")
+            conn.execute("UPDATE users SET tenant_id = 'ankur-tenant-1' WHERE tenant_id IS NULL OR tenant_id != 'ankur-tenant-1'")
+            conn.execute("UPDATE devices SET tenant_id = 'ankur-tenant-1' WHERE tenant_id IS NULL OR tenant_id != 'ankur-tenant-1'")
+        except Exception as e:
+            logger.debug("Tenant consolidation notice: %s", e)
 
 
 def _migrate_db(conn) -> None:
@@ -321,12 +329,12 @@ def _migrate_db(conn) -> None:
             "ALTER TABLE interceptions ADD COLUMN IF NOT EXISTS finding_code TEXT NOT NULL DEFAULT 'PII-INPUT-001'",
             "ALTER TABLE interceptions ADD COLUMN IF NOT EXISTS severity TEXT NOT NULL DEFAULT 'HIGH'",
             "ALTER TABLE interceptions ADD COLUMN IF NOT EXISTS session_id TEXT NOT NULL DEFAULT 'sess_8f3a92b1'",
-            "ALTER TABLE interceptions ADD COLUMN IF NOT EXISTS tenant_id TEXT NOT NULL DEFAULT 'tnt_84ndhdjdj94844hj'",
+            "ALTER TABLE interceptions ADD COLUMN IF NOT EXISTS tenant_id TEXT NOT NULL DEFAULT 'ankur-tenant-1'",
             "ALTER TABLE interceptions ADD COLUMN IF NOT EXISTS hash_chain TEXT",
             "ALTER TABLE tokens ADD COLUMN IF NOT EXISTS expires_at TEXT NOT NULL DEFAULT ''",
             "ALTER TABLE tokens ADD COLUMN IF NOT EXISTS days_valid INTEGER NOT NULL DEFAULT 48",
             "ALTER TABLE tokens ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active'",
-            "ALTER TABLE tokens ADD COLUMN IF NOT EXISTS tenant_id TEXT NOT NULL DEFAULT 'tnt_84ndhdjdj94844hj'",
+            "ALTER TABLE tokens ADD COLUMN IF NOT EXISTS tenant_id TEXT NOT NULL DEFAULT 'ankur-tenant-1'",
             "ALTER TABLE resources ADD COLUMN IF NOT EXISTS use_case_type TEXT NOT NULL DEFAULT 'customer_support'",
             "ALTER TABLE resources ADD COLUMN IF NOT EXISTS policy_id TEXT DEFAULT 'pol_customer_support'",
             "ALTER TABLE resources ADD COLUMN IF NOT EXISTS reply_timeout_sec INTEGER NOT NULL DEFAULT 60",
@@ -369,7 +377,7 @@ def _migrate_db(conn) -> None:
         if "session_id" not in int_cols:
             conn.execute("ALTER TABLE interceptions ADD COLUMN session_id TEXT NOT NULL DEFAULT 'sess_8f3a92b1'")
         if "tenant_id" not in int_cols:
-            conn.execute("ALTER TABLE interceptions ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'tnt_84ndhdjdj94844hj'")
+            conn.execute("ALTER TABLE interceptions ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'ankur-tenant-1'")
         if "hash_chain" not in int_cols:
             conn.execute("ALTER TABLE interceptions ADD COLUMN hash_chain TEXT")
 
@@ -381,7 +389,7 @@ def _migrate_db(conn) -> None:
         if "status" not in tok_cols:
             conn.execute("ALTER TABLE tokens ADD COLUMN status TEXT NOT NULL DEFAULT 'active'")
         if "tenant_id" not in tok_cols:
-            conn.execute("ALTER TABLE tokens ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'tnt_84ndhdjdj94844hj'")
+            conn.execute("ALTER TABLE tokens ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'ankur-tenant-1'")
 
         res_cols = [r["name"] for r in conn.execute("PRAGMA table_info(resources)").fetchall()]
         if "use_case_type" not in res_cols:
@@ -490,7 +498,7 @@ def _seed_default_interceptions(conn) -> None:
             "SEC-003",
             "CRITICAL",
             "sess_chatgpt_9a1b",
-            "tnt_84ndhdjdj94844hj"
+            "ankur-tenant-1"
         ),
         (
             "ic_seed_002",
@@ -515,7 +523,7 @@ def _seed_default_interceptions(conn) -> None:
             "INJ-002",
             "HIGH",
             "sess_claude_4c2d",
-            "tnt_84ndhdjdj94844hj"
+            "ankur-tenant-1"
         ),
         (
             "ic_seed_003",
@@ -540,7 +548,7 @@ def _seed_default_interceptions(conn) -> None:
             "PII-INPUT-001",
             "HIGH",
             "sess_gemini_7e8f",
-            "tnt_84ndhdjdj94844hj"
+            "ankur-tenant-1"
         ),
         (
             "ic_seed_004",
@@ -565,7 +573,7 @@ def _seed_default_interceptions(conn) -> None:
             "PII-INPUT-002",
             "HIGH",
             "sess_globex_3k2m",
-            "tnt_92kf74bc109312ae"
+            "ankur-tenant-1"
         ),
         (
             "ic_seed_005",
@@ -590,7 +598,7 @@ def _seed_default_interceptions(conn) -> None:
             "AUDIT-FIN-001",
             "LOW",
             "sess_globex_1b4f",
-            "tnt_92kf74bc109312ae"
+            "ankur-tenant-1"
         ),
     ]
     for item in seeds:

@@ -39,7 +39,7 @@ def log_interception(
     source: str = "Endpoint",
     context: str = "EMAIL_ADDRESS",
     session_id: Optional[str] = None,
-    tenant_id: str = "tnt_84ndhdjdj94844hj",
+    tenant_id: str = "ankur-tenant-1",
 ) -> dict:
     intercept_id = "ic_" + uuid.uuid4().hex[:12]
     if not session_id:
@@ -112,9 +112,10 @@ def log_interception(
             """
             INSERT INTO interceptions (
                 id, resource_id, timestamp, user_prompt, raw_response,
-                sanitized_prompt, sanitized_response, action, enforcement_mode, latency_ms,
-                performance_score, cost_score, responsibility_score, triggered_rules_json, risk_findings_json,
-                source, context, status, finding_title, finding_code, severity, session_id, tenant_id, hash_chain
+                sanitized_prompt, sanitized_response, action, enforcement_mode,
+                latency_ms, performance_score, cost_score, responsibility_score,
+                triggered_rules_json, risk_findings_json, source, context, status,
+                finding_title, finding_code, severity, session_id, tenant_id, hash_chain
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
@@ -122,9 +123,9 @@ def log_interception(
                 resource_id,
                 timestamp,
                 user_prompt,
-                raw_response,
+                raw_response or "",
                 sanitized_prompt,
-                sanitized_response,
+                sanitized_response or "",
                 action,
                 enforcement_mode,
                 latency_ms,
@@ -144,14 +145,16 @@ def log_interception(
                 hash_chain_val,
             ),
         )
+
+    # Return structured dictionary matching model/API response
     return {
         "id": intercept_id,
         "resource_id": resource_id,
         "timestamp": timestamp,
         "user_prompt": user_prompt,
-        "raw_response": raw_response,
+        "raw_response": raw_response or "",
         "sanitized_prompt": sanitized_prompt,
-        "sanitized_response": sanitized_response,
+        "sanitized_response": sanitized_response or "",
         "action": action,
         "enforcement_mode": enforcement_mode,
         "latency_ms": latency_ms,
@@ -162,7 +165,7 @@ def log_interception(
         "risk_findings": risk_findings,
         "source": source,
         "context": context,
-        "status": "open",
+        "status": initial_status,
         "finding_title": finding_title,
         "finding_code": finding_code,
         "severity": severity,
@@ -178,15 +181,15 @@ def list_interceptions(
     source: Optional[str] = None,
     severity: Optional[str] = None,
     status: Optional[str] = None,
-    search: Optional[str] = None,
     tenant_id: Optional[str] = None,
+    search: Optional[str] = None,
 ) -> list[dict]:
     with get_conn() as conn:
         query = "SELECT * FROM interceptions WHERE (action != 'ALLOW' OR (risk_findings_json IS NOT NULL AND risk_findings_json != '[]'))"
         params = []
 
         if tenant_id and tenant_id.lower() != "all":
-            query += " AND (tenant_id = ? OR tenant_id IN ('acme-tenant-1', 'ankur-tenant-1', 'cp_live_default', 'tnt_84ndhdjdj94844hj'))"
+            query += " AND (tenant_id = ? OR tenant_id IN ('ankur-tenant-1', 'cp_live_default'))"
             params.append(tenant_id)
 
         if resource_id:

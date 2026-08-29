@@ -125,34 +125,43 @@ def extract_bot_text(message: dict) -> Optional[str]:
     """
     Extract human-readable text from a single Botpress message object.
 
-    Handles the minimum required `text` payload type. Other rich types
-    (image, carousel, card, dropdown, etc.) are not parsed for text content;
-    a short placeholder is returned instead so scans never silently produce
-    `None` for a real bot reply. See DESIGN.md "Known limitations".
+    Handles text payloads, plain strings, nested content dicts, carousels,
+    and direct text attributes so scans never produce None for real bot replies.
     """
-    payload = message.get("payload") or {}
-    payload_type = payload.get("type")
+    payload = message.get("payload")
+    if isinstance(payload, str):
+        try:
+            payload = json.loads(payload)
+        except Exception:
+            return payload
 
-    if payload_type == "text":
-        return payload.get("text")
+    if isinstance(payload, dict):
+        payload_type = payload.get("type")
+        if payload_type == "text" or "text" in payload:
+            return payload.get("text")
 
-    if payload_type in ("image", "audio", "video", "file"):
-        return f"[unsupported {payload_type} message]"
+        if payload_type in ("image", "audio", "video", "file"):
+            return f"[unsupported {payload_type} message]"
 
-    if payload_type == "carousel":
-        cards = payload.get("items") or payload.get("cards") or []
-        titles = [c.get("title", "") for c in cards if isinstance(c, dict)]
-        return "[carousel] " + ", ".join(t for t in titles if t)
+        if payload_type == "carousel":
+            cards = payload.get("items") or payload.get("cards") or []
+            titles = [c.get("title", "") for c in cards if isinstance(c, dict)]
+            return "[carousel] " + ", ".join(t for t in titles if t)
 
-    if payload_type == "dropdown" or payload_type == "choice":
-        return payload.get("text") or "[choice message]"
+        if payload_type in ("dropdown", "choice"):
+            return payload.get("text") or "[choice message]"
 
-    if payload_type:
-        return f"[unsupported message type: {payload_type}]"
+        for k in ("content", "message", "response", "value", "text"):
+            if k in payload and isinstance(payload[k], str):
+                return payload[k]
 
-    # Some Botpress responses nest text directly without a payload wrapper
-    if "text" in message:
-        return message.get("text")
+        if payload_type:
+            return f"[unsupported message type: {payload_type}]"
+
+    # Direct fallback if text is on the message root
+    for k in ("text", "content", "message"):
+        if k in message and isinstance(message[k], str):
+            return message[k]
 
     return None
 
@@ -161,18 +170,21 @@ def is_bot_message(message: dict, own_user_id: Optional[str] = None) -> bool:
     """
     Identify whether a message in the conversation came from the bot
     (as opposed to the user/connector itself).
-
-    Botpress messages may carry a `direction` field
-    ("incoming" = from user, "outgoing" = from bot). The current Chat API
-    responses also commonly omit `direction`, in which case `userId` is
-    compared against the connector's own user id.
     """
     direction = message.get("direction")
     if direction is not None:
-        return direction == "outgoing"
+        if direction == "outgoing":
+            return True
+        if own_user_id and message.get("userId"):
+            return message.get("userId") != own_user_id
+        return False
 
     if own_user_id and message.get("userId") is not None:
         return message.get("userId") != own_user_id
+
+    author_id = message.get("authorId") or message.get("senderId")
+    if own_user_id and author_id is not None:
+        return author_id != own_user_id
 
     # Legacy fallback: messages authored by a bot sometimes have no userId.
     return message.get("userId") is None

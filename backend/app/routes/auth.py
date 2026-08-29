@@ -87,6 +87,6 @@ def get_me():
         "email": "ankur@acme.com",
         "name": "Ankur Kumar Singh",
         "role": "ADMIN",
-        "tenant_id": "acme-tenant-1",
-        "allowed_tenants": ["acme-tenant-1", "globex-tenant-2", "stark-tenant-3", "wayne-tenant-4"],
+        "tenant_id": "ankur-tenant-1",
+        "allowed_tenants": ["ankur-tenant-1"],
     }
