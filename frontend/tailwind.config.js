@@ -9,17 +9,17 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#f97316',
-          hover: '#ea580c',
-          light: '#fb923c',
-          dark: '#c2410c',
+          DEFAULT: '#ffffff',
+          hover: '#e4e4e7',
+          light: '#ffffff',
+          dark: '#a1a1aa',
         },
         dark: {
-          900: '#080808',
-          850: '#111111',
-          800: '#1b1b1b',
-          750: '#242424',
-          700: '#333333',
+          900: '#08090b',
+          850: '#0e1014',
+          800: '#181b22',
+          750: '#22252c',
+          700: '#2a2d36',
         },
         accent: {
           cyan: '#06b6d4',
@@ -30,11 +30,11 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
-        reading: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
-        brand: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
-        code: ['"Fira Code"', '"JetBrains Mono"', 'monospace'],
+        sans: ['"JetBrains Mono"', '"Fira Code"', 'ui-monospace', 'monospace'],
+        reading: ['"JetBrains Mono"', '"Fira Code"', 'ui-monospace', 'monospace'],
+        brand: ['"JetBrains Mono"', '"Fira Code"', 'ui-monospace', 'monospace'],
+        mono: ['"JetBrains Mono"', '"Fira Code"', 'ui-monospace', 'monospace'],
+        code: ['"Fira Code"', '"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
     },
   },

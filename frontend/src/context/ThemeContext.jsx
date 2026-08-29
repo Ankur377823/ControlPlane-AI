@@ -6,8 +6,7 @@ export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('cp_theme');
     if (saved) return saved;
-    // Default to light mode as requested by the user
-    return 'light';
+    return 'dark';
   });
 
   useEffect(() => {

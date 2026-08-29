@@ -67,16 +67,15 @@ export function DashboardView() {
   // Dynamic Platform and Asset Calculation from Live Database Data
   const platformBreakdown = data?.platform_breakdown || {
     'Botpress Cloud Webhook': Math.max(1, data?.total_resources || 1),
-    'ChatGPT (OpenAI)': Math.max(1, data?.total_interceptions || 1),
+    'Browser Extension Shield': Math.max(1, data?.total_interceptions || 1),
     'REST AI Gateway': 1,
   };
 
   const platforms = Object.entries(platformBreakdown).map(([name, count]) => {
     let Icon = Bot;
     const lower = name.toLowerCase();
-    if (lower.includes('botpress')) Icon = Bot;
-    else if (lower.includes('chatgpt') || lower.includes('openai') || lower.includes('claude')) Icon = Cloud;
-    else if (lower.includes('gateway') || lower.includes('rest')) Icon = Server;
+    if (lower.includes('botpress') || lower.includes('webhook')) Icon = Bot;
+    else if (lower.includes('gateway') || lower.includes('rest') || lower.includes('api')) Icon = Server;
     else if (lower.includes('extension') || lower.includes('browser')) Icon = Laptop;
     else Icon = Layers;
 
@@ -170,10 +169,10 @@ export function DashboardView() {
             </div>
             <a
               href="#/inventory/add"
-              className="px-3 py-1 rounded bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30 text-[11px] font-semibold uppercase tracking-wider transition-colors inline-flex items-center gap-1"
+              className="px-3 py-1.5 rounded-lg bg-white hover:bg-[#e4e4e7] text-black border border-white text-[11px] font-bold font-mono uppercase tracking-wider transition-all inline-flex items-center gap-1 shadow-sm"
             >
-              <Plus className="w-3 h-3" />
-              <span>Add Resource</span>
+              <Plus className="w-3.5 h-3.5 text-black stroke-[2.5]" />
+              <span>+ Add Resource</span>
             </a>
           </div>
 

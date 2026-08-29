@@ -197,6 +197,8 @@ export function PoliciesView({ onViewPolicyDetail }) {
     showToast(`Duplicated '${policy.name}' as a new User-defined policy!`, 'success');
   };
 
+  const [editingRuleId, setEditingRuleId] = useState(null);
+
   // Delete User policy
   const handleDeleteUserPolicy = async (id) => {
     const target = userPolicies.find(p => p.id === id);
@@ -207,12 +209,28 @@ export function PoliciesView({ onViewPolicyDetail }) {
 
   // Open Edit Modal (User defined only)
   const handleOpenEditModal = (policy) => {
+    let initialRules = [];
+    if (Array.isArray(policy.rules) && policy.rules.length > 0) {
+      initialRules = [...policy.rules];
+    } else if (Array.isArray(policy.custom_regex_rules) && policy.custom_regex_rules.length > 0) {
+      initialRules = [...policy.custom_regex_rules];
+    } else if (Array.isArray(policy.threatCategories) && policy.threatCategories.length > 0) {
+      initialRules = policy.threatCategories.map((cat, idx) => ({
+        id: `r_${idx}_${Date.now()}`,
+        name: typeof cat === 'string' ? cat : (cat.name || 'Regex Rule'),
+        pattern: typeof cat === 'object' && cat.pattern ? cat.pattern : `\\b${(typeof cat === 'string' ? cat : cat.name || 'RULE').toUpperCase().replace(/\s+/g, '_')}-[0-9]{4}\\b`,
+        action: typeof cat === 'object' && cat.action ? cat.action : 'MASK',
+        redaction: `[REDACTED_${(typeof cat === 'string' ? cat : cat.name || 'RULE').toUpperCase().replace(/\s+/g, '_')}]`,
+      }));
+    }
+
     setEditingGroup(policy);
     setIsCreatingNew(false);
-    setFormName(policy.name);
+    setFormName(policy.name || '');
     setFormCategory(policy.category || 'Custom Security');
-    setFormDescription(policy.description);
-    setFormRules(policy.rules ? [...policy.rules] : []);
+    setFormDescription(policy.description || '');
+    setFormRules(initialRules);
+    setEditingRuleId(null);
     setNewRuleName('');
     setNewRulePattern('');
     setNewRuleRedaction('');
@@ -228,6 +246,7 @@ export function PoliciesView({ onViewPolicyDetail }) {
     setFormCategory('Custom Security');
     setFormDescription('');
     setFormRules([]);
+    setEditingRuleId(null);
     setNewRuleName('');
     setNewRulePattern('');
     setNewRuleRedaction('');
@@ -235,9 +254,20 @@ export function PoliciesView({ onViewPolicyDetail }) {
     setIsModalOpen(true);
   };
 
-  // Add rule inside modal
+  // Edit existing rule inside modal
+  const handleEditRuleInForm = (rule) => {
+    setEditingRuleId(rule.id);
+    setNewRuleName(rule.name || '');
+    setNewRulePattern(rule.pattern || '');
+    setNewRuleAction(rule.action || 'MASK');
+    setNewRuleRedaction(rule.redaction || '');
+    setTestText('');
+    showToast(`Loaded rule '${rule.name}' for editing`, 'cyan');
+  };
+
+  // Add / Update rule inside modal
   const handleAddRuleToForm = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!newRuleName.trim() || !newRulePattern.trim()) {
       showToast('Rule Name and Pattern are required', 'error');
       return;
@@ -249,20 +279,32 @@ export function PoliciesView({ onViewPolicyDetail }) {
       return;
     }
 
-    const newRuleItem = {
-      id: `r_${Date.now()}`,
-      name: newRuleName.trim(),
-      pattern: newRulePattern.trim(),
-      action: newRuleAction,
-      redaction: newRuleRedaction.trim() || `[REDACTED_${newRuleName.trim().toUpperCase().replace(/\s+/g, '_')}]`,
-    };
+    if (editingRuleId) {
+      setFormRules(formRules.map(r => r.id === editingRuleId ? {
+        ...r,
+        name: newRuleName.trim(),
+        pattern: newRulePattern.trim(),
+        action: newRuleAction,
+        redaction: newRuleRedaction.trim() || `[REDACTED_${newRuleName.trim().toUpperCase().replace(/\s+/g, '_')}]`,
+      } : r));
+      showToast(`Updated regex rule '${newRuleName.trim()}'`, 'success');
+      setEditingRuleId(null);
+    } else {
+      const newRuleItem = {
+        id: `r_${Date.now()}`,
+        name: newRuleName.trim(),
+        pattern: newRulePattern.trim(),
+        action: newRuleAction,
+        redaction: newRuleRedaction.trim() || `[REDACTED_${newRuleName.trim().toUpperCase().replace(/\s+/g, '_')}]`,
+      };
+      setFormRules([...formRules, newRuleItem]);
+      showToast(`Added custom regex rule '${newRuleItem.name}'`, 'success');
+    }
 
-    setFormRules([...formRules, newRuleItem]);
     setNewRuleName('');
     setNewRulePattern('');
     setNewRuleRedaction('');
     setTestText('');
-    showToast(`Added custom regex rule '${newRuleItem.name}'`, 'success');
   };
 
   const handleRemoveRuleFromForm = (ruleId) => {
@@ -446,79 +488,77 @@ export function PoliciesView({ onViewPolicyDetail }) {
       </div>
 
       {/* 1. MASTER SHIELD (Featured Top Card) */}
-      <div className="glass-panel relative rounded-2xl border-2 border-emerald-500/50 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent p-6 sm:p-7 shadow-lg shadow-emerald-500/5 space-y-5 overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
-
+      <div className="rounded-xl border border-[#22252c] bg-[#0e1014] p-6 sm:p-7 shadow-xl space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/30 flex-shrink-0">
-              <ShieldCheck className="w-7 h-7" />
+            <div className="w-11 h-11 rounded-lg bg-white text-black flex items-center justify-center font-bold flex-shrink-0 shadow-md">
+              <ShieldCheck className="w-6 h-6 text-black stroke-[2.5]" />
             </div>
             <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-500 text-white uppercase tracking-wider">
-                  Recommended Master Shield
+              <div className="flex items-center gap-2 flex-wrap font-mono">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-black uppercase tracking-wider">
+                  MASTER SHIELD
                 </span>
-                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 font-mono">
-                  {activeCount} Policies Active & Connected
+                <span className="text-[10px] font-bold text-[#8a8f98]">
+                  {activeCount} POLICIES ACTIVE & CONNECTED
                 </span>
               </div>
-              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white font-brand">
+              <h2 className="text-lg sm:text-xl font-bold text-white font-mono uppercase tracking-tight">
                 {masterPreset.name}
               </h2>
-              <p className="text-xs text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">
+              <p className="text-xs text-[#8a8f98] max-w-3xl leading-relaxed">
                 {masterPreset.description}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-3 flex-shrink-0 font-mono">
             <button
               type="button"
               onClick={() => {
                 if (onViewPolicyDetail) onViewPolicyDetail(masterPreset.id);
               }}
-              className="px-4 py-2.5 rounded-xl border border-emerald-600/30 bg-white/80 dark:bg-dark-900/80 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              className="px-4 py-2 rounded-lg bg-[#181b22] hover:bg-[#22252c] text-white border border-[#2a2d36] text-xs font-bold transition-all flex items-center gap-1.5"
             >
-              <span>View Policy Details</span>
+              <span>View Details</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
 
             {enforcedPresetId === masterPreset.id ? (
-              <div className="px-5 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 text-xs font-extrabold flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>Currently Enforcing ({activeCount})</span>
+              <div className="px-4 py-2 rounded-lg bg-[#08090b] text-white border border-[#2a2d36] text-xs font-bold flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>ACTIVE ENFORCING ({activeCount})</span>
               </div>
             ) : (
               <button
                 type="button"
                 disabled={loadingId === masterPreset.id}
                 onClick={() => handleOneClickEnforce(masterPreset)}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-extrabold shadow-md shadow-emerald-600/25 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-4 py-2 rounded-lg bg-white hover:bg-[#e4e4e7] text-black text-xs font-bold transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {loadingId === masterPreset.id ? (
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                 ) : (
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4 text-black stroke-[2.5]" />
                 )}
-                <span>Activate Master Shield</span>
+                <span>ACTIVATE MASTER SHIELD</span>
               </button>
             )}
           </div>
         </div>
 
         {/* Master Threat Vectors Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-2 border-t border-emerald-500/20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-4 border-t border-[#22252c]">
           {masterPreset.threatCategories.map((tc, idx) => (
-            <div key={idx} className="flex items-center gap-2 p-2.5 rounded-xl bg-white/60 dark:bg-dark-900/60 border border-emerald-500/15 text-[11px] font-medium text-slate-700 dark:text-slate-300 font-mono">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+            <div key={idx} className="flex items-center gap-2 p-2.5 rounded-lg bg-[#08090b] border border-[#22252c] text-[11px] font-medium text-[#d4d4d8] font-mono">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
               <span className="truncate">{tc}</span>
             </div>
           ))}
           {userPolicies.filter(p => p.enabled).length > 0 && (
-            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-bold text-emerald-800 dark:text-emerald-200 font-mono">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-              <span className="truncate">+{userPolicies.filter(p => p.enabled).length} Custom User Policies Active</span>
+            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-[#08090b] border border-[#2a2d36] text-[11px] font-bold text-white font-mono">
+              <Sparkles className="w-3.5 h-3.5 text-white flex-shrink-0" />
+              <span>+{userPolicies.filter(p => p.enabled).length} Custom User Policies Active</span>
             </div>
           )}
         </div>
@@ -825,19 +865,28 @@ export function PoliciesView({ onViewPolicyDetail }) {
                     </div>
                   ) : (
                     formRules.map(rule => (
-                      <div key={rule.id} className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 text-xs">
+                      <div key={rule.id} className="flex items-center justify-between p-2.5 rounded-lg bg-[#050608] border border-[#22252c] text-xs font-mono">
                         <div className="space-y-0.5 min-w-0 flex-1">
-                          <div className="font-bold text-slate-800 dark:text-white truncate">{rule.name}</div>
-                          <div className="font-mono text-[10px] text-primary truncate">{rule.pattern}</div>
+                          <div className="font-bold text-white truncate">{rule.name}</div>
+                          <div className="text-[10px] text-emerald-400 font-bold truncate">{rule.pattern}</div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 font-mono">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#181b22] text-white border border-[#2a2d36]">
                             {rule.action || 'MASK'}
                           </span>
                           <button
                             type="button"
+                            onClick={() => handleEditRuleInForm(rule)}
+                            className="px-2 py-1 rounded bg-[#181b22] hover:bg-[#22252c] text-white transition-colors border border-[#2a2d36] flex items-center gap-1 font-mono text-[10px]"
+                            title="Edit this rule's regex pattern"
+                          >
+                            <Edit3 className="w-3 h-3 text-white" />
+                            <span>Edit</span>
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => handleRemoveRuleFromForm(rule.id)}
-                            className="p-1 rounded text-slate-400 hover:text-red-500 transition-colors"
+                            className="p-1 rounded text-slate-400 hover:text-red-400 transition-colors"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -848,11 +897,27 @@ export function PoliciesView({ onViewPolicyDetail }) {
                 </div>
               </div>
 
-              {/* Add New Rule Box */}
-              <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-dark-900/80 border border-slate-200 dark:border-slate-800 space-y-3">
-                <div className="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
-                  <Plus className="w-3.5 h-3.5 text-primary" />
-                  <span>Add Regex Pattern</span>
+              {/* Add / Edit Rule Box */}
+              <div className="p-4 rounded-xl bg-[#090a0d] border border-[#22252c] space-y-3 font-mono">
+                <div className="text-xs font-bold text-white flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Plus className="w-3.5 h-3.5 text-white" />
+                    <span>{editingRuleId ? 'Edit / Update Regex Pattern' : 'Add Regex Pattern'}</span>
+                  </div>
+                  {editingRuleId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingRuleId(null);
+                        setNewRuleName('');
+                        setNewRulePattern('');
+                        setNewRuleRedaction('');
+                      }}
+                      className="text-[10px] text-[#8a8f98] hover:text-white underline"
+                    >
+                      Cancel Rule Edit
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -924,32 +989,32 @@ export function PoliciesView({ onViewPolicyDetail }) {
                   )}
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end font-mono">
                   <button
                     type="button"
                     onClick={handleAddRuleToForm}
-                    className="px-3.5 py-1.5 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90 transition-all flex items-center gap-1"
+                    className="px-4 py-2 rounded-lg bg-white hover:bg-[#e4e4e7] text-black text-xs font-bold transition-all flex items-center gap-1.5 shadow-md"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Pattern to Policy</span>
+                    <Plus className="w-3.5 h-3.5 text-black stroke-[2.5]" />
+                    <span>{editingRuleId ? 'Update Pattern in Policy' : '+ Add Pattern to Policy'}</span>
                   </button>
                 </div>
               </div>
 
               {/* Modal Save Buttons */}
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#22252c] font-mono">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-dark-800 transition-colors"
+                  className="px-4 py-2 rounded-lg border border-[#2a2d36] bg-[#181b22] text-white text-xs font-bold hover:bg-[#22252c] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md shadow-primary/20 transition-all flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-lg bg-white hover:bg-[#e4e4e7] text-black text-xs font-bold transition-all flex items-center gap-1.5 shadow-md"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <CheckCircle2 className="w-4 h-4 text-black stroke-[2.5]" />
                   <span>Save Policy</span>
                 </button>
               </div>

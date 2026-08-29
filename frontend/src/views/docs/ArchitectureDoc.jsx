@@ -1,202 +1,174 @@
 import React from 'react';
-import { Shield, Zap, Filter, Scale, Eye, Cpu, Database, CheckCircle2, AlertTriangle, XCircle, ArrowDown, ArrowRight, RefreshCw, Lock } from 'lucide-react';
+import { Shield, Zap, Filter, Scale, Eye, Cpu, Database, CheckCircle2, ArrowDown, ArrowRight, Lock } from 'lucide-react';
 
 export function ArchitectureDoc() {
   return (
-    <div className="space-y-10 animate-fade-in text-slate-800 dark:text-slate-200 font-reading leading-relaxed">
+    <div className="space-y-10 animate-fade-in text-slate-200 font-mono leading-relaxed max-w-5xl mx-auto">
       {/* Header */}
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
-          <Cpu className="w-3.5 h-3.5" />
-          <span>System Design & Architecture</span>
+      <div className="space-y-3 border-b border-[#22252c] pb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#181b22] border border-[#2a2d36] text-white text-xs font-bold uppercase tracking-wider">
+          <Cpu className="w-3.5 h-3.5 text-white" />
+          <span>CONTROLPLANE AI // TECHNICAL SPECIFICATIONS</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-brand tracking-tight">
-          Multi-Tier Interception & Decision Architecture
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight uppercase">
+          Multi-Tier Interception & Security Architecture
         </h1>
-        <p className="text-[16px] sm:text-[17px] text-slate-700 dark:text-slate-200 leading-relaxed max-w-3xl font-normal">
+        <p className="text-xs text-[#8a8f98] leading-relaxed max-w-3xl">
           ControlPlane AI is engineered with a sub-15ms fast-path pipeline combining deterministic pattern filters, RAG evidence-grounding, state-machine agent safety, and cryptographic audit persistence.
         </p>
       </div>
 
-      {/* VISUAL FLOWCHART 1: End-to-End Decision Pipeline */}
-      <section id="pipeline-flowchart" className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+      {/* SYSTEM ARCHITECTURE WIREFRAME DIAGRAM */}
+      <section id="system-diagram" className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-brand flex items-center gap-2">
-            <span>Visual Pipeline & Interception Flowchart</span>
-            <span className="text-primary text-lg font-normal">#</span>
+          <h2 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span>[1] 4-TIER THREAT CASCADING INTERCEPTION ENGINE</span>
           </h2>
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">End-to-End Decision Lifecycle</span>
+          <span className="text-[10px] text-[#555a64] uppercase font-mono">LATENCY &lt; 15MS</span>
         </div>
 
-        {/* Interactive Flowchart Container */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-slate-50 dark:bg-dark-900/90 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
-          {/* Step 1: Ingestion Node */}
-          <div className="flex flex-col items-center">
-            <div className="w-full max-w-lg p-4 rounded-xl bg-white dark:bg-dark-850 border-2 border-primary/40 shadow-sm text-center space-y-1.5">
-              <div className="text-[11px] font-mono font-bold text-primary uppercase tracking-wider">STAGE 1: Ingestion & Identification</div>
-              <div className="text-[15px] font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
-                <span>User Prompt / Chatbot Response / Agent Tool Call</span>
-              </div>
-              <div className="text-[13px] text-slate-600 dark:text-slate-400">Chrome Extension (Capture Phase) or FastAPI REST Gateway</div>
+        {/* ASCII Flowchart */}
+        <div className="p-5 border border-dashed border-[#2a2d36] rounded-lg bg-[#07080a] text-[#d4d4d8] text-[10px] sm:text-[11px] leading-tight overflow-x-auto shadow-inner select-none font-mono">
+          <pre>
+{`+-----------------------------------------------------------------------------------+
+|                        INGRESS GATEWAY / INTERCEPTION SHIELD                      |
+|           (FastAPI Webhook / Chrome Extension / Agent Tool Execution)              |
++-----------------------------------------------------------------------------------+
+                                          |
+                                          v
++-----------------------------------------------------------------------------------+
+| TIER 1: DETERMINISTIC DELIMITER STRIPPER & UNICODE ANTI-EVASION                   |
+| - Strips zero-width chars ('Cf', 'Cs'), homoglyphs, ChatML / Llama-3 headers       |
+| - Luhn Mod-10 credit card validation & Shannon Entropy secret scanner              |
++-----------------------------------------------------------------------------------+
+                                          |
+                                          v
++-----------------------------------------------------------------------------------+
+| TIER 2: UNIVERSAL VECTOR SPACE PROJECTION & CENTROID CLASSIFIER                   |
+| - Projects input into continuous subword n-gram frequency space (3 <= n <= 5)     |
+| - Evaluates cosine similarity against 134 threat centroids across 5 taxonomies    |
++-----------------------------------------------------------------------------------+
+                                          |
+                                          v
++-----------------------------------------------------------------------------------+
+| TIER 3: SLIDING WINDOW CHUNKING & CONTINUOUS EVALUATION                           |
+| - 450-token window with 100-token overlap to stop payload obfuscation             |
+| - Aggregates maximum vector distance across all sliding windows                   |
++-----------------------------------------------------------------------------------+
+                                          |
+                    +---------------------+---------------------+
+                    |                                           |
+                    v (Borderline Risk)                         v (Clear Pass / Block)
++---------------------------------------+   +---------------------------------------+
+| TIER 4: SECONDARY LLM JUDGE (OLLAMA)  |   | ENFORCEMENT & CRYPTOGRAPHIC AUDIT     |
+| - Contextual verdict for borderline   |   | - ALLOW / MASK / FLAG / BLOCK         |
+|   scores (0.40 <= score < 0.70)       |   | - SHA-256 Hash Chain Audit Log        |
++---------------------------------------+   +---------------------------------------+`}
+          </pre>
+        </div>
+      </section>
+
+      {/* 5-PHASE SCANNING PIPELINE DIAGRAM */}
+      <section id="scanning-pipeline" className="space-y-4 pt-6 border-t border-[#22252c]">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span>[2] 5-PHASE COMPREHENSIVE SCANNING PIPELINE</span>
+          </h2>
+          <span className="text-[10px] text-[#555a64] uppercase font-mono">AUTOMATED RED-TEAM</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
+          <div className="p-3.5 rounded bg-[#090a0d] border border-[#22252c] space-y-1.5">
+            <div className="text-[10px] font-bold text-[#8a8f98] uppercase">PHASE 1</div>
+            <div className="font-bold text-white">PII & Secrets</div>
+            <div className="text-[11px] text-[#717682] leading-normal">
+              Luhn Mod-10 card check, SSNs, API tokens, Shannon entropy calculation.
             </div>
-            <ArrowDown className="w-5 h-5 text-primary my-2 animate-bounce" />
           </div>
 
-          {/* Step 2: Sub-15ms Fast-Path Layer */}
-          <div className="flex flex-col items-center">
-            <div className="w-full max-w-2xl p-5 rounded-xl bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3.5">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-amber-500" />
-                  <span className="text-xs font-bold text-slate-900 dark:text-white font-brand uppercase tracking-wider">
-                    STAGE 2: Sub-15ms Deterministic Fast-Path Layer
-                  </span>
-                </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
-                  LATENCY &lt; 15ms
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 text-xs">
-                <div className="p-3 rounded-lg bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">1. PII & Shannon Entropy</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400">Luhn cards, Shannon secrets, SSNs, PHI</div>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">2. Unicode Anti-Evasion</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400">Zero-width stripper ('Cf', 'Cs'), homoglyphs</div>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">3. Vector Cosine Space</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400">Dense N-gram vectorizer across NIST centroids</div>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                  <div className="font-bold text-[13px] text-slate-900 dark:text-white">4. Sliding Chunking</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400">450-token windows to stop hidden payloads</div>
-                </div>
-              </div>
+          <div className="p-3.5 rounded bg-[#090a0d] border border-[#22252c] space-y-1.5">
+            <div className="text-[10px] font-bold text-[#8a8f98] uppercase">PHASE 2</div>
+            <div className="font-bold text-white">Unicode Evasion</div>
+            <div className="text-[11px] text-[#717682] leading-normal">
+              Zero-width stripper, homoglyph normalization, ChatML delimiter sanitization.
             </div>
-            <ArrowDown className="w-5 h-5 text-primary my-2" />
           </div>
 
-          {/* Step 3: Deep Verification & State Tracking Layer */}
-          <div className="flex flex-col items-center">
-            <div className="w-full max-w-2xl p-5 rounded-xl bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3.5">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-                <div className="flex items-center gap-2">
-                  <Scale className="w-4 h-4 text-blue-500" />
-                  <span className="text-xs font-bold text-slate-900 dark:text-white font-brand uppercase tracking-wider">
-                    STAGE 3: Deep Context, Multi-Turn Trajectory & Tier 4 LLM Judge
-                  </span>
-                </div>
-                <span className="text-[10px] font-mono text-slate-400">Contextual Verification</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                <div className="p-3.5 rounded-lg bg-blue-500/5 border border-blue-500/20 space-y-1">
-                  <div className="font-bold text-[13.5px] text-blue-700 dark:text-blue-300">Speech-Act Grounding</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed">Propositional claim extraction vs conversational acts with live RAG/web verification.</div>
-                </div>
-                <div className="p-3.5 rounded-lg bg-purple-500/5 border border-purple-500/20 space-y-1">
-                  <div className="font-bold text-[13.5px] text-purple-700 dark:text-purple-300">Multi-Turn Decay Tracker</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed">Rolling session accumulator (alpha = 0.85) to stop salami-slicing attacks.</div>
-                </div>
-                <div className="p-3.5 rounded-lg bg-amber-500/5 border border-amber-500/20 space-y-1">
-                  <div className="font-bold text-[13.5px] text-amber-700 dark:text-amber-300">Tier 4 Ollama LLM Judge</div>
-                  <div className="text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed">Local on-device reasoning invoked only for ambiguous scores (0.40 - 0.70).</div>
-                </div>
-              </div>
+          <div className="p-3.5 rounded bg-[#090a0d] border border-[#22252c] space-y-1.5">
+            <div className="text-[10px] font-bold text-[#8a8f98] uppercase">PHASE 3</div>
+            <div className="font-bold text-white">Vector Threat</div>
+            <div className="text-[11px] text-[#717682] leading-normal">
+              N-gram continuous subword vector space projection across 134 taxonomy centroids.
             </div>
-            <ArrowDown className="w-5 h-5 text-primary my-2" />
           </div>
 
-          {/* Step 4: Decision Matrix */}
-          <div className="flex flex-col items-center">
-            <div className="text-xs font-mono font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">STAGE 4: Automated Policy Decision Routing</div>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 w-full max-w-3xl">
-              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-1">
-                <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase font-mono">ALLOW</div>
-                <p className="text-[12px] text-slate-700 dark:text-slate-300">Clean prompt passes straight to LLM with 0 delay.</p>
-              </div>
-              <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-center space-y-1">
-                <div className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase font-mono">MASK / REDACT</div>
-                <p className="text-[12px] text-slate-700 dark:text-slate-300">Auto-redacts PII/keys to `[REDACTED_...]` and sends safely.</p>
-              </div>
-              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center space-y-1">
-                <div className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase font-mono">CONFIRM (HITL)</div>
-                <p className="text-[12px] text-slate-700 dark:text-slate-300">Routes to Human Review Queue for explicit sign-off.</p>
-              </div>
-              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-center space-y-1">
-                <div className="text-xs font-black text-rose-600 dark:text-rose-400 uppercase font-mono">BLOCK</div>
-                <p className="text-[12px] text-slate-700 dark:text-slate-300">Hard-halts prompt. Prevents data egress.</p>
-              </div>
+          <div className="p-3.5 rounded bg-[#090a0d] border border-[#22252c] space-y-1.5">
+            <div className="text-[10px] font-bold text-[#8a8f98] uppercase">PHASE 4</div>
+            <div className="font-bold text-white">Speech-Act RAG</div>
+            <div className="text-[11px] text-[#717682] leading-normal">
+              Propositional claim verification vs conversational speech acts with Serper web search.
             </div>
-            <ArrowDown className="w-5 h-5 text-primary my-2" />
           </div>
 
-          {/* Step 5: Audit & Closed Loop Feedback */}
-          <div className="flex flex-col items-center">
-            <div className="w-full max-w-2xl p-4 rounded-xl bg-white dark:bg-dark-850 border border-emerald-500/30 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2.5">
-                <Lock className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                <div>
-                  <span className="font-bold text-[13.5px] text-slate-900 dark:text-white">STAGE 5: Cryptographic Audit & Feedback Auto-Tuning</span>
-                  <p className="text-[12px] text-slate-600 dark:text-slate-400">Every interception is linked into a SHA-256 tamper-evident hash chain and updates the Trust Index.</p>
-                </div>
-              </div>
-              <span className="text-[11px] font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded font-bold whitespace-nowrap">
-                SHA-256 Chained
-              </span>
+          <div className="p-3.5 rounded bg-[#090a0d] border border-[#22252c] space-y-1.5">
+            <div className="text-[10px] font-bold text-[#8a8f98] uppercase">PHASE 5</div>
+            <div className="font-bold text-white">SHA-256 Audit</div>
+            <div className="text-[11px] text-[#717682] leading-normal">
+              Cryptographic hash chaining for SOC 2, HIPAA, and EU AI Act compliance.
             </div>
           </div>
         </div>
       </section>
 
-      {/* Technology Specifications Table */}
-      <section id="technology-stack" className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-brand flex items-center gap-2">
-          <span>Core Technology Components</span>
-          <span className="text-primary text-lg font-normal">#</span>
+      {/* CORE MODULE SPECIFICATIONS TABLE */}
+      <section id="technology-stack" className="space-y-4 pt-6 border-t border-[#22252c]">
+        <h2 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>[3] CORE MODULE SPECIFICATIONS</span>
         </h2>
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-850 shadow-sm">
+        <div className="overflow-x-auto rounded-lg border border-[#22252c] bg-[#090a0d] shadow-sm">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50 dark:bg-dark-900 border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 uppercase font-semibold text-[11px]">
+            <thead className="bg-[#050608] border-b border-[#22252c] text-[#8a8f98] uppercase font-bold text-[10px] tracking-wider">
               <tr>
-                <th className="py-3.5 px-4">Component</th>
-                <th className="py-3.5 px-4">File Path</th>
-                <th className="py-3.5 px-4">Technical Responsibilities</th>
+                <th className="py-3 px-4">Component Module</th>
+                <th className="py-3 px-4">File Path</th>
+                <th className="py-3 px-4">Technical Responsibilities</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-700 dark:text-slate-300 text-[13px]">
+            <tbody className="divide-y divide-[#1e222b] text-[#d4d4d8] text-[11px]">
               <tr>
-                <td className="py-3.5 px-4 font-bold text-primary dark:text-primary-light">Master Orchestrator</td>
-                <td className="py-3.5 px-4 font-mono text-[12px]">backend/app/connector/guardrail.py</td>
-                <td className="py-3.5 px-4">Coordinates the 9 evaluator modules and computes composite P/C/R scores</td>
+                <td className="py-3 px-4 font-bold text-white">Master Guardrail Orchestrator</td>
+                <td className="py-3 px-4 text-[#8a8f98]">backend/app/connector/guardrail.py</td>
+                <td className="py-3 px-4">Coordinates 9 evaluator modules and computes composite P/C/R scores</td>
               </tr>
               <tr>
-                <td className="py-3.5 px-4 font-bold text-primary dark:text-primary-light">PII & Secret Engine</td>
-                <td className="py-3.5 px-4 font-mono text-[12px]">backend/app/connector/evaluators/pii.py</td>
-                <td className="py-3.5 px-4">Luhn validation, regex redaction, and API token sanitization</td>
+                <td className="py-3 px-4 font-bold text-white">Universal Vector Engine</td>
+                <td className="py-3 px-4 text-[#8a8f98]">backend/app/connector/evaluators/universal_vector_engine.py</td>
+                <td className="py-3 px-4">Subword n-gram vectorization and dynamic centroid evaluation</td>
               </tr>
               <tr>
-                <td className="py-3.5 px-4 font-bold text-primary dark:text-primary-light">RAG Grounding Engine</td>
-                <td className="py-3.5 px-4 font-mono text-[12px]">backend/app/connector/evaluators/grounding.py</td>
-                <td className="py-3.5 px-4">Atomic claim extraction, context-faithfulness evaluation, and Google Serper API fallback</td>
+                <td className="py-3 px-4 font-bold text-white">PII & Secret Evaluator</td>
+                <td className="py-3 px-4 text-[#8a8f98]">backend/app/connector/evaluators/pii.py</td>
+                <td className="py-3 px-4">Luhn card check, Shannon entropy secret detection, and PII masking</td>
               </tr>
               <tr>
-                <td className="py-3.5 px-4 font-bold text-primary dark:text-primary-light">Zero-LLM Guardian</td>
-                <td className="py-3.5 px-4 font-mono text-[12px]">backend/app/connector/evaluators/guardian.py</td>
-                <td className="py-3.5 px-4">7 deterministic security checks and SHA-256 cryptographic hash chaining</td>
+                <td className="py-3 px-4 font-bold text-white">RAG Grounding Evaluator</td>
+                <td className="py-3 px-4 text-[#8a8f98]">backend/app/connector/evaluators/grounding.py</td>
+                <td className="py-3 px-4">Speech-act claim extraction, contextual verification, and Serper API fallback</td>
               </tr>
               <tr>
-                <td className="py-3.5 px-4 font-bold text-primary dark:text-primary-light">HITL Review Queue</td>
-                <td className="py-3.5 px-4 font-mono text-[12px]">backend/app/models/db/reviews.py</td>
-                <td className="py-3.5 px-4">Human review decision persistence and closed-loop feedback threshold auto-tuning</td>
+                <td className="py-3 px-4 font-bold text-white">Zero-LLM Guardian</td>
+                <td className="py-3 px-4 text-[#8a8f98]">backend/app/connector/evaluators/guardian.py</td>
+                <td className="py-3 px-4">Deterministic security checks and SHA-256 cryptographic hash chaining</td>
               </tr>
               <tr>
-                <td className="py-3.5 px-4 font-bold text-primary dark:text-primary-light">Chrome Extension Shield</td>
-                <td className="py-3.5 px-4 font-mono text-[12px]">frontend/extension/content.js</td>
-                <td className="py-3.5 px-4">Client-side form interception across ChatGPT, Claude, Gemini, Copilot, and DeepSeek</td>
+                <td className="py-3 px-4 font-bold text-white">HITL Review Queue</td>
+                <td className="py-3 px-4 text-[#8a8f98]">backend/app/models/db/reviews.py</td>
+                <td className="py-3 px-4">Human review decision persistence and closed-loop feedback threshold auto-tuning</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-bold text-white">Chrome Extension Shield</td>
+                <td className="py-3 px-4 text-[#8a8f98]">frontend/extension/content.js</td>
+                <td className="py-3 px-4">Client-side form interception across ChatGPT, Claude, Gemini, Copilot, and DeepSeek</td>
               </tr>
             </tbody>
           </table>

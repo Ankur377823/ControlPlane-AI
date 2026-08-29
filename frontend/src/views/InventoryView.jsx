@@ -84,10 +84,10 @@ export function InventoryView({ onNavigateOnboard }) {
 
         <button
           onClick={onNavigateOnboard}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-md shadow-primary/20 transition-colors self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white hover:bg-[#e4e4e7] active:bg-[#d4d4d8] text-black text-xs font-bold font-mono tracking-wider transition-all shadow-md self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4" />
-          <span>Onboard New Resource</span>
+          <Plus className="w-4 h-4 text-black stroke-[2.5]" />
+          <span>+ Onboard New Resource</span>
         </button>
       </div>
 

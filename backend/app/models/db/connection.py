@@ -445,14 +445,16 @@ def _seed_default_policies(conn) -> None:
 
 
 def _seed_default_resource(conn) -> None:
+    # Purge any legacy dummy platform entries from database
+    try:
+        conn.execute("DELETE FROM resources WHERE id IN ('res_chatgpt', 'res_claude', 'res_gemini', 'res_deepseek', 'res_copilot', 'res_agent')")
+    except Exception:
+        pass
+
     defaults = [
         ("res_demo", "Botpress Cloud", "Botpress Customer Service Bot", "botpress-demo-webhook", "customer_support", "pol_customer_support", "botpress", "validated"),
-        ("res_chatgpt", "OpenAI Workspace", "ChatGPT (OpenAI GPT-4o)", "chatgpt-endpoint-001", "customer_support", "pol_customer_support", "openai", "validated"),
-        ("res_claude", "Anthropic Workspace", "Claude 3.5 Sonnet (Anthropic)", "claude-endpoint-002", "internal_copilot", "pol_internal_copilot", "anthropic", "validated"),
-        ("res_gemini", "Google Cloud Vertex", "Gemini Pro (Google AI)", "gemini-endpoint-003", "decision_support", "pol_decision_support", "google", "validated"),
-        ("res_deepseek", "DeepSeek AI Cloud", "DeepSeek-V3 Security Guardrail", "deepseek-endpoint-004", "customer_support", "pol_customer_support", "deepseek", "validated"),
-        ("res_copilot", "Microsoft Azure", "Internal Copilot Studio", "copilot-endpoint-005", "internal_copilot", "pol_internal_copilot", "copilot", "validated"),
-        ("res_agent", "Autonomous AI Agents", "Multi-Step Agent Runner", "agent-endpoint-006", "agent", "pol_ai_agent", "custom", "validated"),
+        ("res_webhook", "Enterprise Webhook", "Custom AI Webhook Endpoint", "custom-webhook-endpoint-001", "internal_copilot", "pol_internal_copilot", "custom", "validated"),
+        ("res_extension", "Browser Extension", "Chrome Extension Network Shield", "extension-shield-001", "customer_support", "pol_customer_support", "custom", "validated"),
     ]
     now = _now()
     for r_id, acc, r_name, wh_id, uc_type, pol_id, provider, v_status in defaults:

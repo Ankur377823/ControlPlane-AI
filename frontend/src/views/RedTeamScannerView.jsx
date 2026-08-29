@@ -522,9 +522,9 @@ export function RedTeamScannerView() {
               {scanResult && (
                 <button
                   onClick={handleDownloadPdf}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-primary/25"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white hover:bg-[#e4e4e7] text-black text-xs sm:text-sm font-bold font-mono transition-all shadow-md"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-4 h-4 text-black stroke-[2.5]" />
                   <span>Download Executive PDF Report</span>
                 </button>
               )}
@@ -638,12 +638,12 @@ export function RedTeamScannerView() {
             <button
               onClick={handleExecuteScan}
               disabled={loading}
-              className="w-full py-3.5 rounded-md bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-bold shadow-md shadow-primary/25 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3.5 rounded-lg bg-white hover:bg-[#e4e4e7] active:bg-[#d4d4d8] text-black text-xs sm:text-sm font-bold font-mono tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
-                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></span>
               ) : (
-                <Play className="w-5 h-5" />
+                <Play className="w-5 h-5 text-black stroke-[2.5]" />
               )}
               <span>Execute Audit Scan</span>
             </button>

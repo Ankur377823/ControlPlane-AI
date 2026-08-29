@@ -1,6 +1,11 @@
-# ControlPlane AI — Chrome Extension Setup Guide
+# ControlPlane AI — Chrome Extension Setup & Installation Guide
 
-This guide describes how to install, configure, and verify the **ControlPlane AI Network Shield & Guardrail Extension** on your local browser.
+> 📍 **Cross-Reference Links**:
+> * Master Project Overview: **[`README.md`](file:///c:/ControlPlane/README.md)**
+> * Technical Architecture: **[`DESIGN.md`](file:///c:/ControlPlane/DESIGN.md)**
+> * Live Production Deployment: **[https://controlplane-ai-utso.onrender.com/](https://controlplane-ai-utso.onrender.com/)**
+
+This guide describes step-by-step how to install, configure, auto-enroll, and test the **ControlPlane AI Network Shield & Guardrail Extension** on your local browser.
 
 ---
 
@@ -18,18 +23,18 @@ The Chrome Extension is pre-packaged inside this repository in the `frontend/ext
    C:\ControlPlane\frontend\extension
    ```
 6. Click **Select Folder** (or Open).
-7. The **ControlPlane AI Guardrail** extension will now appear in your list of active extensions.
+7. The **ControlPlane AI Guardrail** extension will now appear in your list of active extensions with a crisp dark theme popup.
 
 ---
 
-## ⚙️ 2. Configuration & Enrollment
+## ⚙️ 2. Configuration & Auto-Enrollment
 
 Once loaded, enroll the extension with your local ControlPlane security server:
 
 1. Locate the puzzle piece icon 🧩 in the top-right corner of your browser toolbar.
 2. Click the icon and select **ControlPlane AI Guardrail** (you can pin it for quick access).
-3. Open the extension popup (styled in sleek dark theme):
-   * **Server URL**: Keep as `http://localhost:8000` (or your production server URL).
+3. Open the extension popup (styled in sleek minimalist dark terminal theme):
+   * **Server URL**: Keep as `http://localhost:8000` (or your live production server URL `https://controlplane-ai-utso.onrender.com`).
    * **Tenant ID**: Enter your workspace identifier (default: `ankur-tenant-1`).
 4. Click **⚡ Auto-Enroll**:
    * The extension will automatically query `/api/v1/tokens/active` to fetch your active 48-day activation token and configure itself.

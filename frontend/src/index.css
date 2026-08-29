@@ -1,22 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..800;1,14..32,300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&family=Fira+Code:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --primary: #f97316;
-  --primary-hover: #ea580c;
+  --primary: #ffffff;
+  --primary-hover: #e4e4e7;
   --success: #10b981;
   --danger: #ef4444;
   --warning: #f59e0b;
   --cyan: #06b6d4;
-  --font-brand: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-body: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-brand: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  --font-body: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
   --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
 }
 
-/* Light Mode Defaults (Crisp High-Contrast Text & Clean Backgrounds) */
+/* Light Mode Defaults */
 html.light {
   color-scheme: light;
   --bg-page: #f8fafc;
@@ -25,34 +25,32 @@ html.light {
   --bg-input: #ffffff;
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
-  --text-main: #0f172a;      /* Deep Slate 900 for razor-sharp readability */
-  --text-body: #334155;      /* Rich Slate 700 for comfortable long reading */
-  --text-muted: #64748b;     /* Slate 500 */
-  --text-subtle: #94a3b8;    /* Slate 400 */
+  --text-main: #0f172a;
+  --text-body: #334155;
+  --text-muted: #64748b;
+  --text-subtle: #94a3b8;
 }
 
-/* Dark Mode Defaults (Pure Black, Slate Tones & High-Legibility Contrast) */
+/* Dark Mode Defaults */
 html.dark {
   color-scheme: dark;
-  --bg-page: #080808;
-  --bg-card: #111111;
-  --bg-card-subtle: #1b1b1b;
-  --bg-input: #0b0b0b;
-  --border: #292929;
-  --border-strong: #3a3a3a;
-  --text-main: #f8fafc;      /* Crisp White/Slate 50 */
-  --text-body: #cbd5e1;      /* Crisp Slate 300 for eye-friendly dark reading */
-  --text-muted: #94a3b8;     /* Slate 400 */
-  --text-subtle: #64748b;    /* Slate 500 */
+  --bg-page: #08090b;
+  --bg-card: #0e1014;
+  --bg-card-subtle: #08090b;
+  --bg-input: #050608;
+  --border: #22252c;
+  --border-strong: #2a2d36;
+  --text-main: #ffffff;
+  --text-body: #eaeaea;
+  --text-muted: #8a8f98;
+  --text-subtle: #555a64;
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-body);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
-  letter-spacing: -0.011em;
-  line-height: 1.625;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -60,24 +58,46 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Enhanced Typography & Readability Styles */
-h1, h2, h3, h4, h5, h6 {
-  letter-spacing: -0.022em;
-  color: var(--text-main);
+/* Global Primary Button High-Contrast Overrides */
+.bg-primary,
+button.bg-primary,
+a.bg-primary {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  border-color: #ffffff !important;
 }
 
-p, li, span, td, th {
-  letter-spacing: -0.008em;
+.bg-primary:hover,
+button.bg-primary:hover,
+a.bg-primary:hover {
+  background-color: #e4e4e7 !important;
+  color: #000000 !important;
+}
+
+.bg-primary *,
+.bg-primary svg,
+button.bg-primary *,
+button.bg-primary svg,
+a.bg-primary *,
+a.bg-primary svg {
+  color: #000000 !important;
+  stroke: #000000 !important;
+}
+
+/* Typography & Readability Styles */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.02em;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+
+p, li, span, td, th, label, input, select, button {
+  letter-spacing: -0.01em;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
 }
 
 code, kbd, pre, samp {
-  font-family: var(--font-mono);
-  letter-spacing: normal;
-}
-
-.font-black,
-.font-extrabold {
-  font-weight: 700;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
 }
 
 /* Scrollbars */
@@ -90,42 +110,12 @@ code, kbd, pre, samp {
 }
 .light ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 4px;
+  border-radius: 3px;
 }
-.light ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
 .dark ::-webkit-scrollbar-track {
-  background: #080808;
+  background: #08090b;
 }
 .dark ::-webkit-scrollbar-thumb {
-  background: #3a3a3a;
-  border-radius: 4px;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #f97316;
-}
-
-/* Glassmorphism & Card Utilities */
-.glass-panel {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-}
-.dark .glass-panel {
-  background-color: #111111;
-  border: 1px solid #292929;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
-}
-
-.glass-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-.dark .glass-card {
-  background-color: #111111;
-  border: 1px solid #292929;
-  box-shadow: none;
+  background: #22252c;
+  border-radius: 3px;
 }

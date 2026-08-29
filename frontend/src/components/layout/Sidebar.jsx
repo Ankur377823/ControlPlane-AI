@@ -78,8 +78,8 @@ export function Sidebar({ activeRoute, onNavigate }) {
       {/* Brand Header */}
       <div className="h-[68px] flex items-center px-6 border-b border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-dark-900">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-white shadow-sm shadow-primary/30">
-            <Shield className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-lg bg-black border border-[#2a2d36] flex items-center justify-center text-white shadow-sm">
+            <Shield className="w-4 h-4 text-white" />
           </div>
           <div>
             <div className="font-brand font-extrabold text-slate-900 dark:text-white text-base tracking-tight leading-none">

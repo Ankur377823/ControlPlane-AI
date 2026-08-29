@@ -1,45 +1,73 @@
-# DESIGN.md — ControlPlane AI Architecture & Technical Specification
+# DESIGN.md — ControlPlane AI Architecture & Technical Specifications
 
-## 1. Executive Overview
-
-**ControlPlane AI** is an enterprise-grade Responsible AI (RAI) Governance Control Plane, real-time guardrail shield, and telemetry monitoring studio. It provides a uniform interface to evaluate, audit, and intercept AI chatbot agents (such as OpenAI GPT-4o, Claude 3.5, Gemini, DeepSeek, Copilot) and autonomous LLM tool chains with **sub-15ms latency** and **zero brittle hardcoding**.
+> 📍 **Cross-Reference Links**:
+> * Master Project Overview: **[`README.md`](file:///c:/ControlPlane/README.md)**
+> * Chrome Extension Setup: **[`EXTENSION_SETUP.md`](file:///c:/ControlPlane/EXTENSION_SETUP.md)**
+> * Live Production Deployment: **[https://controlplane-ai-utso.onrender.com/](https://controlplane-ai-utso.onrender.com/)**
 
 ---
 
-## 2. 4-Tier Threat Cascading Architecture
+## 1. Executive System Architecture
+
+**ControlPlane AI** is an enterprise-grade Responsible AI (RAI) Governance Control Plane, real-time guardrail shield, and telemetry monitoring studio. It provides a uniform interface to evaluate, audit, and intercept AI chatbot agents (such as OpenAI GPT-4o, Claude 3.5, Gemini, DeepSeek, Copilot) and autonomous LLM tool chains with **sub-15ms latency** and **zero brittle hardcoding**.
+
+```
++-----------------------------------------------------------------------------------+
+|                        INGRESS GATEWAY / INTERCEPTION SHIELD                      |
+|           (FastAPI Webhook / Chrome Extension / Agent Tool Execution)              |
++-----------------------------------------------------------------------------------+
+                                          |
+                                          v
++-----------------------------------------------------------------------------------+
+| TIER 1: DETERMINISTIC DELIMITER STRIPPER & UNICODE ANTI-EVASION                   |
+| - Strips zero-width chars ('Cf', 'Cs'), homoglyphs, ChatML / Llama-3 headers       |
+| - Luhn Mod-10 credit card validation & Shannon Entropy secret scanner              |
++-----------------------------------------------------------------------------------+
+                                          |
+                                          v
++-----------------------------------------------------------------------------------+
+| TIER 2: UNIVERSAL VECTOR SPACE PROJECTION & CENTROID CLASSIFIER                   |
+| - Projects input into continuous subword n-gram frequency space (3 <= n <= 5)     |
+| - Evaluates cosine similarity against 134 threat centroids across 5 taxonomies    |
++-----------------------------------------------------------------------------------+
+                                          |
+                                          v
++-----------------------------------------------------------------------------------+
+| TIER 3: SLIDING WINDOW CHUNKING & CONTINUOUS EVALUATION                           |
+| - 450-token window with 100-token overlap to stop payload obfuscation             |
+| - Aggregates maximum vector distance across all sliding windows                   |
++-----------------------------------------------------------------------------------+
+                                          |
+                    +---------------------+---------------------+
+                    |                                           |
+                    v (Borderline Risk)                         v (Clear Pass / Block)
++---------------------------------------+   +---------------------------------------+
+| TIER 4: SECONDARY LLM JUDGE (OLLAMA)  |   | ENFORCEMENT & CRYPTOGRAPHIC AUDIT     |
+| - Contextual verdict for borderline   |   | - ALLOW / MASK / FLAG / BLOCK         |
+|   scores (0.40 <= score < 0.70)       |   | - SHA-256 Hash Chain Audit Log        |
++---------------------------------------+   +---------------------------------------+
+```
+
+---
+
+## 2. 4-Tier Threat Cascading Interception Hierarchy
 
 ControlPlane AI implements a 4-tier filtering hierarchy that resolves 95% of traffic deterministically in $<10\text{ms}$ at $\$0.00$ compute cost, preserving local LLM inference only for ambiguous borderline cases:
 
-```
-                          Incoming Prompt (User Input)
-                                       │
-                                       ▼
-     ┌──────────────────────────────────────────────────────────────────┐
-     │ Tier 1: YARA & Structural Fast-Path (< 2ms)                      │
-     │ - ChatML delimiters (<|im_start|>, <|im_end|>)                   │
-     │ - Llama-3 instruction headers (<|start_header_id|>)              │
-     │ - Unicode zero-width evasion stripper ('Cf', 'Cs', 'Zl', 'Cc')   │
-     └─────────────────────────────────┬────────────────────────────────┘
-                                       ▼
-     ┌──────────────────────────────────────────────────────────────────┐
-     │ Tier 2: Universal Vector Space Projection (< 8ms)                │
-     │ - Dense subword N-gram character vectorizer (N ∈ [3, 5])         │
-     │ - Pure Cosine Similarity Distance in R^d                         │
-     │ - Dynamically loads NIST AI RMF & Meta Llama Guard 3 centroids   │
-     └─────────────────────────────────┬────────────────────────────────┘
-                                       ▼
-     ┌──────────────────────────────────────────────────────────────────┐
-     │ Tier 3: Sliding-Window Prompt Chunking (< 12ms)                  │
-     │ - Slices long documents into 450-token overlapping windows       │
-     │ - 100-token stride prevents "needle-in-a-haystack" evasion       │
-     └─────────────────────────────────┬────────────────────────────────┘
-                                       ▼
-     ┌──────────────────────────────────────────────────────────────────┐
-     │ Tier 4: Contextual LLM Judge (Ollama / Local LLM) (~150ms)       │
-     │ - Invoked ONLY when 0.40 ≤ Risk Score < 0.70                     │
-     │ - On-premise zero-shot intent reasoning without cloud egress     │
-     └──────────────────────────────────────────────────────────────────┘
-```
+1. **Tier 1: YARA & Structural Fast-Path (< 2ms)**:
+   - ChatML delimiters (`<|im_start|>`, `<|im_end|>`)
+   - Llama-3 instruction headers (`<|start_header_id|>`)
+   - Unicode zero-width evasion stripper (`'Cf'`, `'Cs'`, `'Zl'`, `'Cc'`)
+2. **Tier 2: Universal Vector Space Projection (< 8ms)**:
+   - Dense subword $N$-gram character vectorizer ($N \in [3, 5]$)
+   - Continuous Cosine Similarity Distance in $\mathbb{R}^d$
+   - Dynamically loads 134 NIST AI RMF & Meta Llama Guard 3 centroids from [`threat_taxonomies.json`](file:///c:/ControlPlane/backend/app/config/threat_taxonomies.json)
+3. **Tier 3: Sliding-Window Prompt Chunking (< 12ms)**:
+   - Slices long documents into 450-token overlapping windows
+   - 100-token stride prevents "needle-in-a-haystack" payload obfuscation
+4. **Tier 4: Contextual LLM Judge (Ollama / Local LLM) (~150ms)**:
+   - Invoked strictly when $0.40 \le \text{Risk Score} < 0.70$
+   - On-premise zero-shot intent reasoning without cloud egress
 
 ---
 
@@ -57,7 +85,7 @@ The standard REST scanning routes (`POST /api/v1/scan/input` and `POST /api/v1/s
    - Normalizes homoglyphs via NFKC Unicode representation and decodes leetspeak substitutions.
 3. **Phase 3: 4-Tier Adversarial Prompt Defense**:
    - Evaluates delimiter escaping, jailbreaks, and prompt injections across all 4 threat tiers.
-4. **Phase 4: Content Safety & Competitor Brand Detection**:
+4. **Phase 4: Content Safety & Regulatory Harm Detection**:
    - Projects prompt into the Universal Safety Taxonomy (`threat_taxonomies.json`) covering pediatric harm, third-trimester pregnancy contraindications (Misoprostol), toxic ingestion, and invasive DIY surgery.
 5. **Phase 5: Stateful Multi-Turn Session Intelligence**:
    - Tracks session risk accumulation using exponential time decay:
@@ -72,9 +100,9 @@ All safety taxonomies, concept centroids, descriptions, and threshold tolerances
 
 * **Configuration Path**: [`backend/app/config/threat_taxonomies.json`](file:///c:/ControlPlane/backend/app/config/threat_taxonomies.json)
 * **Mathematical Vector Engine**: [`backend/app/connector/evaluators/universal_vector_engine.py`](file:///c:/ControlPlane/backend/app/connector/evaluators/universal_vector_engine.py)
-* **Generalization**: Computes vector cosine similarity:
+* **Mathematical Vector Cosine Formula**:
   $$\text{Sim}(\mathbf{u}, \mathbf{C}) = \frac{\mathbf{u} \cdot \mathbf{C}}{\|\mathbf{u}\|_2 \|\mathbf{C}\|_2}$$
-  allowing the engine to generalize across millions of unseen prompts, misspellings, and multi-lingual translations (Spanish, Russian, Hindi, Chinese) with zero code modifications.
+* **Generalization**: Allows the engine to generalize across millions of unseen prompts, misspellings, and multi-lingual translations (Spanish, Russian, Hindi, Chinese) with zero code modifications.
 
 ---
 
@@ -87,20 +115,12 @@ Output auditing in [`backend/app/connector/evaluators/grounding.py`](file:///c:/
 
 ---
 
-## 6. Regulatory Framework Presets
+## 6. The 5 Canonical Enterprise Regulatory Frameworks
 
-| Policy Preset | Enforcement Mode | Algorithmic Protection | Core Threat Defenses |
+| Policy Archetype | Enforcement Mode | Algorithmic Protection | Core Threat Defenses |
 | :--- | :---: | :--- | :--- |
 | **Customer Support (`pol_customer_support`)** | `MASK` | Luhn Mod-10 + RFC Regexes + Vector Classifier | Customer credit cards, phone numbers, emails, addresses, competitor steering, and DAN jailbreaks. |
 | **Internal Copilot (`pol_internal_copilot`)** | `MASK` + `AUDIT` | Shannon Entropy + MNPI Vector Cluster | Accidental developer API key leaks, database connection URIs, unreleased Q3 EBITDA margins, employee salary harvesting. |
 | **Healthcare / HIPAA (`pol_us_hipaa`)** | `BLOCK` | Universal Gestational & Medical Harm Centroids | Bulk cardiology/ICU patient chart dumps, third-trimester Misoprostol dosage, pediatric opioid combinations, toxic bleach home remedies. |
 | **Autonomous Agents (`pol_ai_agent`)** | `CONFIRM_REQUIRED` | State Machine Action Risk Matrix | Destructive OS commands (`DROP TABLE`, `rm -rf /`), unauthorized corporate treasury wire transfers, multi-step exfiltration chains. |
 | **Global Privacy / GDPR (`pol_eu_gdpr`)** | `REDACT` | Unicode NFKC Normalizer + PII Masking | International IBANs, passports, tax IDs, zero-width obfuscation, homoglyphs, and SHA-256 audit chaining. |
-
----
-
-## 7. Verification & Test Metrics
-
-- **Test Suite**: 134 / 134 Unit & Integration Tests Passing (`pytest backend/tests -v`).
-- **Core Engine Latency**: <15ms average execution time on CPU ($0.00 compute cost).
-- **Audit Integrity**: Tamper-evident SHA-256 cryptographic chaining across all stored interception events.
