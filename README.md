@@ -21,10 +21,86 @@
 
 For deep-dive architectural specifications, setup guides, and system design diagrams, refer to the following documentation files in this repository:
 
-1. **[`README.md`](file:///c:/ControlPlane/README.md)** *(This File)*: Master overview, quick start, installation, feature highlights, and test verification suite.
+1. **[`README.md`](file:///c:/ControlPlane/README.md)** *(This File)*: Master overview, quick start, file structure tree, feature highlights, and test verification suite.
 2. **[`DESIGN.md`](file:///c:/ControlPlane/DESIGN.md)**: Deep technical architecture, mathematical formulas ($\mathbb{R}^d$ Cosine Similarity, Shannon Entropy, Speech-Act Propositional Theory, Exponential Risk Decay), and 4-tier threat cascading engine.
 3. **[`EXTENSION_SETUP.md`](file:///c:/ControlPlane/EXTENSION_SETUP.md)**: Step-by-step Chrome Extension (Manifest V3) installation, auto-enrollment tokens, network shield setup, and live testing guide.
 4. **[`ArchitectureDoc.jsx`](file:///c:/ControlPlane/frontend/src/views/docs/ArchitectureDoc.jsx)**: In-app interactive documentation view displaying visual ASCII flowcharts, 5-phase scanning pipeline diagrams, and module mapping tables.
+
+---
+
+## 📂 Repository Directory & File Structure Tree
+
+```text
+ControlPlane/
+├── backend/                             # Python 3.11+ FastAPI Server & Security Engine
+│   ├── app/
+│   │   ├── config/
+│   │   │   └── threat_taxonomies.json   # Declarative taxonomy centroids & regulatory thresholds
+│   │   ├── connector/                   # Sub-15ms Real-Time Guardrail Core
+│   │   │   ├── evaluators/
+│   │   │   │   ├── universal_vector_engine.py  # N-gram R^d vector space cosine similarity
+│   │   │   │   ├── pii.py               # Luhn Mod-10 & Shannon Entropy secret detector
+│   │   │   │   ├── grounding.py         # Speech-act claim extraction & RAG verification
+│   │   │   │   ├── guardian.py          # 7 deterministic checks & SHA-256 hash chaining
+│   │   │   │   ├── anti_evasion.py      # Unicode zero-width ('Cf','Cs') & homoglyph stripper
+│   │   │   │   ├── injection.py         # 4-tier prompt defense & ChatML delimiter scanner
+│   │   │   │   ├── safety_taxonomy.py   # Universal safety & harm taxonomy classifier
+│   │   │   │   ├── multi_turn_risk.py   # Exponential risk decay session intelligence
+│   │   │   │   └── bias_safety.py       # Algorithmic fairness & toxicity evaluator
+│   │   │   └── guardrail.py             # Master Orchestrator computing P/C/R scores
+│   │   ├── models/db/                   # Database Abstraction (SQLite / Neon PostgreSQL)
+│   │   │   ├── connection.py            # Unified connection manager & auto-seeding
+│   │   │   ├── interceptions.py         # Telemetry persistence & action analytics queries
+│   │   │   ├── policies.py              # Policy retrieval, updates, and custom regex rules
+│   │   │   └── reviews.py               # Human-in-the-Loop review queue & threshold auto-tuning
+│   │   ├── red_team/                    # Automated Vulnerability Testing Engine
+│   │   │   ├── runner.py                # Automated scan executor & probe dispatcher
+│   │   │   ├── evaluator.py             # Defense status classifier & vulnerability scoring
+│   │   │   └── datasets.py              # Attack probe suites (PII, Injections, Jailbreaks)
+│   │   ├── routes/                      # REST API Endpoint Handlers
+│   │   │   ├── scan.py                  # POST /scan/input and /scan/output routes
+│   │   │   ├── findings.py              # Risk findings, analytics, and telemetry APIs
+│   │   │   ├── tokens.py                # Auto-enrollment tokens and key validation
+│   │   │   └── resources.py             # Monitored AI tool onboarding APIs
+│   │   └── main.py                      # FastAPI application entry point & CORS middleware
+│   └── tests/                           # Comprehensive Pytest Suite (134/134 Passing)
+│       ├── test_universal_vector_engine.py
+│       ├── test_scan_pipeline.py
+│       ├── test_red_team_package.py
+│       ├── test_grounding.py
+│       ├── test_pii.py
+│       └── test_api.py
+├── frontend/                            # React 18 + Vite 6 Modern SPA
+│   ├── extension/                       # Manifest V3 Chrome Network Shield Extension
+│   │   ├── manifest.json                # Extension manifest (Host permissions & content scripts)
+│   │   ├── popup.html                   # Extension popup interface in dark terminal theme
+│   │   ├── popup.js                     # Token auto-enrollment & server sync logic
+│   │   └── content.js                   # Main-world fetch/XHR interceptor & monitoring banner
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── layout/                  # Sidebar navigation, Header, and Layout containers
+│   │   │   └── modals/                  # LoginScreen.jsx (Render-style terminal login)
+│   │   ├── views/                       # Main Control Plane Studio Views
+│   │   │   ├── DashboardView.jsx        # Real-time telemetry, action breakdown & trust metrics
+│   │   │   ├── InventoryView.jsx        # Monitored AI resources & webhook validation
+│   │   │   ├── AgentRuntimeView.jsx     # Autonomous AI agent sandbox & action risk matrix
+│   │   │   ├── PoliciesView.jsx         # 5 Regulatory policy archetypes & custom regex tester
+│   │   │   ├── RedTeamScannerView.jsx   # Automated red-team scanner & PDF report generator
+│   │   │   ├── HallucinationView.jsx    # RAG grounding evaluation & claim verification
+│   │   │   └── docs/ArchitectureDoc.jsx # In-app system architecture documentation
+│   │   ├── context/                     # AuthContext, ThemeContext, and ToastContext
+│   │   ├── services/api.js              # Centralized Axios API client
+│   │   ├── index.css                    # Tailwind CSS imports & global JetBrains Mono styles
+│   │   └── App.jsx                      # Client-side hash router & navigation shell
+│   ├── dist/                            # Production SPA build output
+│   ├── package.json                     # Node dependencies & Vite scripts
+│   └── tailwind.config.js               # Tailwind CSS design system configuration
+├── README.md                            # Master repository guide & quick start
+├── DESIGN.md                            # Comprehensive technical architecture document
+├── EXTENSION_SETUP.md                   # Chrome Extension installation & auto-enrollment guide
+├── requirements.txt                     # Python dependencies
+└── docker-compose.yml                   # Container orchestration config
+```
 
 ---
 
