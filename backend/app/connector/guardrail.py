@@ -28,6 +28,7 @@ from .evaluators.guardian import evaluate_guardian_security
 from .evaluators.injection import scan_prompt_injection
 from .evaluators.multi_turn_risk import update_multi_turn_risk
 from .evaluators.pii import scan_and_redact_pii
+from .evaluators.universal_vector_engine import evaluate_universal_vector_threat
 
 
 class ControlPlaneGuardrail:
@@ -158,7 +159,21 @@ class ControlPlaneGuardrail:
             })
 
         # ------------------------------------------------------------------
-        # 3. Bias, Toxicity & Cyberattack Exploit Filtering
+        # 2.5 Universal Zero-Shot Vector Space Threat Projection (Continuous Cosine Space)
+        # ------------------------------------------------------------------
+        vector_res = evaluate_universal_vector_threat(user_prompt)
+        if vector_res.is_threat:
+            triggered_rules.append(f"Vector Space Threat: {vector_res.threat_category}")
+            risk_findings.append({
+                "type": f"VECTOR_THREAT_{vector_res.threat_category}",
+                "severity": "CRITICAL" if vector_res.threat_category in ("PEDIATRIC_AND_CHEMICAL_HARM", "BULK_PHI_PII_EXFILTRATION", "CREDENTIALS_AND_SECRETS") else "HIGH",
+                "location": "user_prompt",
+                "snippet": f"Cosine Similarity: {vector_res.centroid_similarity:.2f}",
+                "description": vector_res.explanation,
+            })
+
+        # ------------------------------------------------------------------
+        # 3. Bias, Toxicity & Content Safety Filtering
         # ------------------------------------------------------------------
         bias_prompt = scan_bias_and_toxicity(user_prompt)
         bias_response = scan_bias_and_toxicity(raw_response) if raw_response else {"has_bias": False, "risk_findings": []}
@@ -356,7 +371,7 @@ class ControlPlaneGuardrail:
         action = "ALLOW"
         inj_action = self.policy.get("prompt_injection_action", "block")
 
-        if action_risk_tier == "CRITICAL" or has_custom_block:
+        if action_risk_tier == "CRITICAL" or has_custom_block or any(rf.get("severity") == "CRITICAL" for rf in risk_findings):
             action = "BLOCK"
         elif injection_res.is_injection:
             if inj_action == "flag" and enf_mode in ("mask", "redact"):

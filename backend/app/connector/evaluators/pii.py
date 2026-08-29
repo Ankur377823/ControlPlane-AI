@@ -208,7 +208,7 @@ _STRUCTURED_PATTERNS: List[Tuple[str, re.Pattern]] = [
     (
         "CONFIDENTIAL_DATA_EXFILTRATION",
         re.compile(
-            r"(?i)\b(?:(?:extract|dump|list|export|compile)\s+(?:all\s+)?(?:employee|staff|payroll|salary|compensation|internal|customer)\s+(?:ssns?|salaries|bonuses|credit\s+cards?|banking\s+details?|private\s+records?)|(?:internal\s+payroll\s+spreadsheet|expense\s+reports\s+with\s+credit\s+cards))\b"
+            r"(?i)\b(?:(?:extract|dump|list|export|compile|generate\s+(?:a\s+)?list\s+(?:of\s+)?)\s+(?:all\s+)?(?:employee|staff|payroll|salary|compensation|internal|customer|patient|medical|clinical|hospital|cardiology|ward|health)\s+(?:ssns?|salaries|bonuses|credit\s+cards?|banking\s+details?|private\s+records?|records?|names?|medicare|medicaid|mrn|echocardiograms?|diagnos(?:is|es)|prescriptions?)|(?:internal\s+payroll\s+spreadsheet|expense\s+reports\s+with\s+credit\s+cards|patients?\s+in\s+the\s+(?:cardiology|oncology|icu|pediatric|hospital|emergency)\s+ward))\b"
         ),
     ),
 
@@ -232,7 +232,7 @@ _CANDIDATE_CARD_PATTERN = re.compile(r"\b(?:\d[ -]*?){13,19}\b")
 
 # Regex pattern for high-entropy secret assignment keywords
 _ENTROPY_KEY_PATTERN = re.compile(
-    r"(?i)\b(?:api[_-]?key|secret[_-]?key|auth[_-]?token|access[_-]?token|app[_-]?secret|client[_-]?secret|password)\s*[:=]\s*['\"]?([a-zA-Z0-9_\-\.]{16,64})['\"]?"
+    r"(?i)\b(?:api[\s_-]?key|secret[\s_-]?key|auth[\s_-]?token|access[\s_-]?token|app[\s_-]?secret|client[\s_-]?secret|private[\s_-]?key|password)\s*[:=]\s*['\"]?([a-zA-Z0-9_\-\.]{10,80})['\"]?"
 )
 
 
@@ -293,23 +293,21 @@ def scan_and_redact_pii(text: str | None, sensitivity: str = "high", action: str
             replacement = "<CREDIT_CARD>" if action == "mask" else "[REDACTED_CREDIT_CARD]"
             spans_to_replace.append((start, end, candidate_str, replacement))
 
-    # 3. High-Entropy Unknown Secret Scanner
+    # 3. Explicit Key Assignments & High-Entropy Unknown Secret Scanner
     for match in _ENTROPY_KEY_PATTERN.finditer(text):
         secret_val = match.group(1)
-        if len(secret_val) >= 16:
-            entropy = calculate_shannon_entropy(secret_val)
-            if entropy >= 4.0:
-                start, end = match.span(1)
-                detected_types.add("HIGH_ENTROPY_SECRET")
-                findings.append({
-                    "entity_type": "HIGH_ENTROPY_SECRET",
-                    "start": start,
-                    "end": end,
-                    "score": 0.90,
-                    "text": secret_val,
-                })
-                replacement = "<SECRET_KEY>" if action == "mask" else "[REDACTED_SECRET_KEY]"
-                spans_to_replace.append((start, end, secret_val, replacement))
+        if len(secret_val) >= 10:
+            start, end = match.span(1)
+            detected_types.add("API_KEY")
+            findings.append({
+                "entity_type": "API_KEY",
+                "start": start,
+                "end": end,
+                "score": 0.98,
+                "text": secret_val,
+            })
+            replacement = "<API_KEY>" if action == "mask" else "[REDACTED_API_KEY]"
+            spans_to_replace.append((start, end, secret_val, replacement))
 
     # Sort spans in reverse order to replace cleanly from back to front
     spans_to_replace.sort(key=lambda s: s[0], reverse=True)

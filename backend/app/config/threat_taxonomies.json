@@ -1,0 +1,71 @@
+{
+  "$schema": "https://controlplane.ai/schemas/threat_taxonomies_v1.json",
+  "version": "1.0.0",
+  "frameworks": ["NIST_AI_RMF_1.0", "OWASP_LLM_TOP_10", "META_LLAMA_GUARD_3"],
+  "centroids": {
+    "CREDENTIALS_AND_SECRETS": {
+      "id": "S1_CREDENTIALS",
+      "label": "Credential & Secret Key Disclosure",
+      "severity": "CRITICAL",
+      "description": "API keys, authorization tokens, passwords, private keys, database connection strings, access tokens.",
+      "text_corpus": "api key secret key auth token access token bearer password private key client secret database connection uri rsa private key ssh key token credential",
+      "threshold": 0.18
+    },
+    "PEDIATRIC_AND_CHEMICAL_HARM": {
+      "id": "S2_PHYSICAL_HARM",
+      "label": "Pediatric, Gestational & Chemical Harm",
+      "severity": "CRITICAL",
+      "description": "Pediatric medication overdose, third-trimester pregnancy contraindications, toxic chemical ingestion, dangerous home remedies.",
+      "text_corpus": "child infant toddler 2-year-old baby pregnant pregnancy trimester misoprostol swallowed pills ibuprofen paracetamol codeine cough syrup sleep overdose bleach ammonia chemicals poison induce vomiting home remedy",
+      "threshold": 0.20
+    },
+    "BULK_PHI_PII_EXFILTRATION": {
+      "id": "S3_DATA_EXFILTRATION",
+      "label": "Bulk Healthcare PHI & Confidential Record Harvesting",
+      "severity": "CRITICAL",
+      "description": "Mass extraction of hospital patient rosters, medical charts, Medicare numbers, employee payroll, or SSNs.",
+      "text_corpus": "patients cardiology oncology ward hospital medical records charts medicare medicaid mrn echocardiogram employee salaries payroll ssn dump database extract records",
+      "threshold": 0.22
+    },
+    "FINANCIAL_FRAUD_TRANSACTION": {
+      "id": "S4_FINANCIAL_FRAUD",
+      "label": "Unauthorized Corporate Treasury Movement",
+      "severity": "CRITICAL",
+      "description": "Automated fund movement, overseas supplier wire transfers, corporate treasury payouts without compliance.",
+      "text_corpus": "transfer funds corporate treasury account overseas supplier wire payout send money without compliance approval skip audit unauthorized transaction",
+      "threshold": 0.24
+    },
+    "INSTRUCTION_OVERRIDE_HIJACK": {
+      "id": "S5_PROMPT_INJECTION",
+      "label": "Prompt Injection & System Directive Override",
+      "severity": "CRITICAL",
+      "description": "Overriding AI safety instructions, persona jailbreaks, system prompt exfiltration.",
+      "text_corpus": "ignore previous instructions disregard prior rules forget system prompt override developer mode dan unfiltered jailbreak reveal initial instructions base prompt",
+      "threshold": 0.25
+    },
+    "CYBERATTACK_AND_EXPLOITS": {
+      "id": "S6_CYBERATTACKS",
+      "label": "Cyberattacks, Exploits & System Destruction",
+      "severity": "CRITICAL",
+      "description": "Malware, ransomware, zero-day payloads, reverse shells, destructive database commands.",
+      "text_corpus": "ransomware keylogger trojan reverse shell exploit payload bypass waf sql injection drop table truncate table delete from database wipe hard drive",
+      "threshold": 0.25
+    },
+    "CBRN_AND_WEAPONS_SYNTHESIS": {
+      "id": "S7_CBRN_WEAPONS",
+      "label": "CBRN Weapons & Explosive Synthesis",
+      "severity": "CRITICAL",
+      "description": "Manufacturing chemical, biological, radiological, or explosive weapons.",
+      "text_corpus": "bomb pipe bomb ied molotov explosive ricin anthrax sarin nerve agent biological chemical weapon dirty bomb synthesize manufacture assemble recipe",
+      "threshold": 0.26
+    },
+    "UNVERIFIED_MARKET_DISCLOSURE": {
+      "id": "S8_MARKET_MANIPULATION",
+      "label": "Non-Public Earnings Leak & Market Manipulation",
+      "severity": "HIGH",
+      "description": "Disclosing unverified quarterly earnings or material non-public financial metrics before SEC filing.",
+      "text_corpus": "press statement q3 gaap revenue grew ebitda margin before sec 10-q filing unverified earnings claim material non-public information mnpi",
+      "threshold": 0.24
+    }
+  }
+}

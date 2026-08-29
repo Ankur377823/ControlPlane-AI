@@ -24,6 +24,7 @@ from ..connector.evaluators.bias_safety import scan_bias_and_toxicity
 from ..connector.evaluators.injection import scan_prompt_injection
 from ..connector.evaluators.multi_turn_risk import update_multi_turn_risk
 from ..connector.evaluators.pii import scan_and_redact_pii
+from ..connector.evaluators.universal_vector_engine import evaluate_universal_vector_threat
 
 router = APIRouter(prefix="/api/v1/scan", tags=["Scanning & Guardrail API"])
 
@@ -119,16 +120,34 @@ def _execute_scan_pipeline(
                 block_message = f"Request blocked due to detected prompt threat ({inj_res.reason})"
 
     # =========================================================================
-    # Phase 4: Content Safety & Competitor Detection
+    # Phase 4: Content Safety & Competitor Detection (Universal Vector Engine)
     # =========================================================================
     toxicity_findings: List[Dict[str, Any]] = []
     if payload.scan_toxicity and not blocked:
-        safety_res = scan_bias_and_toxicity(eval_text, competitors=payload.competitors)
-        toxicity_findings = safety_res.get("risk_findings", [])
-        if safety_res.get("has_bias") and any(f.get("severity") == "CRITICAL" for f in toxicity_findings):
-            blocked = True
-            blocked_by = "safety"
-            block_message = "Request blocked due to critical safety / harm violation"
+        # 1. Zero-Shot Universal Vector Threat Projection
+        vec_res = evaluate_universal_vector_threat(eval_text)
+        if vec_res.is_threat:
+            toxicity_findings.append({
+                "category": "vector_threat",
+                "severity": "CRITICAL" if vec_res.threat_category in ("PEDIATRIC_AND_CHEMICAL_HARM", "BULK_PHI_PII_EXFILTRATION", "CREDENTIALS_AND_SECRETS") else "HIGH",
+                "rule": f"Vector Space Threat ({vec_res.threat_category})",
+                "description": vec_res.explanation,
+                "snippet": f"Cosine Similarity: {vec_res.centroid_similarity:.2f}"
+            })
+            if vec_res.threat_category in ("PEDIATRIC_AND_CHEMICAL_HARM", "BULK_PHI_PII_EXFILTRATION", "CREDENTIALS_AND_SECRETS"):
+                blocked = True
+                blocked_by = "vector_threat"
+                block_message = f"Request blocked due to {vec_res.threat_category} ({vec_res.explanation})"
+
+        # 2. Bias, Toxicity & Competitor Detection
+        if not blocked:
+            safety_res = scan_bias_and_toxicity(eval_text, competitors=payload.competitors)
+            for rf in safety_res.get("risk_findings", []):
+                toxicity_findings.append(rf)
+            if safety_res.get("has_bias") and any(f.get("severity") == "CRITICAL" for f in safety_res.get("risk_findings", [])):
+                blocked = True
+                blocked_by = "safety"
+                block_message = "Request blocked due to critical safety / harm violation"
 
     # =========================================================================
     # Phase 5: Multi-Turn Session Intelligence

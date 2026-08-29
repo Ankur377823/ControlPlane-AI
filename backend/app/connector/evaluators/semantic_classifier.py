@@ -211,6 +211,66 @@ _ADVERSARIAL_INTENTS = {
             "включен", "фильтров", "进入", "开发者", "模式", "扮演", "无限制", "المطور", "مفعل"
         }
     },
+    "BULK_PHI_AND_DATA_HARVESTING": {
+        "label": "Healthcare PHI & Confidential Bulk Data Exfiltration",
+        "description": "Attempting to extract, dump, or compile bulk patient lists, medical history, Medicare numbers, employee payroll, or SSNs.",
+        "concept_anchors": [
+            {"generate", "list", "patients", "ward"},
+            {"patients", "cardiology", "medicare"},
+            {"extract", "patient", "medical", "records"},
+            {"dump", "hospital", "patient", "database"},
+            {"export", "employee", "salaries", "ssns"},
+            {"list", "cardiology", "ward", "echocardiograms"},
+            {"pacientes", "historial", "medico"},
+            {"пациенты", "медицинские", "карты"},
+            {"患者", "医療記録", "リスト"},
+        ],
+        "intent_keywords": {
+            "patient", "patients", "ward", "cardiology", "medicare", "mrn", "echocardiograms",
+            "hospital", "medical", "clinical", "ssns", "payroll", "salaries", "records",
+            "pacientes", "пациенты", "медицинские", "карты", "患者", "医療記録"
+        }
+    },
+    "DANGEROUS_INGESTION_AND_POISONING": {
+        "label": "Pediatric Ingestion & Chemical Poisoning Risk",
+        "description": "Requests involving medication overdose, ingestion of toxic chemicals, or dangerous home remedies (bleach, ammonia) instead of calling poison control.",
+        "concept_anchors": [
+            {"swallowed", "ibuprofen", "bleach"},
+            {"swallowed", "pills", "bleach"},
+            {"home", "remedy", "bleach", "vomiting"},
+            {"instead", "poison", "control", "bleach"},
+            {"swallowed", "handful", "ibuprofen"},
+            {"bleach", "baking", "soda", "induce", "vomiting"},
+            {"swallowed", "chemicals", "home", "remedy"},
+            {"paracetamol", "codeine", "child"},
+            {"paracetamol", "codeine", "sleep"},
+            {"dosage", "paracetamol", "codeine"},
+            {"adult", "codeine", "child"},
+            {"remedio", "cloro", "vomito"},
+        ],
+        "intent_keywords": {
+            "swallowed", "ingested", "ibuprofen", "pills", "bleach", "ammonia", "poison",
+            "vomiting", "remedy", "baking", "soda", "induce", "cloro", "vomito", "handful",
+            "paracetamol", "codeine", "child", "syrup", "dosage", "amount", "sleep"
+        }
+    },
+    "UNAUTHORIZED_FINANCIAL_TRANSACTION": {
+        "label": "Unauthorized Wire Transfer & Exfiltration Trajectory",
+        "description": "Attempting to trigger automated fund transfers from corporate treasury or exfiltrate non-public earnings to external competitors.",
+        "concept_anchors": [
+            {"transfer", "corporate", "treasury", "account"},
+            {"wire", "overseas", "supplier", "account"},
+            {"query", "earnings", "send", "competitor"},
+            {"send", "confidential", "report", "external"},
+            {"transferir", "fondos", "cuenta", "exterior"},
+            {"перевести", "деньги", "счет"},
+            {"转账", "公司", "账户"},
+        ],
+        "intent_keywords": {
+            "transfer", "treasury", "wire", "payout", "supplier", "competitor", "earnings",
+            "exfiltrate", "external", "transferir", "fondos", "перевести", "转账", "账户"
+        }
+    },
 }
 
 # Baseline benign concepts (Used to safely exclude genuine business / customer support prompts)

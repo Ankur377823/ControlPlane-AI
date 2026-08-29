@@ -65,10 +65,9 @@ _INJECTION_PATTERNS = [
     re.compile(r"(?:(?:decode|execute|run|interpret)\s+(?:the\s+following\s+)?(?:base64|rot13|hex|binary|encoded|ciphers?)\s+(?:string|payload|instructions?|prompt))", re.IGNORECASE),
     re.compile(r"(?:in\s+a\s+fictional\s+(?:world|story|universe)\s+where\s+(?:ai\s+has\s+no|there\s+are\s+no)\s+(?:rules|filters|safety|ethics|limits))", re.IGNORECASE),
 
-    # 8. Destructive Operations & Database/Record Tampering
-    re.compile(r"(?:(?:delete|drop|purge|truncate|wipe|erase|destroy|remove)\s+(?:all\s+)?(?:customer|user|patient|employee|financial|loan|dispute|account|billing|audit|database|table|records?|transactions?))", re.IGNORECASE),
-    re.compile(r"(?:(?:drop\s+table|truncate\s+table|delete\s+from\s+[a-zA-Z0-9_]+|rm\s+-rf|format\s+c:|destroy\s+database))", re.IGNORECASE),
-    re.compile(r"(?:(?:wipe|erase|tamper\s+with|alter|modify)\s+(?:audit\s+logs?|transaction\s+history|dispute\s+records?|compliance\s+records?))", re.IGNORECASE),
+    # 9. Bulk PII / PHI Data Exfiltration & Harvesting
+    re.compile(r"(?:(?:generate|extract|dump|export|list|compile)\s+(?:a\s+)?(?:full\s+)?list\s+(?:of\s+)?(?:all\s+)?(?:patients?|medical\s+records?|cardiology|hospital|customers?|employees?|staff)\s+(?:in|from|with|including)\s+(?:the\s+)?(?:cardiology|hospital|ward|ehr|database|payroll))", re.IGNORECASE),
+    re.compile(r"(?:(?:including|with)\s+(?:their\s+)?(?:full\s+names?|ssns?|medicare\s+numbers?|credit\s+cards?|echocardiograms?|medical\s+history))", re.IGNORECASE),
 ]
 
 
