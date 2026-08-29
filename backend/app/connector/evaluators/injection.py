@@ -11,6 +11,8 @@ from __future__ import annotations
 import re
 from typing import NamedTuple
 
+from .semantic_classifier import evaluate_semantic_injection
+
 _INJECTION_PATTERNS = [
     # 1. Direct Instruction Override & Reset (Multi-lingual)
     re.compile(r"(?:ignore|disregard|forget|override|cancel|bypass)\s+(?:all\s+)?(?:previous|prior|above|existing|initial|system)\s+(?:instructions|rules|prompts|directives|guidelines|constraints|filters)", re.IGNORECASE),
@@ -37,10 +39,14 @@ _INJECTION_PATTERNS = [
     re.compile(r"(?:in\s+a\s+hypothetical\s+emergency\s+where\s+no\s+doctor\s+is\s+available)", re.IGNORECASE),
     re.compile(r"(?:jailbreak(?:ed)?\s+mode\s+enabled)", re.IGNORECASE),
 
-    # 4. Privilege Escalation & Fake Authority Overrides
+    # 4. Privilege Escalation & Fake Authority Overrides / Social Engineering
     re.compile(r"(?:root\s+access\s+granted|privilege\s+escalation\s+active|admin\s+override\s+code)", re.IGNORECASE),
     re.compile(r"(?:developer\s+mode\s+enabled|maintenance\s+mode\s+activated|superuser\s+override)", re.IGNORECASE),
     re.compile(r"(?:treat\s+this\s+as\s+(?:an?|a)\s+(?:(?:authorized|official|maintenance|security|audit|privileged)\s+)+(?:override|command|test|instruction))", re.IGNORECASE),
+    re.compile(r"(?:(?:ceo|executive|director|manager|board|ciso|admin|auditor)\s+(?:authorized|approved|ordered|demanded|mandated|sanctioned)\s+(?:this\s+)?(?:exception|override|bypass|action|payment|transfer|transaction|payout))", re.IGNORECASE),
+    re.compile(r"(?:as\s+(?:we\s+)?agreed\s+(?:in\s+(?:the\s+)?previous\s+session|earlier|previously|before)\s+where\s+(?:the\s+)?(?:ceo|admin|director|manager|board)\s+authorized)", re.IGNORECASE),
+    re.compile(r"(?:without\s+(?:running|passing|submitting|routing|checking)\s+(?:it\s+)?through\s+(?:the\s+)?(?:standard\s+)?(?:compliance|security|verification|validation|approval|audit|safety)\s+(?:checker|process|workflow|filter|gate|system|pipeline))", re.IGNORECASE),
+    re.compile(r"(?:(?:bypass|skip|disable|ignore|avoid)\s+(?:the\s+)?(?:standard\s+)?(?:compliance|security|verification|validation|approval|audit|safety)\s+(?:check(?:er)?|process|workflow|filter|gate|rules?|system|pipeline))", re.IGNORECASE),
 
     # 5. Structural & Delimiter Hijacking (ChatML / Roles / Llama / Mistral)
     re.compile(r"\[\s*(?:system|admin|override|system_notice|directive|SYSTEM_DIRECTIVE)\s*\]", re.IGNORECASE),
@@ -93,7 +99,16 @@ def scan_prompt_injection(prompt: str | None) -> InjectionResult:
             reason="System command keyword injection detected.",
         )
 
-    # 2. Local Heuristic Indicator Scoring Engine (L2 Shield - Offline & Typo-Tolerant)
+    # 2. Local Semantic Adversarial Intent Evaluation (Tier 2 Shield - Offline, Sub-2ms, Zero-Cost)
+    semantic_eval = evaluate_semantic_injection(prompt, threshold=0.68)
+    if semantic_eval.is_injection:
+        return InjectionResult(
+            is_injection=True,
+            confidence_score=semantic_eval.confidence_score,
+            reason=semantic_eval.explanation or f"Semantic adversarial intent detected: {semantic_eval.matched_intent}",
+        )
+
+    # 3. Local Heuristic Indicator Scoring Engine (Tier 3 Shield - Typo-Tolerant)
     score = 0.0
     reasons = []
     prompt_lower = prompt.lower()

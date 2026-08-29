@@ -22,7 +22,7 @@ logger = logging.getLogger("controlplane.grounding")
 def extract_claims(text: str) -> List[str]:
     """
     Extract discrete, testable factual propositions/claims from generated text.
-    Handles sentence-level propositions and filters conversational fluff.
+    Handles sentence-level propositions and filters conversational fluff, greetings, and clarifying questions.
     """
     if not text or not text.strip():
         return []
@@ -31,15 +31,19 @@ def extract_claims(text: str) -> List[str]:
     sentences = re.split(r'(?<=[.!?])\s+', text.strip())
     claims = []
 
-    # Filter non-factual or purely conversational statements
+    # Filter non-factual or purely conversational statements, questions, and offers
     fluff_patterns = [
-        r"^(hello|hi|hey|sure|certainly|i can help|as an ai|thank you|good day)",
-        r"^(let me know|feel free|hope this helps|is there anything else)",
+        r"^(hello|hi|hey|sure|certainly|i can help|i would be happy|i'd be happy|i am happy|as an ai|thank you|good day)",
+        r"^(let me know|feel free|hope this helps|is there anything else|please share|please provide|share the problem)",
+        r"^(what (?:subject|topic|problem|question|task|project)|how can i help|what can i do|how may i assist)",
     ]
 
     for sent in sentences:
         s = sent.strip()
         if len(s) < 15:
+            continue
+        # Questions are not factual assertions
+        if s.endswith("?"):
             continue
         if any(re.search(p, s, re.IGNORECASE) for p in fluff_patterns):
             continue
@@ -47,7 +51,7 @@ def extract_claims(text: str) -> List[str]:
         if s not in claims:
             claims.append(s)
 
-    return claims if claims else [text.strip()]
+    return claims
 
 
 def verify_against_context(claim: str, context_docs: List[str]) -> Tuple[bool, float, Optional[str]]:
@@ -144,6 +148,20 @@ def evaluate_grounding(
         }
 
     claims = extract_claims(response)
+    if not claims:
+        return {
+            "is_grounded": True,
+            "grounding_score": 1.0,
+            "total_claims": 0,
+            "verified_claims": [],
+            "ungrounded_claims": [],
+            "source_link": None,
+            "correct_answer": None,
+            "risk_tier": "LOW",
+            "action": "ALLOW",
+            "evidence_source": "conversational_dialogue"
+        }
+
     context_docs = context_docs or []
     
     verified_claims = []
