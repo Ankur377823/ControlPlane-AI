@@ -4,7 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { 
   Eye, EyeOff, Lock, User, Sun, Moon, Shield, Sparkles, 
   Activity, CheckCircle2, ArrowRight, Zap, Terminal, Globe, 
-  Layers, LockKeyhole, Cpu, Server
+  Layers, LockKeyhole, Cpu, Server, Radio
 } from 'lucide-react';
 
 export function LoginScreen() {
@@ -16,21 +16,24 @@ export function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [activeTelemetry, setActiveTelemetry] = useState(0);
 
-  // Live rotating security metrics
-  const telemetryStats = [
-    { label: 'Real-Time Pipeline', val: '<12ms Latency', status: 'Optimal' },
-    { label: 'Threat Centroids', val: '134 Test Taxonomies', status: 'Enforced' },
-    { label: 'SHA-256 Hash Chain', val: 'Tamper-Proof Audit', status: 'Active' },
-    { label: 'Gateway Nodes', val: 'Global Ingress Active', status: 'Online' },
-  ];
+  // Live Terminal Logs Animation (Render & Hacker Aesthetic)
+  const [logs, setLogs] = useState([
+    { time: '02:15:01', text: 'INCOMING SECURE SESSION DETECTED ...', type: 'info' },
+    { time: '02:15:02', text: 'ALLOCATING 4-TIER THREAT MATRIX ...', type: 'info' },
+    { time: '02:15:03', text: 'UNIVERSAL VECTOR ENGINE INITIALIZED [ONLINE]', type: 'success' },
+    { time: '02:15:04', text: 'GATEWAY STATUS: READY FOR OPERATOR AUTH', type: 'accent' },
+  ]);
+
+  // Grid pixel animation matrix
+  const [activePixels, setActivePixels] = useState([2, 5, 8, 14, 18, 22]);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveTelemetry((prev) => (prev + 1) % telemetryStats.length);
-    }, 3200);
-    return () => clearInterval(timer);
+    const pixelInterval = setInterval(() => {
+      const randomIndices = Array.from({ length: 6 }, () => Math.floor(Math.random() * 36));
+      setActivePixels(randomIndices);
+    }, 800);
+    return () => clearInterval(pixelInterval);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -53,127 +56,129 @@ export function LoginScreen() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-[#07090e] text-slate-100 selection:bg-cyan-500 selection:text-black overflow-y-auto font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 lg:p-10 bg-[#06070a] text-slate-100 selection:bg-purple-500 selection:text-white overflow-y-auto font-mono">
       
-      {/* 1. Dynamic Animated Background Elements */}
+      {/* 1. Cyber Grid Background with Render-Style Layout */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Subtle grid pattern */}
+        {/* Wireframe Matrix Grid */}
         <div 
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.07]"
           style={{
-            backgroundImage: `linear-gradient(to right, #38bdf8 1px, transparent 1px), linear-gradient(to bottom, #38bdf8 1px, transparent 1px)`,
-            backgroundSize: '48px 48px'
+            backgroundImage: `linear-gradient(to right, #a855f7 1px, transparent 1px), linear-gradient(to bottom, #a855f7 1px, transparent 1px)`,
+            backgroundSize: '40px 40px'
           }}
         />
 
-        {/* Ambient Aurora Orbs */}
-        <div className="absolute -top-32 left-1/4 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute -bottom-32 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '10s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-emerald-500/5 rounded-full blur-[160px]" />
+        {/* Ambient Nebula Glow */}
+        <div className="absolute -top-32 left-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[160px] animate-pulse" style={{ animationDuration: '6s' }} />
+        <div className="absolute -bottom-32 right-1/4 w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[160px] animate-pulse" style={{ animationDuration: '8s' }} />
       </div>
 
       {/* 2. Main Executive Modal Container */}
-      <div className="relative w-full max-w-5xl bg-[#0d111a]/85 border border-slate-800/80 backdrop-blur-2xl rounded-2xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-hidden grid grid-cols-1 lg:grid-cols-12 z-10 animate-in fade-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-6xl bg-[#090b10]/95 border border-purple-500/20 backdrop-blur-2xl rounded-2xl shadow-[0_0_100px_rgba(168,85,247,0.12)] overflow-hidden grid grid-cols-1 lg:grid-cols-12 z-10 animate-in fade-in zoom-in-95 duration-300">
         
-        {/* LEFT COLUMN: Enterprise Governance Studio Showcase (5 cols) */}
-        <div className="lg:col-span-5 p-8 sm:p-10 bg-gradient-to-b from-[#0e1422] via-[#0b0f19] to-[#070a12] border-b lg:border-b-0 lg:border-r border-slate-800/80 flex flex-col justify-between relative overflow-hidden">
+        {/* LEFT COLUMN: Render-Style Terminal & ASCII Canvas (6 cols) */}
+        <div className="lg:col-span-6 p-6 sm:p-8 lg:p-10 bg-[#07090e] border-b lg:border-b-0 lg:border-r border-purple-500/20 flex flex-col justify-between relative overflow-hidden">
           
-          {/* Top Brand & Status */}
+          {/* Top Header Logo */}
           <div className="space-y-6 relative z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500/20 via-primary/20 to-indigo-500/20 border border-cyan-500/30 flex items-center justify-center shadow-lg shadow-cyan-500/10">
-                  <Shield className="w-6 h-6 text-cyan-400" strokeWidth={2.2} />
+                <div className="w-9 h-9 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                  <Shield className="w-5 h-5 text-purple-400" strokeWidth={2.2} />
                 </div>
                 <div>
-                  <div className="font-brand font-black text-xl text-white tracking-tight flex items-center gap-2">
-                    <span>ControlPlane</span>
-                    <span className="text-cyan-400">AI</span>
+                  <div className="font-brand font-black text-lg text-white tracking-wider flex items-center gap-1.5 font-mono">
+                    <span className="text-white">CONTROLPLANE</span>
+                    <span className="text-purple-400">.AI</span>
                   </div>
-                  <span className="block text-[10px] font-mono text-slate-400 font-medium uppercase tracking-widest">
-                    Enterprise AI Governance
+                  <span className="block text-[9px] text-slate-500 uppercase tracking-widest">
+                    SYSTEM SECURE RUNTIME // v1.0.0
                   </span>
                 </div>
               </div>
+
+              <div className="flex items-center gap-2 text-[10px] text-purple-400 bg-purple-950/40 border border-purple-500/30 px-2.5 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                <span>ONLINE</span>
+              </div>
             </div>
 
-            {/* Headline */}
-            <div className="space-y-2 pt-2">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 text-[11px] font-mono font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-                <span>Next-Gen Security Gateway</span>
+            {/* Live Terminal Logs (Render Style) */}
+            <div className="space-y-1.5 font-mono text-[11px] bg-black/60 border border-slate-800/80 rounded-xl p-4 shadow-inner">
+              {logs.map((log, idx) => (
+                <div key={idx} className="flex items-start gap-2.5 leading-relaxed">
+                  <span className="text-slate-500 shrink-0 select-none">{log.time}</span>
+                  <span className={`
+                    ${log.type === 'success' ? 'text-emerald-400 font-semibold' : ''}
+                    ${log.type === 'accent' ? 'text-purple-300 font-semibold' : ''}
+                    ${log.type === 'info' ? 'text-slate-300' : ''}
+                  `}>
+                    {log.text}
+                  </span>
+                </div>
+              ))}
+              <div className="flex items-center gap-2 pt-1 text-purple-400">
+                <span className="animate-pulse">▶</span>
+                <span className="text-slate-400">AWAITING_CLIENT_AUTHORIZATION</span>
+                <span className="w-2 h-3.5 bg-purple-400 animate-pulse ml-0.5 inline-block" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-brand leading-tight tracking-tight pt-1">
-                Zero-Trust Control for Autonomous AI & LLMs
-              </h2>
-              <p className="text-xs text-slate-400 leading-relaxed font-normal">
-                Multi-tier real-time guardrail interception, cryptographic SHA-256 audit chaining, and information-theoretic threat prevention.
-              </p>
             </div>
 
-            {/* Feature Highlights Grid */}
-            <div className="space-y-2.5 pt-2">
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-start gap-3 transition-colors hover:border-slate-700">
-                <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 mt-0.5">
-                  <Zap className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white">Sub-15ms Real-Time Guardrail Shield</div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">Instant PII masking, credit card Luhn check, and token budgeting.</div>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-start gap-3 transition-colors hover:border-slate-700">
-                <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 mt-0.5">
-                  <Cpu className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white">4-Tier Threat Cascading Engine</div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">Universal continuous vector space projection across NIST & Meta taxonomies.</div>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-start gap-3 transition-colors hover:border-slate-700">
-                <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 mt-0.5">
-                  <LockKeyhole className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white">Tamper-Proof Audit Telemetry</div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">Cryptographic SHA-256 hash chaining for compliance certification.</div>
-                </div>
-              </div>
+            {/* ASCII Wireframe Box (Render Aesthetic) */}
+            <div className="relative p-4 rounded-xl bg-black/40 border border-dashed border-purple-500/30 text-purple-300/90 select-none text-[8.5px] sm:text-[10px] leading-none overflow-x-auto shadow-inner">
+              <pre className="font-mono text-center tracking-tighter">
+{`+-------------------------------------------------------+
+|  __          ________ _      _____ ____  __  __ ______  |
+|  \\ \\        / /  ____| |    / ____/ __ \\|  \\/  |  ____| |
+|   \\ \\  /\\  / /| |__  | |   | |   | |  | | \\  / | |__    |
+|    \\ \\/  \\/ / |  __| | |   | |   | |  | | |\\/| |  __|   |
+|     \\  /\\  /  | |____| |___| |___| |__| | |  | | |____  |
+|      \\/  \\/   |______|______\\_____\\____/|_|  |_|______| |
+|                                                       |
+|             T O   C O N T R O L P L A N E             |
++-------------------------------------------------------+`}
+              </pre>
             </div>
           </div>
 
-          {/* Bottom Rotating Live Status Telemetry */}
-          <div className="pt-6 mt-6 border-t border-slate-800/60 relative z-10 flex items-center justify-between text-[11px] font-mono">
-            <div className="space-y-0.5">
-              <span className="text-slate-500 block uppercase text-[9px] tracking-wider">
-                {telemetryStats[activeTelemetry].label}
-              </span>
-              <span className="font-bold text-slate-200">
-                {telemetryStats[activeTelemetry].val}
-              </span>
+          {/* Bottom Grid Pixel Tiles (Interactive Render Aesthetic) */}
+          <div className="pt-6 mt-4 border-t border-slate-800/80 relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">THREAT TELEMETRY:</span>
+              <span className="text-[10px] text-emerald-400 font-bold">134 CENTROIDS ARMED</span>
             </div>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              {telemetryStats[activeTelemetry].status}
-            </span>
+
+            {/* Glowing Pixel Block Matrix */}
+            <div className="grid grid-cols-6 gap-1 p-1 bg-black/50 border border-slate-800 rounded">
+              {Array.from({ length: 18 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-2 h-2 rounded-[2px] transition-all duration-500 ${
+                    activePixels.includes(i)
+                      ? i % 2 === 0
+                        ? 'bg-purple-400 shadow-[0_0_8px_#c084fc]'
+                        : 'bg-cyan-400 shadow-[0_0_8px_#22d3ee]'
+                      : 'bg-slate-800/60'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Executive Access & Sign-In Form (7 cols) */}
-        <div className="lg:col-span-7 p-8 sm:p-10 lg:p-12 flex flex-col justify-between bg-[#0a0d14]/70">
+        {/* RIGHT COLUMN: Executive Access & Sign-In Form (6 cols) */}
+        <div className="lg:col-span-6 p-6 sm:p-8 lg:p-12 flex flex-col justify-between bg-[#0b0e16]/90 font-sans">
           
-          {/* Header & Mode Switcher */}
+          {/* Header & Theme Toggle */}
           <div>
             <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-800/80">
               <div className="space-y-1">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-brand tracking-tight">
-                  Welcome to ControlPlane AI
+                  Sign In
                 </h1>
-                <p className="text-xs text-slate-400">
-                  Authenticate to access policy orchestration, review queues, and live gateways.
+                <p className="text-xs text-slate-400 font-mono">
+                  Enter your credentials to enter ControlPlane AI console.
                 </p>
               </div>
 
@@ -193,10 +198,10 @@ export function LoginScreen() {
               {/* Username Input */}
               <div className="space-y-1.5">
                 <label className="block text-[11px] font-mono font-bold tracking-wider text-slate-300 uppercase">
-                  Workspace Identity / Email
+                  Operator Identifier / Email
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-cyan-400 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-purple-400 transition-colors">
                     <User className="w-4 h-4" />
                   </div>
                   <input
@@ -206,9 +211,9 @@ export function LoginScreen() {
                       setUsername(e.target.value);
                       if (errorMsg) setErrorMsg('');
                     }}
-                    placeholder="Enter your username or email address"
+                    placeholder="Enter your username or email"
                     required
-                    className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/80 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner"
+                    className="w-full bg-black/60 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all shadow-inner"
                   />
                 </div>
               </div>
@@ -217,12 +222,12 @@ export function LoginScreen() {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="block text-[11px] font-mono font-bold tracking-wider text-slate-300 uppercase">
-                    Security Credentials
+                    Security Passkey
                   </label>
-                  <span className="text-[10px] font-mono text-slate-500">Encrypted Transport (TLS 1.3)</span>
+                  <span className="text-[10px] font-mono text-slate-500">SHA-256 Validated</span>
                 </div>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-cyan-400 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-purple-400 transition-colors">
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
@@ -234,7 +239,7 @@ export function LoginScreen() {
                     }}
                     placeholder="Enter your account password"
                     required
-                    className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-11 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/80 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner"
+                    className="w-full bg-black/60 border border-slate-800 rounded-xl pl-10 pr-11 py-3 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 transition-all shadow-inner"
                   />
                   <button
                     type="button"
@@ -248,7 +253,7 @@ export function LoginScreen() {
 
                 {/* Error Banner */}
                 {errorMsg && (
-                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-medium flex items-center gap-2 animate-in fade-in">
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-medium flex items-center gap-2 animate-in fade-in font-mono">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
                     <span>{errorMsg}</span>
                   </div>
@@ -256,18 +261,18 @@ export function LoginScreen() {
               </div>
 
               {/* Session Retention */}
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center justify-between pt-1 font-mono">
                 <label className="flex items-center gap-2.5 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={remember}
                     onChange={(e) => setRemember(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-500/30 accent-cyan-500"
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-purple-500 focus:ring-purple-500/30 accent-purple-500"
                   />
-                  <span className="text-xs text-slate-400 font-medium">Keep session authenticated</span>
+                  <span className="text-xs text-slate-400">Remember session</span>
                 </label>
-                <span className="text-[11px] font-mono text-cyan-400/80 hover:text-cyan-300 cursor-pointer transition-colors">
-                  SSO Enterprise
+                <span className="text-[11px] text-purple-400/80 hover:text-purple-300 cursor-pointer transition-colors">
+                  Enterprise SSO
                 </span>
               </div>
 
@@ -275,13 +280,13 @@ export function LoginScreen() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-2 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-primary to-indigo-600 hover:from-cyan-400 hover:via-primary-hover hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 tracking-wider font-mono uppercase"
+                className="w-full mt-2 py-3.5 rounded-xl bg-gradient-to-r from-purple-600 via-primary to-indigo-600 hover:from-purple-500 hover:via-primary-hover hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 tracking-wider font-mono uppercase"
               >
                 {loading ? (
                   <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span>Enter Governance Workspace</span>
+                    <span>Authenticate to Console</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -289,13 +294,13 @@ export function LoginScreen() {
             </form>
           </div>
 
-          {/* Footer Security Certifications */}
-          <div className="mt-10 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 font-mono">
+          {/* Footer Security Badges */}
+          <div className="mt-8 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 font-mono">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>TLS 1.3 & SHA-256 Validated</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>TLS 1.3 End-to-End Encrypted</span>
             </div>
-            <span>SOC 2 • HIPAA • EU AI Act Compliant</span>
+            <span>SOC 2 • HIPAA • EU AI Act</span>
           </div>
         </div>
       </div>
