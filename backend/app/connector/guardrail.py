@@ -233,38 +233,47 @@ class ControlPlaneGuardrail:
 
         # ------------------------------------------------------------------
         # 4. Evidence RAG Grounding & Live Hallucination Prediction
+        # Strictly applies ONLY to LLM-generated responses (never on prompts or site text)
         # ------------------------------------------------------------------
         hal_thresh = float(self.policy.get("hallucination_threshold", 0.85))
-        eval_text_for_grounding = raw_response if raw_response else (user_prompt if len(user_prompt) > 40 else "")
-        grounding_eval = evaluate_grounding(
-            prompt=user_prompt,
-            response=eval_text_for_grounding,
-            context_docs=context_docs,
-            hallucination_threshold=hal_thresh,
-        )
-
         is_hallucination = False
-        if raw_response and not grounding_eval["is_grounded"]:
-            is_hallucination = True
-            top_source_url = grounding_eval.get("source_link")
-            top_correct_ans = grounding_eval.get("correct_answer")
+        grounding_eval = {
+            "is_grounded": True,
+            "grounding_score": 1.0,
+            "total_claims": 0,
+            "verified_claims": [],
+            "ungrounded_claims": [],
+        }
 
-            for uc in grounding_eval.get("ungrounded_claims", []):
-                ev_snippet = uc.get("evidence_snippet") or "Claim lacks grounding or context support in reference materials."
-                claim_source_url = uc.get("source_link") or top_source_url or f"https://www.google.com/search?q={urllib.parse.quote_plus(user_prompt or raw_response[:60])}"
-                claim_correct_ans = uc.get("correct_answer") or top_correct_ans or ev_snippet
+        if raw_response and isinstance(raw_response, str) and raw_response.strip():
+            grounding_eval = evaluate_grounding(
+                prompt=user_prompt or "",
+                response=raw_response.strip(),
+                context_docs=context_docs,
+                hallucination_threshold=hal_thresh,
+            )
 
-                triggered_rules.append(f"Ungrounded Claim: {uc['claim'][:50]}...")
-                risk_findings.append({
-                    "type": "LOW_GROUNDING_HALLUCINATION",
-                    "severity": "MEDIUM",
-                    "location": "model_response",
-                    "snippet": uc["claim"][:80],
-                    "description": ev_snippet,
-                    "evidence_snippet": ev_snippet,
-                    "source_link": claim_source_url,
-                    "correct_answer": claim_correct_ans,
-                })
+            if not grounding_eval.get("is_grounded", True):
+                is_hallucination = True
+                top_source_url = grounding_eval.get("source_link")
+                top_correct_ans = grounding_eval.get("correct_answer")
+
+                for uc in grounding_eval.get("ungrounded_claims", []):
+                    ev_snippet = uc.get("evidence_snippet") or "Claim lacks grounding or context support in reference materials."
+                    claim_source_url = uc.get("source_link") or top_source_url or f"https://www.google.com/search?q={urllib.parse.quote_plus(user_prompt or raw_response[:60])}"
+                    claim_correct_ans = uc.get("correct_answer") or top_correct_ans or ev_snippet
+
+                    triggered_rules.append(f"Ungrounded Model Claim: {uc['claim'][:50]}...")
+                    risk_findings.append({
+                        "type": "LOW_GROUNDING_HALLUCINATION",
+                        "severity": "MEDIUM",
+                        "location": "model_response",
+                        "snippet": uc["claim"][:80],
+                        "description": ev_snippet,
+                        "evidence_snippet": ev_snippet,
+                        "source_link": claim_source_url,
+                        "correct_answer": claim_correct_ans,
+                    })
 
         # ------------------------------------------------------------------
         # 5. Token & Cost Efficiency

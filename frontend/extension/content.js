@@ -26,13 +26,10 @@
 
   // 1. STRICT EXCLUSION: Never run on ControlPlane itself
   const isControlPlaneApp =
-    document.title.toLowerCase().includes("controlplane") ||
-    !!document.querySelector('meta[name="application-name"][content*="ControlPlane" i]') ||
-    !!document.getElementById("login-screen") ||
-    !!document.getElementById("app-shell") ||
-    !!document.getElementById("root") ||
-    host === "localhost" ||
-    host === "127.0.0.1";
+    (host === "localhost" || host === "127.0.0.1") &&
+    (document.title.toLowerCase().includes("controlplane") ||
+     !!document.querySelector('meta[name="application-name"][content*="ControlPlane" i]') ||
+     !!document.getElementById("app-shell"));
 
   if (isControlPlaneApp) {
     return;
@@ -45,6 +42,7 @@
     host.includes("claude.ai") ||
     host.includes("gemini.google.com") ||
     host.includes("aistudio.google.com") ||
+    host.includes("google.com/gemini") ||
     host.includes("deepseek.com") ||
     host.includes("kimi.moonshot.cn") ||
     host.includes("kimi.ai") ||
@@ -76,55 +74,69 @@
 
   const blockedPromptsSet = new Set();
   let isChecking = false;
-  let isConnected = false;
+  let isConnected = true;
 
   function ensureBannerInjected() {
     if (document.getElementById("controlplane-top-banner")) return;
 
-    const banner = document.createElement("div");
-    banner.id = "controlplane-top-banner";
-    banner.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 34px;
-      z-index: 2147483645;
-      background: #090d16;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      color: #f1f5f9;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-      transition: all 0.25s ease;
-    `;
+    function doInject() {
+      if (document.getElementById("controlplane-top-banner")) return;
+      if (!document.body) {
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", doInject, { once: true });
+        } else {
+          setTimeout(doInject, 100);
+        }
+        return;
+      }
 
-    banner.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span id="cp-banner-dot" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);"></span>
-        <span id="cp-banner-text" style="color: #cbd5e1; font-weight: 500;">ControlPlane Active — Guarding ${host}</span>
-      </div>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span id="cp-banner-badge" style="background: rgba(99, 102, 241, 0.12); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.25); padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;">ACTIVE</span>
-        <button id="cp-banner-dismiss" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500; transition: all 0.15s ease;">Dismiss</button>
-      </div>
-    `;
+      const banner = document.createElement("div");
+      banner.id = "controlplane-top-banner";
+      banner.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 34px;
+        z-index: 2147483647;
+        background: #090d16;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        color: #f1f5f9;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        transition: all 0.25s ease;
+      `;
 
-    document.documentElement.style.marginTop = "34px";
-    document.body.appendChild(banner);
+      banner.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span id="cp-banner-dot" style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);"></span>
+          <span id="cp-banner-text" style="color: #cbd5e1; font-weight: 500;">ControlPlane Active — Guarding ${host}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span id="cp-banner-badge" style="background: rgba(99, 102, 241, 0.12); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.25); padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;">ACTIVE</span>
+          <button id="cp-banner-dismiss" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500; transition: all 0.15s ease;">Dismiss</button>
+        </div>
+      `;
 
-    const dismissBtn = document.getElementById("cp-banner-dismiss");
-    if (dismissBtn) {
-      dismissBtn.addEventListener("click", () => {
-        banner.style.display = "none";
-        document.documentElement.style.marginTop = "0px";
-      });
+      document.documentElement.style.marginTop = "34px";
+      document.body.prepend(banner);
+
+      const dismissBtn = document.getElementById("cp-banner-dismiss");
+      if (dismissBtn) {
+        dismissBtn.addEventListener("click", () => {
+          banner.style.display = "none";
+          document.documentElement.style.marginTop = "0px";
+        });
+      }
     }
+
+    doInject();
   }
 
   function ensureToastContainerInjected() {
@@ -161,17 +173,24 @@
   }
 
   async function syncConnectionState() {
-    let token = "";
+    let token = "cp_live_default";
+    let isExplicitlyDisconnected = false;
+
     if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
       try {
-        const stored = await chrome.storage.local.get(["cp_token"]);
-        if (stored && stored.cp_token && stored.cp_token.trim()) {
-          token = stored.cp_token.trim();
+        const stored = await chrome.storage.local.get(["cp_token", "cp_disconnected"]);
+        if (stored) {
+          if (stored.cp_disconnected === true || stored.cp_token === "DISCONNECTED") {
+            isExplicitlyDisconnected = true;
+            token = "";
+          } else if (stored.cp_token && stored.cp_token.trim()) {
+            token = stored.cp_token.trim();
+          }
         }
       } catch (e) {}
     }
 
-    if (!token) {
+    if (isExplicitlyDisconnected || !token) {
       // DISCONNECTED STATE: Clean up all injected UI and disable guardrail
       isConnected = false;
       const existingBanner = document.getElementById("controlplane-top-banner");
@@ -969,9 +988,9 @@
   function getAssistantNodes() {
     const candidateNodes = [];
 
-    // 1. Direct Assistant Turn Selectors across ChatGPT, Claude, Gemini, DeepSeek
+    // 1. Direct Assistant Turn Selectors across ChatGPT, Claude, Gemini, DeepSeek, Botpress
     const assistantTurns = document.querySelectorAll(
-      "[data-message-author-role='assistant'], div.text-message-assistant, div[data-message-id], article:not([data-message-author-role='user']), div.agent-turn, div.font-claude-message, model-response, .ds-markdown, [data-testid*='bot-message']"
+      "[data-message-author-role='assistant'], div.text-message-assistant, div[data-message-id]:not([data-message-author-role='user']), div.agent-turn, div.font-claude-message, model-response, .ds-markdown, [data-testid*='bot-message']"
     );
 
     assistantTurns.forEach((turn) => {
@@ -981,10 +1000,10 @@
       if (turn.classList && turn.classList.contains("font-user-message")) return;
 
       // Find the main text container inside the assistant turn
-      const textContainer = turn.querySelector(".markdown, .prose, div[class*='markdown'], div[class*='prose'], .ds-markdown, p") || turn;
+      const textContainer = turn.querySelector(".markdown, .prose, div[class*='markdown'], div[class*='prose'], .ds-markdown") || turn;
 
       // Skip input forms, footer disclaimers, modals, or existing badges
-      if (textContainer.closest("form, footer, header, #prompt-textarea, [contenteditable='true'], button, .cp-factuality-inline-badge, .cp-modal-overlay")) {
+      if (textContainer.closest("form, footer, header, nav, #prompt-textarea, [contenteditable='true'], button, .cp-factuality-inline-badge, .cp-modal-overlay")) {
         return;
       }
 
@@ -992,16 +1011,6 @@
         candidateNodes.push(textContainer);
       }
     });
-
-    // 2. Generic fallback: search all markdown blocks in main container
-    if (candidateNodes.length === 0) {
-      const markdowns = document.querySelectorAll("main .markdown, main .prose, main p, div.markdown, div.prose");
-      markdowns.forEach((el) => {
-        if (!el.closest("form, footer, header, #prompt-textarea, [contenteditable='true'], button, .cp-factuality-inline-badge, [data-message-author-role='user'], .font-user-message")) {
-          candidateNodes.push(el);
-        }
-      });
-    }
 
     return candidateNodes;
   }
