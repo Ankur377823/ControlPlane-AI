@@ -192,7 +192,7 @@ export function EnrollmentTokensView() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-2 rounded-md bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-md shadow-primary/25 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+              className="w-full py-2 rounded-md bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 text-xs font-semibold shadow-md transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
             >
               <Key className="w-3.5 h-3.5" />
               <span>{submitting ? 'Creating...' : 'Create Token'}</span>

@@ -317,7 +317,7 @@ export function PolicyDetailView({ policyId, onBack, onNavigatePolicies }) {
               type="button"
               disabled={loading}
               onClick={handleEnforceInProduction}
-              className="px-4 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md shadow-primary/25 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              className="px-4 py-1.5 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 text-xs font-bold shadow-md transition-colors flex items-center gap-1.5 disabled:opacity-50"
             >
               {loading ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Sparkles className="w-3.5 h-3.5" />}
               <span>Enforce this Policy in Production</span>
@@ -479,7 +479,7 @@ export function PolicyDetailView({ policyId, onBack, onNavigatePolicies }) {
               type="button"
               disabled={loading}
               onClick={handleEnforceInProduction}
-              className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md shadow-primary/25 transition-colors flex items-center gap-2"
+              className="px-6 py-2.5 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 text-xs font-bold shadow-md transition-colors flex items-center gap-2"
             >
               {loading ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Sparkles className="w-3.5 h-3.5" />}
               <span>Activate & Enforce in Production</span>

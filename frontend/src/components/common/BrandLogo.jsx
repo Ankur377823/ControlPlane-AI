@@ -3,7 +3,7 @@ import React from 'react';
 export function BrandLogo({ className = 'w-9 h-9', size = 'default' }) {
   return (
     <div
-      className={`relative flex items-center justify-center rounded-xl bg-black border border-orange-500/30 shadow-lg shadow-orange-500/20 overflow-hidden flex-shrink-0 group ${className}`}
+      className={`relative flex items-center justify-center rounded-xl bg-slate-100 dark:bg-[#181b22] border border-slate-300 dark:border-[#2a2d36] shadow-sm overflow-hidden flex-shrink-0 group ${className}`}
     >
       {/* Background radial glow */}
       <div className="absolute inset-0 bg-gradient-to-tr from-primary/45 via-orange-600/25 to-amber-400/25 opacity-80 group-hover:opacity-100 transition-opacity" />

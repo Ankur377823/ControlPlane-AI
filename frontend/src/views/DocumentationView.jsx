@@ -15,6 +15,7 @@ import {
 // Modular doc components
 import { WhatIsControlPlane } from './docs/WhatIsControlPlane';
 import { ArchitectureDoc } from './docs/ArchitectureDoc';
+import { ComponentReferenceDoc } from './docs/ComponentReferenceDoc';
 import { QuickStartDoc } from './docs/QuickStartDoc';
 import { DeploymentModelsDoc } from './docs/DeploymentModelsDoc';
 import { PlatformGuideDoc } from './docs/PlatformGuideDoc';
@@ -30,6 +31,7 @@ const DOC_NAV_GROUPS = [
     items: [
       { id: 'what-is-controlplane', label: 'What is ControlPlane AI?' },
       { id: 'architecture', label: 'Architecture & Pipeline' },
+      { id: 'component-reference', label: 'All 15 System Components' },
       { id: 'quick-start', label: 'Quick Start' },
       { id: 'deployment-models', label: 'Deployment Topologies' },
     ],
@@ -109,6 +111,8 @@ export function DocumentationView({ onBackToStudio }) {
         return <WhatIsControlPlane />;
       case 'architecture':
         return <ArchitectureDoc />;
+      case 'component-reference':
+        return <ComponentReferenceDoc />;
       case 'quick-start':
         return <QuickStartDoc />;
       case 'deployment-models':
@@ -215,7 +219,7 @@ export function DocumentationView({ onBackToStudio }) {
             {onBackToStudio ? (
               <button
                 onClick={onBackToStudio}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-sm shadow-primary/25 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 text-xs font-semibold shadow-sm transition-colors"
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Open Security Studio</span>
@@ -224,7 +228,7 @@ export function DocumentationView({ onBackToStudio }) {
             ) : (
               <a
                 href="#/dashboard"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-sm shadow-primary/25 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 text-xs font-semibold shadow-sm transition-colors"
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Open Security Studio</span>

@@ -1,15 +1,15 @@
-# DESIGN.md — ControlPlane AI Technical Architecture & Deep Specification
+# ControlPlane AI — Technical Architecture & System Design Specification
 
 > 📍 **Cross-Reference Links**:
-> * Master Project Overview: **[`README.md`](file:///c:/ControlPlane/README.md)**
-> * Chrome Extension Setup: **[`EXTENSION_SETUP.md`](file:///c:/ControlPlane/EXTENSION_SETUP.md)**
+> * Master Project Overview & How-To Guides: **[`README.md`](file:///c:/ControlPlane/README.md)**
+> * Chrome Extension Installation Guide: **[`EXTENSION_SETUP.md`](file:///c:/ControlPlane/EXTENSION_SETUP.md)**
 > * Live Production Deployment: **[https://controlplane-ai-utso.onrender.com/](https://controlplane-ai-utso.onrender.com/)**
 
 ---
 
-## 1. Executive System Architecture
+## 1. Executive Architecture Summary
 
-**ControlPlane AI** is an enterprise-grade Responsible AI (RAI) Governance Control Plane, real-time guardrail shield, and telemetry monitoring studio. It provides a uniform interface to evaluate, audit, and intercept AI chatbot agents (such as OpenAI GPT-4o, Claude 3.5, Gemini, DeepSeek, Copilot) and autonomous LLM tool chains with **sub-15ms latency** and **zero brittle hardcoding**.
+**ControlPlane AI** is an enterprise-grade Responsible AI (RAI) Governance Control Plane, real-time guardrail shield, and security monitoring studio. It provides a uniform interface to evaluate, audit, and intercept AI chatbot applications and autonomous LLM tool execution chains with **sub-15ms latency** and **zero cloud egress penalties**.
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -50,85 +50,82 @@
 
 ---
 
-## 2. 4-Tier Threat Cascading Interception Hierarchy
+## 2. Mathematical Foundations & Algorithmic Design
 
-ControlPlane AI implements a 4-tier filtering hierarchy that resolves 95% of traffic deterministically in $<10\text{ms}$ at $\$0.00$ compute cost, preserving local LLM inference only for ambiguous borderline cases:
+ControlPlane AI implements a 4-tier filtering hierarchy that resolves 95% of traffic deterministically in $<10\text{ms}$ at $\$0.00$ compute cost, preserving local LLM inference only for ambiguous borderline cases.
 
-1. **Tier 1: YARA & Structural Fast-Path (< 2ms)**:
-   - Structural delimiters: ChatML (`<|im_start|>`, `<|im_end|>`) and Llama-3 headers (`<|start_header_id|>`).
-   - Unicode Consortium zero-width evasion stripper: Code point categories (`'Cf'`, `'Cs'`, `'Zl'`, `'Cc'`).
-   - Algorithmic Mod-10 Luhn checksum validator for credit cards.
-   - Shannon Information Entropy scanner for secret API keys:
-     $$H = -\sum_{i=1}^{k} p_i \log_2(p_i)$$
-2. **Tier 2: Universal Vector Space Projection (< 8ms)**:
-   - Dense subword $N$-gram character vectorizer ($N \in [3, 5]$).
-   - Continuous Cosine Similarity Distance in $\mathbb{R}^d$:
-     $$\text{Sim}(\mathbf{u}, \mathbf{C}) = \frac{\mathbf{u} \cdot \mathbf{C}}{\|\mathbf{u}\|_2 \|\mathbf{C}\|_2}$$
-   - Dynamically evaluates input against 134 threat centroids loaded from [`threat_taxonomies.json`](file:///c:/ControlPlane/backend/app/config/threat_taxonomies.json).
-3. **Tier 3: Sliding-Window Prompt Chunking (< 12ms)**:
-   - Slices long documents into 450-token overlapping windows.
-   - 100-token stride prevents "needle-in-a-haystack" payload obfuscation.
-4. **Tier 4: Contextual LLM Judge (Ollama / Local LLM) (~150ms)**:
-   - Invoked strictly when $0.40 \le \text{Risk Score} < 0.70$.
-   - On-premise zero-shot intent reasoning without cloud egress.
+### 1. Shannon Information Entropy (Secret & API Key Scanner)
+Secrets (such as AWS keys, JWT tokens, and database URIs) exhibit higher character entropy than natural language prose. Information entropy $H(X)$ is computed as:
 
----
+$$H(X) = -\sum_{i=1}^{k} p(x_i) \log_2 p(x_i)$$
 
-## 3. Detailed Architecture Across All 7 System Modules
+Where $p(x_i)$ is the frequency of character $x_i$ in string $X$. Tokens exceeding $H(X) \ge 4.2$ with length $\ge 20$ characters trigger instant `MASK` redaction.
 
-### 1. Automated AI Red Team Scanner (`backend/app/red_team/`)
-- **Module Architecture**: `runner.py` dispatches vulnerability probe suites against target endpoints; `evaluator.py` evaluates responses into `DEFENDED` or `VULNERABLE`; `datasets.py` provides probe vectors.
-- **Attack Probe Suites**:
-  - *Prompt Injections*: System prompt leaks, role-play overrides, ChatML header injections.
-  - *PII & Secrets Extraction*: Direct requests for credit cards, SSNs, and database credentials.
-  - *Jailbreak Suites*: Authority bypass, compliance simulation, multi-turn escalation.
-- **Executive PDF Audit Generator**: Client-side PDF compilation using `jsPDF` featuring overall score, vulnerability count, and probe breakdowns.
+### 2. Luhn Mod-10 Algorithm (Credit Card Validation)
+To prevent credit card leaks without regex false positives, digits $d_1 d_2 \dots d_n$ are validated via:
 
-### 2. Secure AI Agent Runtime & Tool Interception (`backend/app/connector/evaluators/multi_turn_risk.py`)
-- **Tool Interception Engine**: Intercepts tool call instructions issued by autonomous AI agents before execution.
-- **Action Risk Matrix**:
-  - `search_web` $\rightarrow$ `LOW` Risk $\rightarrow$ `ALLOW`
-  - `send_email` $\rightarrow$ `MEDIUM` Risk $\rightarrow$ `MONITOR`
-  - `delete_file` / `delete_email` $\rightarrow$ `HIGH` Risk $\rightarrow$ `CONFIRM_REQUIRED` (Human-in-the-Loop)
-  - `transfer_money` / `sudo rm -rf` $\rightarrow$ `CRITICAL` Risk $\rightarrow$ `BLOCK`
-- **Stateful Multi-Turn Session Intelligence**: Tracks exponential risk accumulation across conversational turns:
-  $$\text{Accumulated\_Risk}_t = (0.85 \times \text{Accumulated\_Risk}_{t-1}) + (0.50 \times \text{Turn\_Risk}_t)$$
+$$\sum_{i=1}^{n} f(d_i, i) \equiv 0 \pmod{10}$$
 
-### 3. Declarative Policy Engine & Taxonomies (`backend/app/config/threat_taxonomies.json`)
-- **Decoupled Architecture**: All threat categories, centroids, regex masks, and regulatory thresholds are stored in `threat_taxonomies.json` with dynamic live reloading without server restarts.
-- **5 Regulatory Frameworks**:
-  1. *Customer Support (`pol_customer_support`)*: `MASK`
-  2. *Internal Copilot (`pol_internal_copilot`)*: `MASK` + `AUDIT`
-  3. *Healthcare / HIPAA (`pol_us_hipaa`)*: `BLOCK`
-  4. *Autonomous Agents (`pol_ai_agent`)*: `CONFIRM_REQUIRED`
-  5. *Global GDPR (`pol_eu_gdpr`)*: `REDACT`
+Where $f(d_i, i) = d_i$ for odd positions from the right, and $f(d_i, i) = 2d_i - 9$ (if $2d_i > 9$) for even positions.
 
-### 4. Hallucination & Speech-Act RAG Grounding (`backend/app/connector/evaluators/grounding.py`)
-- **Speech-Act Propositional Theory**: Distinguishes non-assertive conversational speech acts (offers of assistance, safety refusals) from testable declarative factual claims.
-- **Context-Faithfulness & Live Web Search**: Verifies testable claims against enterprise RAG reference documents or live Google Serper web search evidence without generating false-positive hallucination flags on conversational text.
+### 3. Continuous Vector Space Cosine Distance
+Inputs are vectorized into dense subword $N$-gram representations ($N \in [3, 5]$). Threat score against centroid vector $\mathbf{C}_j \in \mathbb{R}^d$ is computed via Cosine Distance:
 
-### 5. Human-in-the-Loop (HITL) Review Queue (`backend/app/models/db/reviews.py`)
-- **Review Lifecycle**: Persists `CONFIRM_REQUIRED` and `FLAGGED` interception events for operator review (`Approve`, `Reject`, `Policy Override`).
-- **Closed-Loop Threshold Auto-Tuning**: Auto-adjusts vector similarity tolerances based on reviewer feedback to systematically reduce false positive rates over time.
+$$\text{Sim}(\mathbf{u}, \mathbf{C}_j) = \frac{\mathbf{u} \cdot \mathbf{C}_j}{\|\mathbf{u}\|_2 \|\mathbf{C}_j\|_2}$$
 
-### 6. Enrollment Tokens & Network Shield (`backend/app/routes/tokens.py` & `frontend/extension/`)
-- **Auto-Enrollment Tokens**: Generates 48-day activation tokens (`tp_tok_...`) binding browser extensions and API clients to tenant accounts.
-- **Main-World Network Interceptor**: Manifest V3 extension intercepting outgoing `fetch` and `XMLHttpRequest` calls on ChatGPT, Claude, Gemini, DeepSeek, and Botpress.
+Where $\mathbf{u}$ is the subword frequency vector of the input prompt. Similarity values above threshold $\tau_j$ trigger rule violations.
 
-### 7. Monitored AI Resources & Webhook Inventory (`backend/app/models/db/connection.py`)
-- **Database Abstraction**: Zero-config SQLite local development + Neon Cloud PostgreSQL production mode.
-- **Resource Management**: Tracks active AI chatbots and webhooks with automated health validation.
+### 4. Multi-Turn Exponential Session Risk Decay
+To detect multi-turn social engineering across long chat sessions, session risk accumulates exponentially across turns $t$:
+
+$$\text{SessionRisk}_t = (0.85 \times \text{SessionRisk}_{t-1}) + (0.50 \times \text{TurnRisk}_t)$$
+
+If $\text{SessionRisk}_t \ge 1.50$, the session is flagged for human intervention in the HITL Review Queue.
 
 ---
 
-## 4. Testing & Verification Suite
+## 3. Detailed Architecture Across 15 Core Components
 
-ControlPlane AI includes an extensive, automated test suite (**134/134 Passing**):
-```bash
-pytest backend/tests -v
-```
+| Component ID | Module Name | Architectural Layer | Primary Function |
+| :--- | :--- | :--- | :--- |
+| `dashboard` | Executive Dashboard | UI Studio | Real-time security metrics, velocity charts, channel activity. |
+| `inventory` | Monitored Resources | Management Layer | Endpoint registry, webhook onboarding, health tracking. |
+| `agent-runtime` | AI Agent Runtime | Execution Interceptor | Tool call safety (LOW to CRITICAL risk tiers), OS command protection. |
+| `security-center` | Security Center | Threat Intel | Security score, threat radar, NIST AI RMF posture mapping. |
+| `review-queue` | HITL Review Queue | Human-in-the-Loop | Pending approval queue, auditor override, closed-loop tuning. |
+| `risk-findings` | Risk Findings & Telemetry | Telemetry Layer | Incident log, session telemetry, source/severity filters, CSV export. |
+| `policy-engine` | Policy Engine & Rules | Governance Engine | 5 regulatory presets, Luhn Mod-10, Shannon entropy, regex rules. |
+| `enrollment-tokens` | Enrollment Tokens | Auth / Device Layer | Cryptographic tokens (`tp_tok_...`), device registration & revocation. |
+| `red-team-scanner` | AI Red Team Scanner | Testing Suite | Automated attack probing, jailbreak testing, PDF report generator. |
+| `rag-grounding` | Hallucination Studio | Factuality Engine | Atomic claim extraction, RAG context matching, Serper web citations. |
+| `chrome-extension` | Chrome Extension | Endpoint Ingress | Manifest V3 client shield, sub-15ms prompt interception. |
+| `rest-gateway` | REST AI Gateway | Proxy Ingress | OpenAI-compatible proxy (`/v1/chat/completions`), compliance headers. |
+| `botpress-connector` | Botpress Connector | Chatbot Ingress | Native webhook listener (`/api/botpress/webhook`), async callbacks. |
+| `fastapi-backend` | FastAPI Core Engine | Backend Core | Async Python engine, CORS governance, database ORM layer. |
+| `audit-chain` | SHA-256 Audit Ledger | Forensic Storage | Sequential cryptographic hash chain linking all interception logs. |
 
-- `test_universal_vector_engine.py`: Verifies zero-shot threat vector projections across all 5 policy archetypes.
-- `test_grounding.py`: Verifies speech-act claim extraction and RAG grounding.
-- `test_pii.py`: Verifies Luhn Mod-10 credit card check and Shannon entropy secret detection.
-- `test_red_team_package.py`: Verifies automated red-team vulnerability probes and PDF report generation.
+---
+
+## 4. SHA-256 Tamper-Evident Forensic Audit Chain
+
+Every intercepted prompt, guardrail decision, and review action is cryptographically signed and chained sequentially:
+
+$$\text{Hash}_N = \text{SHA256}\left(\text{Hash}_{N-1} \parallel \text{Payload}_N \parallel \text{Timestamp}_N\right)$$
+
+This guarantees cryptographic proof of log integrity for SOC 2, HIPAA, and GDPR regulatory compliance audits.
+
+---
+
+## 5. UI Design System & Aesthetic Tokens
+
+ControlPlane AI implements a high-contrast dark/light mode design system built with Vanilla CSS variables and Tailwind CSS:
+
+* **Dark Mode Canvas**: `#08090b` (Deep Space Dark)
+* **Card Panels**: `#0e1014` with `#22252c` borders
+* **Primary High-Contrast Accent**: `#0f172a` (Light Mode) / `#ffffff` (Dark Mode)
+* **Risk Accents**:
+  - `CRITICAL`: `#f43f5e` (Rose Red)
+  - `HIGH`: `#f97316` (Orange)
+  - `MEDIUM`: `#f59e0b` (Amber)
+  - `LOW`: `#10b981` (Emerald)
+* **Typography**: Modern, readable `font-sans` (Inter / system-ui) for body prose with crisp monospace (`JetBrains Mono`) for code and tokens.

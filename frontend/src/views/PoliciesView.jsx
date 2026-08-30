@@ -451,9 +451,9 @@ export function PoliciesView({ onViewPolicyDetail }) {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2.5 text-primary">
-            <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Sliders className="w-4 h-4 text-primary" />
+          <div className="flex items-center gap-2.5 text-slate-900 dark:text-white">
+            <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#181b22] border border-slate-300 dark:border-[#2a2d36] text-slate-900 dark:text-white flex items-center justify-center">
+              <Sliders className="w-4 h-4 text-slate-900 dark:text-white" />
             </div>
             <h1 className="font-brand text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               AI Security Guardrail Policies
@@ -479,24 +479,24 @@ export function PoliciesView({ onViewPolicyDetail }) {
           <button
             type="button"
             onClick={handleOpenCreateModal}
-            className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover active:scale-95 text-white text-xs font-bold shadow-md shadow-primary/25 transition-all flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-black text-xs font-bold shadow-md transition-all flex items-center gap-1.5 font-mono"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-white dark:text-black" />
             <span>Create Policy Group</span>
           </button>
         </div>
       </div>
 
       {/* 1. MASTER SHIELD (Featured Top Card) */}
-      <div className="rounded-xl border border-[#22252c] bg-[#0e1014] p-6 sm:p-7 shadow-xl space-y-5">
+      <div className="rounded-xl border border-slate-200 dark:border-[#22252c] bg-white dark:bg-[#0e1014] p-6 sm:p-7 shadow-sm space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-11 h-11 rounded-lg bg-white text-black flex items-center justify-center font-bold flex-shrink-0 shadow-md">
-              <ShieldCheck className="w-6 h-6 text-black stroke-[2.5]" />
+            <div className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-[#181b22] border border-slate-300 dark:border-[#2a2d36] text-slate-900 dark:text-white flex items-center justify-center font-bold flex-shrink-0 shadow-sm">
+              <ShieldCheck className="w-6 h-6 text-slate-900 dark:text-white stroke-[2.5]" />
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap font-mono">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-black uppercase tracking-wider">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900 dark:bg-white text-white dark:text-black uppercase tracking-wider">
                   MASTER SHIELD
                 </span>
                 <span className="text-[10px] font-bold text-[#8a8f98]">
@@ -621,7 +621,7 @@ export function PoliciesView({ onViewPolicyDetail }) {
             <button
               type="button"
               onClick={handleOpenCreateModal}
-              className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold shadow-sm"
+              className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 text-xs font-bold shadow-sm transition-colors"
             >
               + Create Policy Group
             </button>
@@ -700,14 +700,14 @@ export function PoliciesView({ onViewPolicyDetail }) {
                         onClick={() => {
                           if (onViewPolicyDetail) onViewPolicyDetail(policy.id);
                         }}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary-hover dark:text-orange-400 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-bold font-mono text-slate-900 dark:text-white hover:underline"
                       >
                         <span>View Policy Details</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
 
                       {isCurrentlyEnforced ? (
-                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                        <span className="text-xs font-bold font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                           <CheckCircle2 className="w-4 h-4" />
                           <span>Enforcing</span>
                         </span>
@@ -716,12 +716,12 @@ export function PoliciesView({ onViewPolicyDetail }) {
                           type="button"
                           disabled={isLoading}
                           onClick={() => handleOneClickEnforce(policy)}
-                          className="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover active:scale-95 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50"
+                          className="px-3.5 py-1.5 rounded-lg bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-[#e4e4e7] text-white dark:text-black text-xs font-bold font-mono transition-all flex items-center gap-1.5 disabled:opacity-50 shadow-sm"
                         >
                           {isLoading ? (
-                            <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                            <span className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin"></span>
                           ) : (
-                            <Sparkles className="w-3.5 h-3.5" />
+                            <Sparkles className="w-3.5 h-3.5 text-white dark:text-black stroke-[2.5]" />
                           )}
                           <span>Activate & Enforce</span>
                         </button>

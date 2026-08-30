@@ -9,12 +9,13 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#ffffff',
-          hover: '#e4e4e7',
-          light: '#ffffff',
-          dark: '#a1a1aa',
+          DEFAULT: '#0f172a',
+          hover: '#1e293b',
+          light: '#334155',
+          dark: '#020617',
         },
         dark: {
+          950: '#050608',
           900: '#08090b',
           850: '#0e1014',
           800: '#181b22',

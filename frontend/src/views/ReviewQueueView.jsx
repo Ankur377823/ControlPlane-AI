@@ -109,8 +109,8 @@ export function ReviewQueueView() {
       {trustMetrics && (
         <div className="p-4 rounded-xl border border-slate-300 dark:border-[#22252c] bg-white dark:bg-[#0e1014] flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-white dark:text-black stroke-[2.5]" />
+            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-[#181b22] border border-slate-300 dark:border-[#2a2d36] text-slate-900 dark:text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+              <Sparkles className="w-5 h-5 text-slate-900 dark:text-white stroke-[2.5]" />
             </div>
             <div>
               <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">

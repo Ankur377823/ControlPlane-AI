@@ -145,16 +145,16 @@ export function FindingDetailView({ findingId, onBack }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleAcknowledge}
-              className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-750 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm"
+              className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-750 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm whitespace-nowrap"
             >
               Acknowledge
             </button>
             <button
               onClick={handleResolve}
-              className="px-3.5 py-1.5 rounded-xl bg-amber-100/70 hover:bg-amber-200 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700 text-xs font-bold transition-colors shadow-sm"
+              className="px-3.5 py-1.5 rounded-xl bg-amber-100/70 hover:bg-amber-200 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700 text-xs font-bold transition-colors shadow-sm whitespace-nowrap"
             >
               Resolve
             </button>
@@ -196,7 +196,7 @@ export function FindingDetailView({ findingId, onBack }) {
           <div className="grid grid-cols-1 md:grid-cols-12 p-4 bg-slate-50/50 dark:bg-dark-900/40">
             <div className="md:col-span-3 font-semibold text-slate-500 dark:text-slate-400">Session ID</div>
             <div className="md:col-span-9">
-              <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-dark-950 font-mono text-[11px] text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-dark-800 font-mono text-[11px] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm">
                 {finding.session_id || 'sess_default_001'}
               </span>
             </div>

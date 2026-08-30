@@ -122,7 +122,7 @@ export function RiskFindingsView({ onSelectFinding }) {
               onClick={() => setSourceFilter(src.id)}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
                 isSelected
-                  ? 'bg-primary text-white shadow-sm shadow-primary/25 border border-primary'
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm border border-slate-900 dark:border-white'
                   : 'bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-dark-800'
               }`}
             >

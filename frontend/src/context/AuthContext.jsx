@@ -48,6 +48,9 @@ export function AuthProvider({ children }) {
 
       setUser(userData);
       setActiveTenant(userData.tenant_id || 'ankur-tenant-1');
+      localStorage.setItem('cp_theme', 'dark');
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
       showToast(`Welcome back, ${userData.name || userData.username}!`, 'success');
       return true;
     } catch (err) {

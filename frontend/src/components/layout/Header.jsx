@@ -56,8 +56,8 @@ export function Header({ activeRoute }) {
         </button>
 
         {/* Tenant Pill / Switcher */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 shadow-sm transition-colors text-xs font-semibold">
-          <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-dark-850 border border-slate-300 dark:border-slate-700/80 text-slate-900 dark:text-slate-200 shadow-sm transition-colors text-xs font-semibold font-mono">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           {isAdmin && allowedTenants.length > 1 ? (
             <select
               value={activeTenant}

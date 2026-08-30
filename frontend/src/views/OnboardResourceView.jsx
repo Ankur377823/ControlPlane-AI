@@ -157,7 +157,7 @@ export function OnboardResourceView({ onBack, onComplete }) {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 py-3 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md shadow-primary/25 transition-colors disabled:opacity-50"
+              className="flex-1 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 text-xs font-bold shadow-md transition-colors disabled:opacity-50"
             >
               {submitting ? 'Connecting...' : 'Save & Onboard Resource'}
             </button>
