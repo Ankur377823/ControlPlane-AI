@@ -185,53 +185,57 @@ def list_interceptions(
     search: Optional[str] = None,
 ) -> list[dict]:
     with get_conn() as conn:
-        query = "SELECT * FROM interceptions WHERE (action != 'ALLOW' OR (risk_findings_json IS NOT NULL AND risk_findings_json != '[]'))"
+        query = """
+            SELECT i.*, r.resource_name, r.account_name
+            FROM interceptions i
+            LEFT JOIN resources r ON i.resource_id = r.id
+            WHERE (i.action != 'ALLOW' OR (i.risk_findings_json IS NOT NULL AND i.risk_findings_json != '[]'))
+        """
         params = []
 
         if tenant_id and tenant_id.lower() != "all":
-            query += " AND (tenant_id = ? OR tenant_id IN ('ankur-tenant-1', 'cp_live_default'))"
+            query += " AND (i.tenant_id = ? OR i.tenant_id IN ('ankur-tenant-1', 'cp_live_default'))"
             params.append(tenant_id)
 
         if resource_id:
-            query += " AND resource_id = ?"
+            query += " AND i.resource_id = ?"
             params.append(resource_id)
 
         if source and source.lower() != "all":
             s_low = source.lower()
             if "endpoint" in s_low or "browser" in s_low or "extension" in s_low:
-                query += " AND (LOWER(source) LIKE '%extension%' OR LOWER(source) LIKE '%endpoint%' OR LOWER(source) LIKE '%browser%' OR LOWER(source) LIKE '%chatgpt%' OR LOWER(source) LIKE '%claude%')"
+                query += " AND (LOWER(i.source) LIKE '%extension%' OR LOWER(i.source) LIKE '%endpoint%' OR LOWER(i.source) LIKE '%browser%' OR LOWER(i.source) LIKE '%chatgpt%' OR LOWER(i.source) LIKE '%claude%')"
             elif "inventory" in s_low or "botpress" in s_low or "webhook" in s_low:
-                query += " AND (LOWER(source) LIKE '%botpress%' OR LOWER(source) LIKE '%inventory%' OR LOWER(source) LIKE '%webhook%')"
+                query += " AND (LOWER(i.source) LIKE '%botpress%' OR LOWER(i.source) LIKE '%inventory%' OR LOWER(i.source) LIKE '%webhook%')"
             elif "agent" in s_low or "runtime" in s_low:
-                query += " AND (LOWER(source) LIKE '%agent%' OR LOWER(source) LIKE '%runtime%')"
+                query += " AND (LOWER(i.source) LIKE '%agent%' OR LOWER(i.source) LIKE '%runtime%')"
             elif "gateway" in s_low or "rest" in s_low or "api" in s_low:
-                query += " AND (LOWER(source) LIKE '%gateway%' OR LOWER(source) LIKE '%rest%' OR LOWER(source) LIKE '%api%')"
+                query += " AND (LOWER(i.source) LIKE '%gateway%' OR LOWER(i.source) LIKE '%rest%' OR LOWER(i.source) LIKE '%api%')"
             else:
-                query += " AND LOWER(source) = LOWER(?)"
+                query += " AND LOWER(i.source) = LOWER(?)"
                 params.append(source)
 
         if severity and severity.lower() != "all severities":
-            query += " AND LOWER(severity) = LOWER(?)"
+            query += " AND LOWER(i.severity) = LOWER(?)"
             params.append(severity)
 
         if status and status.lower() != "all":
-            query += " AND LOWER(status) = LOWER(?)"
+            query += " AND LOWER(i.status) = LOWER(?)"
             params.append(status)
 
         if search:
-            query += " AND (user_prompt LIKE ? OR finding_title LIKE ? OR context LIKE ? OR finding_code LIKE ? OR session_id LIKE ?)"
+            query += " AND (i.user_prompt LIKE ? OR i.finding_title LIKE ? OR i.context LIKE ? OR i.finding_code LIKE ? OR i.session_id LIKE ?)"
             s_pat = f"%{search}%"
             params.extend([s_pat, s_pat, s_pat, s_pat, s_pat])
 
-        query += " ORDER BY timestamp DESC LIMIT ?"
+        query += " ORDER BY i.timestamp DESC LIMIT ?"
         params.append(limit)
 
         rows = conn.execute(query, params).fetchall()
         result = []
         for r in rows:
             d = dict(r)
-            res_obj = get_resource(d["resource_id"])
-            resource_name = res_obj["resource_name"] if res_obj else "Global AI Guardrail"
+            resource_name = d.get("resource_name") or "Global AI Guardrail"
 
             rf_list = json.loads(d.get("risk_findings_json", "[]"))
             correct_ans = None

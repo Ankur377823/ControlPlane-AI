@@ -45,6 +45,10 @@
 * **134 Security Taxonomies**: Projects prompts into vector space ($\mathbb{R}^d$ Cosine Similarity) checking against NIST AI RMF, Meta Llama Guard 3, and OWASP LLM Top 10.
 * **Autonomous Agent Action Risk Tiers**: Intercepts tool calls (`delete_file`, `transfer_money`, `send_email`) into `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` risk tiers.
 * **SHA-256 Tamper-Evident Audit Chain**: Cryptographically links every intercepted event into a sequential hash chain for SOC 2, HIPAA, and GDPR audit compliance.
+* **Dual-Engine Database Architecture**:
+  - *Local Development*: Zero-configuration SQLite (`botpress_connector.db`).
+  - *Cloud Production (Render POC)*: Managed **Neon Cloud PostgreSQL** via `DATABASE_URL`.
+  - *Relational Query Optimization*: Single-query `LEFT JOIN resources` relational fetch eliminating N+1 DB roundtrip overheads on cloud deployments.
 
 ---
 
