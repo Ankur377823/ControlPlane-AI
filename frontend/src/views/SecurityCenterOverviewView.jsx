@@ -25,18 +25,36 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
     loadData();
   }, []);
 
-  // Compute breakdown stats
-  const totalCount = findings.length > 0 ? findings.length : 324;
+  // Compute breakdown stats dynamically from loaded findings
+  const totalCount = findings.length;
   const criticalCount = findings.filter((f) => (f.severity || '').toUpperCase() === 'CRITICAL').length;
-  const highCount = findings.filter((f) => (f.severity || '').toUpperCase() === 'HIGH').length || 198;
-  const mediumCount = findings.filter((f) => (f.severity || '').toUpperCase() === 'MEDIUM').length || 126;
+  const highCount = findings.filter((f) => (f.severity || '').toUpperCase() === 'HIGH').length;
+  const mediumCount = findings.filter((f) => (f.severity || '').toUpperCase() === 'MEDIUM').length;
   const lowCount = findings.filter((f) => (f.severity || '').toUpperCase() === 'LOW').length;
-  const openCount = totalCount - (stats?.resolved_count || 5);
 
-  const inventoryCount = findings.filter((f) => (f.source || '').toLowerCase().includes('inventory')).length || 0;
-  const runtimeCount = findings.filter((f) => (f.source || '').toLowerCase().includes('runtime') || (f.source || '').toLowerCase().includes('gateway')).length || 124;
-  const agentSessionCount = findings.filter((f) => (f.source || '').toLowerCase().includes('agent')).length || 0;
-  const endpointCount = findings.filter((f) => (f.source || '').toLowerCase().includes('endpoint')).length || 212;
+  const resolvedCount = findings.filter((f) => (f.status || '').toUpperCase() === 'RESOLVED').length;
+  const openCount = findings.filter((f) => (f.status || '').toUpperCase() === 'OPEN' || !f.status).length;
+  const resolvedPct = totalCount > 0 ? ((resolvedCount / totalCount) * 100).toFixed(1) + '%' : '0.0%';
+
+  const inventoryCount = findings.filter((f) => {
+    const s = (f.source || '').toLowerCase();
+    return s.includes('inventory') || s.includes('resource');
+  }).length;
+
+  const runtimeCount = findings.filter((f) => {
+    const s = (f.source || '').toLowerCase();
+    return s.includes('runtime') || s.includes('gateway') || s.includes('botpress') || s.includes('rest');
+  }).length;
+
+  const agentSessionCount = findings.filter((f) => {
+    const s = (f.source || '').toLowerCase();
+    return s.includes('agent');
+  }).length;
+
+  const endpointCount = findings.filter((f) => {
+    const s = (f.source || '').toLowerCase();
+    return s.includes('endpoint') || s.includes('browser') || s.includes('chatgpt') || s.includes('extension');
+  }).length;
 
   // Filter recent critical/high findings
   const filteredRecent = findings.filter((f) => {
@@ -129,7 +147,7 @@ export function SecurityCenterOverviewView({ onSelectFinding, onNavigatePolicies
           <div className="grid grid-cols-3 lg:grid-cols-1 gap-4 lg:min-w-[180px] pt-4 lg:pt-0 lg:border-l lg:border-slate-100 dark:lg:border-slate-800 lg:pl-8 text-left">
             <div>
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Resolved</div>
-              <div className="text-lg font-bold text-slate-900 dark:text-white font-brand">1.2%</div>
+              <div className="text-lg font-bold text-slate-900 dark:text-white font-brand">{resolvedPct}</div>
             </div>
             <div>
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Findings</div>
