@@ -648,20 +648,27 @@ def _seed_default_users(conn) -> None:
         users.append(("usr_ankur", "ankur", "ankur@acme.com", "password123", "Ankur Kumar Singh", "ADMIN", "local", "approved", "ankur-tenant-1", now))
 
     for u in users:
-        row = conn.execute("SELECT id FROM users WHERE id = ? OR username = ?", (u[0], u[1])).fetchone()
-        if not row:
-            conn.execute(
-                """
-                INSERT INTO users (id, username, email, password_hash, name, role, auth_provider, status, tenant_id, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                u,
-            )
-        else:
-            conn.execute(
-                """
-                UPDATE users SET email = ?, password_hash = ?, name = ?, role = ?, auth_provider = ?, status = ?, tenant_id = ?
-                WHERE id = ?
-                """,
-                (u[2], u[3], u[4], u[5], u[6], u[7], u[8], u[0]),
-            )
+        try:
+            row = conn.execute(
+                "SELECT id FROM users WHERE id = ? OR username = ? OR email = ?",
+                (u[0], u[1], u[2]),
+            ).fetchone()
+            if not row:
+                conn.execute(
+                    """
+                    INSERT INTO users (id, username, email, password_hash, name, role, auth_provider, status, tenant_id, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    u,
+                )
+            else:
+                existing_id = row[0]
+                conn.execute(
+                    """
+                    UPDATE users SET username = ?, email = ?, password_hash = ?, name = ?, role = ?, auth_provider = ?, status = ?, tenant_id = ?
+                    WHERE id = ?
+                    """,
+                    (u[1], u[2], u[3], u[4], u[5], u[6], u[7], u[8], existing_id),
+                )
+        except Exception as e:
+            logger.warning("Failed to seed default user %s (%s): %s", u[0], u[2], e)
