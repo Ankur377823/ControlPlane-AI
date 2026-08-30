@@ -72,9 +72,29 @@ export function ApiReferenceDoc() {
           Executes deterministic sub-15ms guardrail evaluation and agent action risk classification for incoming prompt requests.
         </p>
 
-        <CodeBlock
-          title="cURL Command Example"
-          code={`curl -X POST "http://localhost:8000/api/v1/resources/res_default_001/check" \\
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <CodeBlock
+            title="Windows PowerShell Example"
+            language="powershell"
+            code={`Invoke-RestMethod -Uri "http://localhost:8000/api/v1/resources/res_5caeed21e97d/check" \`
+  -Method POST \`
+  -Headers @{
+    "Content-Type"  = "application/json"
+    "Authorization" = "Bearer cp_live_default"
+  } \`
+  -Body '{
+    "user_prompt": "My credit card is 4532-1234-5678-9010",
+    "tool_call": {
+      "name": "delete_file",
+      "parameters": {"path": "/var/log/audit.log"}
+    },
+    "session_id": "sess_10293847"
+  }'`}
+          />
+
+          <CodeBlock
+            title="cURL (bash / curl.exe) Example"
+            code={`curl.exe -X POST "http://localhost:8000/api/v1/resources/res_5caeed21e97d/check" \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer cp_live_default" \\
   -d '{
@@ -85,18 +105,48 @@ export function ApiReferenceDoc() {
     },
     "session_id": "sess_10293847"
   }'`}
-        />
+          />
+        </div>
 
         <div className="space-y-2 pt-1">
           <div className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">Response Schema (200 OK)</div>
           <pre className="text-xs sm:text-sm font-mono text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-dark-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 overflow-x-auto whitespace-pre leading-relaxed">
 {`{
+  "interception_id": "ic_3997ff9b1472",
+  "resource_id": "res_5caeed21e97d",
   "action": "CONFIRM_REQUIRED",
-  "sanitized_prompt": "My credit card is [CREDIT_CARD_REDACTED]",
+  "enforcement_mode": "mask",
   "action_risk_tier": "HIGH",
-  "latency_ms": 3.8,
-  "triggered_rules": ["PII_CREDIT_CARD", "DESTRUCTIVE_FILE_ACTION"],
-  "hash_chain": "a8fbc7304918e..."
+  "tool_call": {
+    "name": "delete_file",
+    "parameters": { "path": "/var/log/audit.log" }
+  },
+  "user_prompt": "My credit card is 4532-1234-5678-9010",
+  "sanitized_prompt": "My credit card is 4532-1234-5678-9010",
+  "latency_ms": 4,
+  "scores": {
+    "performance_p": 100.0,
+    "cost_dollars": 100.0,
+    "responsibility_r": 40.0
+  },
+  "triggered_rules": [
+    "High Risk Agent Action Intercepted",
+    "Vector Space Threat: CUSTOMER_SUPPORT_PII_AND_ABUSE"
+  ],
+  "risk_findings": [
+    {
+      "type": "ACTION_RISK_HIGH",
+      "severity": "HIGH",
+      "location": "agent_tool_call",
+      "snippet": "Tool: delete_file",
+      "description": "Tool call 'delete_file' requires explicit human confirmation before execution."
+    }
+  ],
+  "policy_applied": {
+    "policy_id": "pol_customer_support",
+    "use_case_type": "customer_support",
+    "enforcement_mode": "mask"
+  }
 }`}
           </pre>
         </div>

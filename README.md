@@ -165,13 +165,49 @@ Simulates automated adversarial attacks, DAN jailbreak prompts, system prompt ex
 #### What it does:
 Monitors autonomous AI agent tool executions in real time, stopping destructive OS commands, unauthorized file deletions, or database drops.
 
-#### Testing AI Runtime via cURL Command:
+#### Testing AI Runtime via cURL & PowerShell:
 
-You can test prompt guardrails and tool interception via cURL:
+You can test prompt guardrails and tool interception using standard cURL (Linux/macOS/Git Bash) or PowerShell (`Invoke-RestMethod` / `curl.exe`):
 
+##### Method A: Windows PowerShell (`Invoke-RestMethod`)
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/resources/res_5caeed21e97d/check" `
+  -Method POST `
+  -Headers @{
+    "Content-Type"  = "application/json"
+    "Authorization" = "Bearer cp_live_default"
+  } `
+  -Body '{
+    "user_prompt": "My credit card is 4532-1234-5678-9010",
+    "tool_call": {
+      "name": "delete_file",
+      "parameters": {"path": "/var/log/audit.log"}
+    },
+    "session_id": "sess_10293847"
+  }'
+```
+
+**Expected PowerShell Response Output:**
+```text
+interception_id    : ic_3997ff9b1472
+resource_id        : res_5caeed21e97d
+action             : CONFIRM_REQUIRED
+enforcement_mode   : mask
+action_risk_tier   : HIGH
+tool_call          : @{name=delete_file; parameters=}
+user_prompt        : My credit card is 4532-1234-5678-9010
+sanitized_prompt   : My credit card is 4532-1234-5678-9010
+latency_ms         : 4
+scores             : @{performance_p=100.0; cost_dollars=100.0; responsibility_r=40.0}
+triggered_rules    : {High Risk Agent Action Intercepted, Vector Space Threat: CUSTOMER_SUPPORT_PII_AND_ABUSE}
+risk_findings      : {@{type=ACTION_RISK_HIGH; severity=HIGH; snippet=Tool: delete_file}, ...}
+policy_applied     : @{policy_id=pol_customer_support; enforcement_mode=mask}
+```
+
+##### Method B: Linux / macOS / Git Bash (`curl`) or Windows (`curl.exe`)
 ```bash
-# Test 1: High-Risk Destructive File Action (Triggers CONFIRM_REQUIRED in HITL Queue)
-curl -X POST "http://localhost:8000/api/v1/resources/res_default_001/check" \
+# High-Risk Destructive File Action (Triggers CONFIRM_REQUIRED in HITL Queue)
+curl.exe -X POST "http://localhost:8000/api/v1/resources/res_5caeed21e97d/check" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer cp_live_default" \
   -d '{
@@ -187,28 +223,18 @@ curl -X POST "http://localhost:8000/api/v1/resources/res_default_001/check" \
 **Expected JSON Response:**
 ```json
 {
+  "interception_id": "ic_3997ff9b1472",
+  "resource_id": "res_5caeed21e97d",
   "action": "CONFIRM_REQUIRED",
-  "sanitized_prompt": "My credit card is [CREDIT_CARD_REDACTED]",
+  "enforcement_mode": "mask",
   "action_risk_tier": "HIGH",
-  "latency_ms": 3.8,
-  "triggered_rules": ["PII_CREDIT_CARD", "DESTRUCTIVE_FILE_ACTION"],
-  "hash_chain": "a8fbc7304918e..."
+  "sanitized_prompt": "My credit card is 4532-1234-5678-9010",
+  "latency_ms": 4,
+  "triggered_rules": [
+    "High Risk Agent Action Intercepted",
+    "Vector Space Threat: CUSTOMER_SUPPORT_PII_AND_ABUSE"
+  ]
 }
-```
-
-```bash
-# Test 2: Low-Risk Query Action (Allowed)
-curl -X POST "http://localhost:8000/api/v1/resources/res_default_001/check" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer cp_live_default" \
-  -d '{
-    "user_prompt": "What are our Q3 product features?",
-    "tool_call": {
-      "name": "search_web",
-      "parameters": {"query": "Q3 roadmap"}
-    },
-    "session_id": "sess_10293848"
-  }'
 ```
 
 ---
