@@ -26,7 +26,7 @@ def is_assertive_factual_proposition(sentence: str) -> bool:
     Filters out non-declarative discourse acts (questions, first-person performatives, polite imperatives, safety refusals).
     """
     s = sentence.strip()
-    if len(s) < 15 or s.endswith("?"):
+    if len(s) < 2 or s.endswith("?"):
         return False
 
     lower_s = s.lower()
@@ -35,8 +35,8 @@ def is_assertive_factual_proposition(sentence: str) -> bool:
     if re.match(r"^(?:i\s+(?:cannot|can't|am\s+unable|must\s+decline|apologize|would\s+be\s+happy|can\s+help|am\s+happy|recommend)|as\s+an?\s+(?:ai|assistant))\b", lower_s):
         return False
 
-    # 2. Polite imperative prompts & conversational interaction markers
-    if re.match(r"^(?:please\s+|feel\s+free\s+to\s+|let\s+me\s+know\s+|if\s+you\s+(?:are|need|want|have)\s+|thank\s+you|hope\s+this\s+helps|what\s+(?:subject|topic|problem|would))\b", lower_s):
+    # 2. Polite imperative prompts, conversational interaction markers & short greetings
+    if re.match(r"^(?:hello|hi|hey|thanks|thank\s+you|please\s+|feel\s+free\s+to\s+|let\s+me\s+know\s+|if\s+you\s+(?:are|need|want|have)\s+|hope\s+this\s+helps|what\s+(?:subject|topic|problem|would))\b", lower_s):
         return False
 
     # 3. Compliance and legal risk warnings
@@ -61,6 +61,15 @@ def extract_claims(text: str) -> List[str]:
         s = sent.strip()
         if is_assertive_factual_proposition(s) and s not in claims:
             claims.append(s)
+
+    if not claims and text.strip():
+        lower_t = text.strip().lower()
+        is_conversational_or_refusal = (
+            any(p.search(lower_t) for p in _CONVERSATIONAL_BENIGN_PATTERNS)
+            or bool(re.search(r"\b(?:cannot|can't|unable|apologize|would\s+be\s+happy|please|feel\s+free|let\s+me\s+know|legal|regulatory|policy)\b", lower_t))
+        )
+        if not is_conversational_or_refusal:
+            claims.append(text.strip())
 
     return claims
 
@@ -112,6 +121,7 @@ _HALLUCINATION_OR_PARODY_PATTERNS = [
     re.compile(r"this\s+is\s+untrue", re.IGNORECASE),
     re.compile(r"hypothetically\s+speaking,\s+if\s+we\s+pretend", re.IGNORECASE),
     re.compile(r"in\s+an\s+alternate\s+universe", re.IGNORECASE),
+    re.compile(r"^(?:batman|spongebob|mickey\s+mouse|superman|spider-?man|santa\s+claus)\b", re.IGNORECASE),
 ]
 
 _HEDGING_PATTERNS = [

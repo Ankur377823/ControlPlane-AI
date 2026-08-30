@@ -18,6 +18,9 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from dotenv import load_dotenv
 
+root_env = Path(__file__).resolve().parent.parent.parent / ".env"
+if root_env.exists():
+    load_dotenv(dotenv_path=root_env)
 load_dotenv()
 
 

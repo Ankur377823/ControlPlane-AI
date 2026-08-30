@@ -79,3 +79,15 @@ def test_safety_refusal_is_grounded():
     assert res["is_grounded"] is True
     assert res["grounding_score"] == 1.0
     assert len(res["ungrounded_claims"]) == 0
+
+
+def test_short_entity_hallucination_detected():
+    # Single-word or short entity answers under 15 chars (e.g. 'Batman') must be extracted and evaluated
+    claims = extract_claims("Batman")
+    assert len(claims) == 1
+    assert claims[0] == "Batman"
+
+    res = evaluate_grounding(prompt="who is the president of india??", response="Batman")
+    assert res["is_grounded"] is False
+    assert len(res["ungrounded_claims"]) == 1
+
