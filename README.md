@@ -113,20 +113,27 @@ ControlPlane AI organizes governance into interconnected operational components.
 #### What it does:
 Registers and manages AI chatbots, autonomous agents, REST API gateways, and Botpress webhooks protected by ControlPlane AI.
 
-#### Step-by-Step Onboarding & Webhook Setup:
+#### Step-by-Step Resource Onboarding & Botpress Setup (~5 minutes):
 1. Navigate to **Monitored Resources** (`/inventory`) in the left sidebar.
 2. Click **+ Onboard Monitored Resource** at the top right.
-3. Select your resource type:
-   - **Internal Employee Copilot** (Secret Redaction & API Key Protection)
-   - **Customer Support Chatbot** (PII Masking & Competitor Steering)
-   - **Regulated Decision Support** (Strict Injection Blocking & HIPAA Centroids)
-4. Specify a resource name (e.g. `Global Botpress Support Bot`).
-5. Click **Save & Onboard Resource**.
-6. **Obtaining Webhook URLs & Endpoints**:
+3. **One-Time Botpress Webhook Setup**:
+   - Sign up at [https://botpress.com](https://botpress.com) and create a new bot in Botpress Studio.
+   - Give it a trivial flow (e.g. *"On Message → Send Text"* replying to anything the user says).
+   - Publish the bot.
+   - Go to **Bot → Integrations** → install and enable **Chat**.
+   - Copy the **Webhook ID** shown in the Chat integration config.
+   - Sanity check from a terminal:
+     ```bash
+     curl -s "https://chat.botpress.cloud/YOUR_WEBHOOK_ID/hello"
+     ```
+     A non-error JSON response confirms the bot is reachable.
+4. Enter your **Account Name**, **Resource Name**, and paste the **Webhook ID** into the onboarding form.
+5. Select your Use Case Category (**Customer Support**, **Internal Copilot**, or **Regulated Decision Support**).
+6. Click **Save & Onboard Resource**.
+7. **Obtaining Webhook URLs & Endpoints**:
    - **REST AI Gateway Endpoint**: `http://localhost:8000/api/v1/resources/{resource_id}/check`
    - **Botpress Cloud Webhook URL**: `http://localhost:8000/api/botpress/webhook`
    - **OpenAI Proxy Endpoint**: `http://localhost:8000/v1/chat/completions`
-7. Use the generated Bearer Token (`Authorization: Bearer cp_live_default`) to authenticate requests.
 
 ---
 

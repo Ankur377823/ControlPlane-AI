@@ -65,6 +65,36 @@ export function OnboardResourceView({ onBack, onComplete }) {
           </p>
         </div>
 
+        {/* 5-Minute Botpress Setup Helper Card */}
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
+          <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 font-mono text-[11.5px] uppercase tracking-wider">
+            <Zap className="w-4 h-4 text-emerald-500" />
+            <span>One-Time Botpress Setup Guide (~5 Minutes):</span>
+          </div>
+          <ol className="list-decimal list-inside space-y-1.5 font-sans leading-relaxed pl-1">
+            <li>
+              Sign up at{' '}
+              <a href="https://botpress.com" target="_blank" rel="noopener noreferrer" className="text-emerald-600 dark:text-emerald-400 underline font-bold">
+                https://botpress.com
+              </a>{' '}
+              and create a new bot in Botpress Studio.
+            </li>
+            <li>Give it a trivial flow (e.g. <em>"On Message → Send Text"</em> replying to anything the user says).</li>
+            <li>Publish the bot.</li>
+            <li>
+              Go to <strong>Bot → Integrations</strong> → install and enable <strong>Chat</strong>.
+            </li>
+            <li>Copy the <strong>Webhook ID</strong> shown in the Chat integration config.</li>
+            <li>
+              Sanity check from a terminal:
+              <code className="block mt-1 p-2 rounded bg-white dark:bg-dark-950 text-emerald-600 dark:text-emerald-300 font-mono text-[11px] border border-slate-200 dark:border-slate-800 select-all">
+                curl -s "https://chat.botpress.cloud/YOUR_WEBHOOK_ID/hello"
+              </code>
+              A non-error JSON response confirms the bot is reachable.
+            </li>
+          </ol>
+        </div>
+
         {/* Preset Card */}
         <div className="space-y-2">
           <div className="text-[11px] font-bold text-primary dark:text-accent-cyan uppercase tracking-wider">
