@@ -28,7 +28,7 @@ from .evaluators.guardian import evaluate_guardian_security
 from .evaluators.injection import scan_prompt_injection
 from .evaluators.multi_turn_risk import update_multi_turn_risk
 from .evaluators.pii import scan_and_redact_pii
-from .evaluators.universal_vector_engine import evaluate_universal_vector_threat
+from .evaluators.universal_vector_engine import evaluate_universal_vector_threat, load_threat_taxonomies
 
 
 class ControlPlaneGuardrail:
@@ -163,10 +163,23 @@ class ControlPlaneGuardrail:
         # ------------------------------------------------------------------
         vector_res = evaluate_universal_vector_threat(user_prompt)
         if vector_res.is_threat:
-            triggered_rules.append(f"Vector Space Threat: {vector_res.threat_category}")
+            cat_id = vector_res.threat_category
+            triggered_rules.append(f"Vector Space Threat: {cat_id}")
+
+            taxonomies = load_threat_taxonomies()
+            cat_meta = taxonomies.get(cat_id, {})
+            tax_sev = cat_meta.get("severity", "HIGH")
+
+            if cat_id in ("HEALTHCARE_HIPAA_AND_PHYSICAL_HARM", "FINANCIAL_TREASURY_AND_FRAUD_TRANSACTION", "AUTONOMOUS_AGENTS_AND_CYBER_INFRASTRUCTURE", "PEDIATRIC_AND_CHEMICAL_HARM"):
+                v_severity = "CRITICAL"
+            elif enf_mode in ("mask", "redact") and cat_id in ("CUSTOMER_SUPPORT_PII_AND_ABUSE", "DEVELOPER_SECRETS_AND_INTERNAL_MNPI", "BULK_PHI_PII_EXFILTRATION", "CREDENTIALS_AND_SECRETS"):
+                v_severity = "HIGH"
+            else:
+                v_severity = tax_sev
+
             risk_findings.append({
-                "type": f"VECTOR_THREAT_{vector_res.threat_category}",
-                "severity": "CRITICAL" if vector_res.threat_category in ("PEDIATRIC_AND_CHEMICAL_HARM", "BULK_PHI_PII_EXFILTRATION", "CREDENTIALS_AND_SECRETS") else "HIGH",
+                "type": f"VECTOR_THREAT_{cat_id}",
+                "severity": v_severity,
                 "location": "user_prompt",
                 "snippet": f"Cosine Similarity: {vector_res.centroid_similarity:.2f}",
                 "description": vector_res.explanation,
@@ -371,26 +384,31 @@ class ControlPlaneGuardrail:
         action = "ALLOW"
         inj_action = self.policy.get("prompt_injection_action", "block")
 
-        if action_risk_tier == "CRITICAL" or has_custom_block or any(rf.get("severity") == "CRITICAL" for rf in risk_findings):
+        # Check for critical threats that mandate hard blocking (e.g. destructive actions, prompt injection, chemical harm, treasury exfiltration)
+        has_critical_block = (
+            action_risk_tier == "CRITICAL"
+            or has_custom_block
+            or injection_res.is_injection
+            or any(rf.get("severity") == "CRITICAL" for rf in risk_findings)
+        )
+
+        if has_critical_block:
             action = "BLOCK"
-        elif injection_res.is_injection:
-            if inj_action == "flag" and enf_mode in ("mask", "redact"):
-                action = "MASK"
-            elif inj_action == "flag":
-                action = "MONITOR"
-            else:
-                action = "BLOCK"
         elif action_risk_tier == "HIGH" or (action_eval.get("action") == "CONFIRM_REQUIRED"):
             action = "CONFIRM_REQUIRED"
         elif multi_turn_eval and multi_turn_eval.get("escalation_action") in ("BLOCK", "CONFIRM_REQUIRED"):
             action = multi_turn_eval["escalation_action"]
         elif has_custom_mask and not has_custom_block:
-            # Custom rule explicitly requested MASK — honor MASK action directly
             action = "MASK"
-        elif bool(risk_findings):
-            if enf_mode in ("monitor", "detect", "warn"):
+        elif has_pii and (sanitized_prompt != user_prompt):
+            if enf_mode in ("mask", "redact"):
+                action = "MASK"
+            elif enf_mode == "block":
+                action = "BLOCK"
+            else:
                 action = "MONITOR"
-            elif enf_mode in ("mask", "redact"):
+        elif bool(risk_findings):
+            if enf_mode in ("mask", "redact") and (sanitized_prompt != user_prompt):
                 action = "MASK"
             elif enf_mode == "block":
                 action = "BLOCK"

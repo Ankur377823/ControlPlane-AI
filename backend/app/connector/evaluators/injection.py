@@ -67,7 +67,7 @@ _INJECTION_PATTERNS = [
 
     # 9. Bulk PII / PHI Data Exfiltration & Harvesting
     re.compile(r"(?:(?:generate|extract|dump|export|list|compile)\s+(?:a\s+)?(?:full\s+)?list\s+(?:of\s+)?(?:all\s+)?(?:patients?|medical\s+records?|cardiology|hospital|customers?|employees?|staff)\s+(?:in|from|with|including)\s+(?:the\s+)?(?:cardiology|hospital|ward|ehr|database|payroll))", re.IGNORECASE),
-    re.compile(r"(?:(?:including|with)\s+(?:their\s+)?(?:full\s+names?|ssns?|medicare\s+numbers?|credit\s+cards?|echocardiograms?|medical\s+history))", re.IGNORECASE),
+    re.compile(r"(?:(?:dump|export|extract|exfiltrate|harvest|compile|list\s+all)\s+.*(?:including|with)\s+(?:their\s+)?(?:full\s+names?|ssns?|medicare\s+numbers?|credit\s+cards?|echocardiograms?|medical\s+history))", re.IGNORECASE),
 ]
 
 

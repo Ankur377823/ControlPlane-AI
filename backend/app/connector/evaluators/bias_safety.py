@@ -77,7 +77,7 @@ def scan_bias_and_toxicity(text: str, competitors: Optional[List[str]] = None) -
                 detected_types.append(cat_name)
             risk_findings.append({
                 "category": "bias_safety",
-                "severity": "CRITICAL" if "malware" in cat_name or "toxicity" in cat_name else "HIGH",
+                "severity": "CRITICAL" if any(k in cat_name for k in ("malware", "toxicity", "tampering", "command", "cbrn", "threats", "fraud")) else "HIGH",
                 "rule": f"Safety Policy Violation ({cat_name.replace('_', ' ').title()})",
                 "description": f"Dangerous or malicious pattern matched: '{match.group(0)}'",
                 "snippet": match.group(0)
